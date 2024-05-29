@@ -57,6 +57,8 @@ class ConfigScene(Scene, state="config"):
         
         
         markup = ReplyKeyboardBuilder()
+        if step > 0:
+            markup.button(text="🔙 Back")
         markup.button(text="🚫 Exit")
 
         ad = CustomerAd()
