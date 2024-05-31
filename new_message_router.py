@@ -15,6 +15,8 @@ from aiogram.types import (
     CallbackQuery,
 )
 
+from markup.main_menu_reply_keyboard import create_reply_kbd
+
 new_message_router = Router()
 
 class NewMessage(StatesGroup):
@@ -29,11 +31,12 @@ class NewMessage(StatesGroup):
     new_msg_interval_type_time_in_the_day = State()
 
 @new_message_router.message(Command("new_message"))
+@new_message_router.message(F.text.casefold() == "Новое сообщение")
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.set_state(NewMessage.new_msg_input_text)
     await message.answer(
         "Введите текст сообщения:",
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=create_reply_kbd()
     )
 
 @new_message_router.message(Command("cancel"))
@@ -81,7 +84,7 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
     inline_btn_1 = InlineKeyboardButton(text='Сейчас', callback_data='now')
     inline_btn_2 = InlineKeyboardButton(text='Запланируем', callback_data='interval')
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
-    await callback_query.message.answer(text, reply_markup=inline_kb)
+    await callback_query.message.answer(text=text, reply_markup=inline_kb)
 
 @new_message_router.callback_query(NewMessage.new_msg_now_or_interval)
 async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext):
@@ -93,3 +96,5 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
     elif code == 'interval':
         text = 'Вы выбрали отправку по расписанию'
         await state.set_state(NewMessage.new_msg_interval_choose_type)
+
+    await callback_query.message.answer(text=text)

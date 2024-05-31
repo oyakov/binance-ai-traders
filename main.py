@@ -47,8 +47,9 @@ def create_dispatcher():
     dispatcher = Dispatcher(
         events_isolation=SimpleEventIsolation(),
     )
-    dispatcher.include_router(config_router)
     dispatcher.include_router(new_message_router)
+    dispatcher.include_router(config_router)
+
 
     # To use scenes, you should create a SceneRegistry and register your scenes there
     scene_registry = SceneRegistry(dispatcher)
