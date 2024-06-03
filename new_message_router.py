@@ -122,19 +122,76 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
     code = callback_query.data
     if code == "months_of_the_year":
         text = 'Выберите месяцы, в которые будет отправляться сообщение'
-        inline_kb = month_of_the_year_picker_inline()
+        inline_kb = month_of_the_year_picker_inline(NewMessage.new_msg_interval_type_months_in_the_year)
     elif code == "days_of_the_month":
         text = 'Выберите дни месяца, в которые будет отправляться сообщение'
         inline_kb = day_of_the_month_picker_inline()
+        await state.set_state(NewMessage.new_msg_interval_type_days_in_the_month)
     elif code == "days_of_the_week":
         text = 'Выберите дни недели, в которые будет отправляться сообщение'
-        inline_kb = day_of_the_week_picker_inline()
+        data = await state.get_data()
+        selected_days = data['selected_dow']
+        if not selected_days:
+            selected_days = {
+                'monday': False,
+                'tuesday': False,
+                'wednesday': False,
+                'thursday': False,
+                'friday': False,
+                'saturday': False,
+                'sunday': False
+            }
+            state.set_data(selected_dow=selected_days)
+        inline_kb = day_of_the_week_picker_inline(selected_days=selected_days)
+        await state.set_state(NewMessage.new_msg_interval_type_days_in_the_week)
     elif code == 'time_of_the_day':
         text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
-        inline_kb = time_of_the_day_picker_inline()
+        selected_times = await state.get_data('selected_tod')
+        if not selected_times:
+            selected_times = {
+                '10:00': False,
+                '12:00': False,
+                '14:00': False,
+                '16:00': False,
+                '18:00': False,
+                '20:00': False,
+                '22:00': False
+            }
+            state.set_data(selected_tod=selected_times)
+        inline_kb = time_of_the_day_picker_inline(selected_times)
+        await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
 
+@new_message_router.callback_query(NewMessage.new_msg_interval_type_days_in_the_week)
+async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMContext):
+    selected_days = await state.get_data("selected_dow")
+    day = callback_query.data
 
+    # Toggle selection
+    selected_days[day] = not selected_days.get(day, False)
 
+    # Update state
+    await state.update_data(selected_days=selected_days)
+
+    # Send updated picker
+    text = 'Выберите дни недели, в которые будет отправляться сообщение'
+    inline_kb = day_of_the_week_picker_inline(selected_days)
+    await callback_query.message.edit_reply_markup(reply_markup=inline_kb)
+
+@new_message_router.callback_query(NewMessage.new_msg_interval_type_time_in_the_day)
+async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMContext):
+    selected_times = state.get_data("selected_tod")
+    day = callback_query.data
+
+    # Toggle selection
+    selected_times[day] = not selected_times.get(day, False)
+
+    # Update state
+    await state.update_data(selected_tod=selected_times)
+
+    # Send updated picker
+    text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
+    inline_kb = day_of_the_week_picker_inline(selected_times)
+    await callback_query.message.edit_reply_markup(reply_markup=inline_kb)

@@ -19,7 +19,6 @@ from aiogram.utils.formatting import (
     as_section,
 )
 
-from config_scene import ConfigScene
 from new_message_router import new_message_router
 
 ############################################################################
@@ -38,9 +37,6 @@ async def send_periodic_message(bot: Bot):
             logging.error(f"Error sending message: {e}")
         await asyncio.sleep(10)  # Sleep for 1 hour
 
-config_router = Router(name=__name__)
-# Add handler that initializes the scene
-config_router.message.register(ConfigScene.as_handler(), Command("config"))
 
 def create_dispatcher():
     # Event isolation is needed to correctly handle fast user responses
@@ -48,15 +44,9 @@ def create_dispatcher():
         events_isolation=SimpleEventIsolation(),
     )
     dispatcher.include_router(new_message_router)
-    dispatcher.include_router(config_router)
-
 
     # To use scenes, you should create a SceneRegistry and register your scenes there
     scene_registry = SceneRegistry(dispatcher)
-    # ... and then register a scene in the registry
-    # by default, Scene will be mounted to the router that passed to the SceneRegistry,
-    # but you can specify the router explicitly using the `router` argument
-    scene_registry.add(ConfigScene)
     return dispatcher
 
 async def main() -> None:
