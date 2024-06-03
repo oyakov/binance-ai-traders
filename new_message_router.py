@@ -53,7 +53,7 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
         "Отмена",
-        reply_markup=ReplyKeyboardRemove(),
+        reply_markup=create_reply_kbd(),
     )
 
 @new_message_router.message(NewMessage.new_msg_input_text)
@@ -67,6 +67,7 @@ async def process_text(message: Message, state: FSMContext) -> None:
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
 
     await message.reply(f"Выберите целевые группы:", reply_markup=inline_kb)
+    await message.answer("", reply_markup=create_reply_kbd())
 
 @new_message_router.callback_query(NewMessage.new_msg_select_group)
 async def process_group(callback_query: CallbackQuery, state: FSMContext):
@@ -91,10 +92,19 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
     code = callback_query.data
     await state.update_data(type=code)
     if code == 'now':
-        text = ''
+        text = 'Вы выбрали отправку сообщения сейчас, сообщение отправлено.'
+        inline_btn_1 = InlineKeyboardButton(text='Создать новое сообщение', callback_data='group1')
+        inline_btn_2 = InlineKeyboardButton(text='Посмотреть контент-план', callback_data='group2')
+        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
         await state.set_state(NewMessage.new_msg_now)
     elif code == 'interval':
-        text = 'Вы выбрали отправку по расписанию'
+        text = 'Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже'
+        inline_btn_1 = InlineKeyboardButton(text='Месяцы', callback_data='months_of_the_year')
+        inline_btn_2 = InlineKeyboardButton(text='Дни месяца', callback_data='days_of_the_month')
+        inline_btn_3 = InlineKeyboardButton(text='Дни недели', callback_data='days_of_the_week')
+        inline_btn_4 = InlineKeyboardButton(text='Время', callback_data='time_of_the_day')
+        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
         await state.set_state(NewMessage.new_msg_interval_choose_type)
 
     await callback_query.message.answer(text=text)
+
