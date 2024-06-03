@@ -16,6 +16,7 @@ from aiogram.types import (
 )
 
 from markup.main_menu_reply_keyboard import create_reply_kbd
+from markup.inline.time_pickers import day_of_the_month_picker_inline, day_of_the_week_picker_inline, month_of_the_year_picker_inline, time_of_the_day_picker_inline
 
 new_message_router = Router()
 
@@ -30,6 +31,7 @@ class NewMessage(StatesGroup):
     new_msg_interval_type_days_in_the_week = State()
     new_msg_interval_type_time_in_the_day = State()
 
+
 @new_message_router.message(Command("new_message"))
 @new_message_router.message(F.text.casefold() == "Новое сообщение")
 async def command_start(message: Message, state: FSMContext) -> None:
@@ -38,6 +40,7 @@ async def command_start(message: Message, state: FSMContext) -> None:
         "Введите текст сообщения:",
         reply_markup=create_reply_kbd()
     )
+
 
 @new_message_router.message(Command("cancel"))
 @new_message_router.message(F.text.casefold() == "cancel")
@@ -56,6 +59,7 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
         reply_markup=create_reply_kbd(),
     )
 
+
 @new_message_router.message(NewMessage.new_msg_input_text)
 async def process_text(message: Message, state: FSMContext) -> None:
     await state.update_data(text=message.text)
@@ -66,8 +70,9 @@ async def process_text(message: Message, state: FSMContext) -> None:
     inline_btn_2 = InlineKeyboardButton(text='Группа 2', callback_data='group2')
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
 
-    await message.reply(f"Выберите целевые группы:", reply_markup=inline_kb)
-    await message.answer("", reply_markup=create_reply_kbd())
+    await message.reply(text=f"Выберите целевые группы:", reply_markup=inline_kb)
+    await message.answer(text="placeholder", reply_markup=create_reply_kbd())
+
 
 @new_message_router.callback_query(NewMessage.new_msg_select_group)
 async def process_group(callback_query: CallbackQuery, state: FSMContext):
@@ -75,9 +80,9 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
     code = callback_query.data
     await state.update_data(group=code)
     if code == 'group1':
-        text = 'Вы выбрали Группу 1'
+        text = 'Вы выбрали Группу 1\n'
     elif code == 'group2':
-        text = 'Вы выбрали Группу 2'
+        text = 'Вы выбрали Группу 2\n'
     
     await state.set_state(NewMessage.new_msg_now_or_interval)
 
@@ -86,6 +91,8 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
     inline_btn_2 = InlineKeyboardButton(text='Запланируем', callback_data='interval')
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
     await callback_query.message.answer(text=text, reply_markup=inline_kb)
+    await callback_query.message.reply(text=text, reply_markup=create_reply_kbd())
+
 
 @new_message_router.callback_query(NewMessage.new_msg_now_or_interval)
 async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext):
@@ -93,8 +100,8 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
     await state.update_data(type=code)
     if code == 'now':
         text = 'Вы выбрали отправку сообщения сейчас, сообщение отправлено.'
-        inline_btn_1 = InlineKeyboardButton(text='Создать новое сообщение', callback_data='group1')
-        inline_btn_2 = InlineKeyboardButton(text='Посмотреть контент-план', callback_data='group2')
+        inline_btn_1 = InlineKeyboardButton(text='Создать новое сообщение', callback_data='new_message')
+        inline_btn_2 = InlineKeyboardButton(text='Посмотреть контент-план', callback_data='content_plan')
         inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
         await state.set_state(NewMessage.new_msg_now)
     elif code == 'interval':
@@ -103,8 +110,31 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
         inline_btn_2 = InlineKeyboardButton(text='Дни месяца', callback_data='days_of_the_month')
         inline_btn_3 = InlineKeyboardButton(text='Дни недели', callback_data='days_of_the_week')
         inline_btn_4 = InlineKeyboardButton(text='Время', callback_data='time_of_the_day')
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2, inline_btn_3, inline_btn_4]])
         await state.set_state(NewMessage.new_msg_interval_choose_type)
 
-    await callback_query.message.answer(text=text)
+    await callback_query.message.answer(text=text, reply_markup=inline_kb)
+    await callback_query.message.reply(text=text, reply_markup=create_reply_kbd())
+
+
+@new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
+async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext):
+    code = callback_query.data
+    if code == "months_of_the_year":
+        text = 'Выберите месяцы, в которые будет отправляться сообщение'
+        inline_kb = month_of_the_year_picker_inline()
+    elif code == "days_of_the_month":
+        text = 'Выберите дни месяца, в которые будет отправляться сообщение'
+        inline_kb = day_of_the_month_picker_inline()
+    elif code == "days_of_the_week":
+        text = 'Выберите дни недели, в которые будет отправляться сообщение'
+        inline_kb = day_of_the_week_picker_inline()
+    elif code == 'time_of_the_day':
+        text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
+        inline_kb = time_of_the_day_picker_inline()
+    
+    await callback_query.message.reply(text=text, reply_markup=inline_kb)
+    await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
+
+
 
