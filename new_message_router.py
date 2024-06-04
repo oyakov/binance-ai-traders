@@ -154,19 +154,23 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
 async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     changed_day = callback_query.data
+    logging.info(f'Changed day is {changed_day}')
 
     try:
         selected_days = data['selected_dow']
+        logging.info('Selected days are loaded suscessfully')
     except KeyError:
+        logging.warn('Error loading selected days')
         selected_days = days_of_the_week()
         await state.set_data({'selected_dow': selected_days})   
 
     # Toggle selection
     for day in selected_days:
+        logging.info(day)
         if day.key == changed_day:
+            logging.info(f'Toggle day {day.key}')
             day.enabled = not day.enabled
 
-    logging.info(selected_days)
 
     # Update state
     await state.update_data(selected_days=selected_days)

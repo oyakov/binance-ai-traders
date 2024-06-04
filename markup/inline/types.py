@@ -8,6 +8,9 @@ class DateSelector:
         self.text = text
         self.enabled = enabled
 
+    def __str__(self) -> str:
+        return f'Date Selector (key:{self.key}, text:{self.text}, enabled:{self.enabled})'
+
 
 def days_of_the_week() -> list[DateSelector]:
     return [
