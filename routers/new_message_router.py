@@ -18,6 +18,7 @@ from aiogram.types import (
 from markup.main_menu_reply_keyboard import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
+from markup.inline.keyboards import *
 
 new_message_router = Router()
 
@@ -150,48 +151,63 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
 
+
 @new_message_router.callback_query(NewMessage.new_msg_interval_type_days_in_the_week)
 async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    changed_day = callback_query.data
-    logging.info(f'Changed day is {changed_day}')
+    if callback_query.data == 'back':
+        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
+                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.reply(text='==============', reply_markup=create_reply_kbd())
+    else:
+        data = await state.get_data()
+        changed_day = callback_query.data
+        logging.info(f'Changed day is {changed_day}')
 
-    try:
-        selected_days = data['selected_dow']
-        logging.info('Selected days are loaded suscessfully')
-    except KeyError:
-        logging.warn('Error loading selected days')
-        selected_days = days_of_the_week()
-        await state.set_data({'selected_dow': selected_days})   
+        try:
+            selected_days = data['selected_dow']
+            logging.info('Selected days are loaded suscessfully')
+        except KeyError:
+            logging.warn('Error loading selected days')
+            selected_days = days_of_the_week()
+            await state.set_data({'selected_dow': selected_days})   
 
-    # Toggle selection
-    for day in selected_days:
-        logging.info(day)
-        if day.key == changed_day:
-            logging.info(f'Toggle day {day.key}')
-            day.enabled = not day.enabled
+        # Toggle selection
+        for day in selected_days:
+            logging.info(day)
+            if day.key == changed_day:
+                logging.info(f'Toggle day {day.key}')
+                day.enabled = not day.enabled
 
 
-    # Update state
-    await state.update_data(selected_days=selected_days)
+        # Update state
+        await state.update_data(selected_days=selected_days)
 
-    # Send updated picker
-    text = 'Выберите дни недели, в которые будет отправляться сообщение'
-    inline_kb = date_selector_picker_inline(selected_days)
-    await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
+        # Send updated picker
+        text = 'Выберите дни недели, в которые будет отправляться сообщение'
+        inline_kb = date_selector_picker_inline(selected_days)
+        await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
+
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_type_time_in_the_day)
 async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMContext):
-    selected_times = state.get_data("selected_tod")
-    day = callback_query.data
+    if callback_query.data == 'back':
+        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
+                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.reply(text='==============', reply_markup=create_reply_kbd())
+    else:
+        selected_times = state.get_data("selected_tod")
+        day = callback_query.data
 
-    # Toggle selection
-    selected_times[day] = not selected_times.get(day, False)
+        # Toggle selection
+        selected_times[day] = not selected_times.get(day, False)
 
-    # Update state
-    await state.update_data(selected_tod=selected_times)
+        # Update state
+        await state.update_data(selected_tod=selected_times)
 
-    # Send updated picker
-    text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
-    inline_kb = date_selector_picker_inline(selected_times)
-    await callback_query.message.edit_reply_markup(reply_markup=inline_kb)
+        # Send updated picker
+        text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
+        inline_kb = date_selector_picker_inline(selected_times)
+        await callback_query.message.edit_reply_markup(reply_markup=inline_kb)
+

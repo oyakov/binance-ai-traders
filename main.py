@@ -19,7 +19,7 @@ from aiogram.utils.formatting import (
     as_section,
 )
 
-from new_message_router import new_message_router
+from routers.new_message_router import new_message_router
 
 ############################################################################
 
