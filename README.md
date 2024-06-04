@@ -1,1 +1,1 @@
-This a spammer bot
+This is a telegram bot to managem multiple telegram channels for business and advertisment
