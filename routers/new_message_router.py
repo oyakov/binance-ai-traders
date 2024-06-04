@@ -9,7 +9,7 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from markup.main_menu_reply_keyboard import *
+from markup.reply.main_menu_reply_keyboard import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
 from markup.inline.keyboards import *
