@@ -1,17 +1,11 @@
 import logging
 
-from aiogram import Bot, Dispatcher, F, Router, html
-from aiogram.enums import ParseMode
-from aiogram.filters import Command, CommandStart
+from aiogram import F, Router, html
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import (
-    KeyboardButton,
     Message,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
     CallbackQuery,
 )
 
@@ -67,18 +61,15 @@ async def process_text(message: Message, state: FSMContext) -> None:
     await state.update_data(text=message.text)
     await state.set_state(NewMessage.new_msg_select_group)
     
-#    inline_kb = InlineKeyboardMarkup(row_width=2)
-    inline_btn_1 = InlineKeyboardButton(text='Группа 1', callback_data='group1')
-    inline_btn_2 = InlineKeyboardButton(text='Группа 2', callback_data='group2')
-    inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+    groups = static_groups_mock()
+    inline_kb = group_picker(groups=groups, row_size=2)
 
     await message.reply(text=f"Выберите целевые группы:", reply_markup=inline_kb)
     await message.answer(text="placeholder", reply_markup=create_reply_kbd())
 
 
 @new_message_router.callback_query(NewMessage.new_msg_select_group)
-async def process_group(callback_query: CallbackQuery, state: FSMContext):
-    
+async def process_group(callback_query: CallbackQuery, state: FSMContext):    
     code = callback_query.data
     await state.update_data(group=code)
     if code == 'group1':
@@ -87,11 +78,9 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
         text = 'Вы выбрали Группу 2\n'
     
     await state.set_state(NewMessage.new_msg_now_or_interval)
-
     text += 'Отправим сообщение сейчас или запланируем?'
-    inline_btn_1 = InlineKeyboardButton(text='Сейчас', callback_data='now')
-    inline_btn_2 = InlineKeyboardButton(text='Запланируем', callback_data='interval')
-    inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+    inline_kb = now_or_later()
+
     await callback_query.message.answer(text=text, reply_markup=inline_kb)
     await callback_query.message.reply(text=text, reply_markup=create_reply_kbd())
 
@@ -102,17 +91,11 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
     await state.update_data(type=code)
     if code == 'now':
         text = 'Вы выбрали отправку сообщения сейчас, сообщение отправлено.'
-        inline_btn_1 = InlineKeyboardButton(text='Создать новое сообщение', callback_data='new_message')
-        inline_btn_2 = InlineKeyboardButton(text='Посмотреть контент-план', callback_data='content_plan')
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+        inline_kb = choose_what_to_do_next()
         await state.set_state(NewMessage.new_msg_now)
     elif code == 'interval':
         text = 'Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже'
-        inline_btn_1 = InlineKeyboardButton(text='Месяцы', callback_data='months_of_the_year')
-        inline_btn_2 = InlineKeyboardButton(text='Дни месяца', callback_data='days_of_the_month')
-        inline_btn_3 = InlineKeyboardButton(text='Дни недели', callback_data='days_of_the_week')
-        inline_btn_4 = InlineKeyboardButton(text='Время', callback_data='time_of_the_day')
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2, inline_btn_3, inline_btn_4]])
+        inline_kb = choose_date_type_inline()
         await state.set_state(NewMessage.new_msg_interval_choose_type)
 
     await callback_query.message.answer(text=text, reply_markup=inline_kb)
@@ -122,16 +105,26 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
 @new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
 async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext):
     code = callback_query.data
+    data = await state.get_data()
     if code == "months_of_the_year":
         text = 'Выберите месяцы, в которые будет отправляться сообщение'
-        inline_kb = date_selector_picker_inline(NewMessage.new_msg_interval_type_months_in_the_year)
+        try:
+            selected_months = data['selected_moy']
+        except KeyError:
+            selected_months = days_of_the_week()
+            await state.set_data({'selected_moy': selected_months})     
+        inline_kb = date_selector_picker_inline(date_selectors=selected_months)
     elif code == "days_of_the_month":
         text = 'Выберите дни месяца, в которые будет отправляться сообщение'
-        inline_kb = date_selector_picker_inline()
+        try:
+            selected_days = data['selected_dom']
+        except KeyError:
+            selected_days = days_of_the_week()
+            await state.set_data({'selected_dom': selected_days})     
+        inline_kb = date_selector_picker_inline(date_selectors=selected_days)
         await state.set_state(NewMessage.new_msg_interval_type_days_in_the_month)
     elif code == "days_of_the_week":
         text = 'Выберите дни недели, в которые будет отправляться сообщение'
-        data = await state.get_data()
         try:
             selected_days = data['selected_dow']
         except KeyError:
@@ -141,8 +134,9 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         await state.set_state(NewMessage.new_msg_interval_type_days_in_the_week)
     elif code == 'time_of_the_day':
         text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
-        selected_times = await state.get_data('selected_tod')
-        if not selected_times:
+        try:
+            selected_times = data['selected_tod']
+        except KeyError:
             selected_times = times_of_the_day()
             state.set_data({'selected_tod': selected_times})
         inline_kb = date_selector_picker_inline(date_selectors=selected_times)
