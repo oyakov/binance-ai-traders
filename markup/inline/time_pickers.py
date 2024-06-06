@@ -20,4 +20,4 @@ def date_selector_picker_inline(date_selectors: list[DateSelector], row_size: in
         
         # Add the "Back" button in a new row
         buttons_layout.append([InlineKeyboardButton(text="Назад 🔙", callback_data='back')])
-        return InlineKeyboardMarkup(buttons_layout)
+        return InlineKeyboardMarkup(inline_keyboard=buttons_layout)

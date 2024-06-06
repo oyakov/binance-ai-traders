@@ -34,6 +34,55 @@ def times_of_the_day() -> list[DateSelector]:
                 DateSelector('time22', '22:00', True),
             ]
 
+def months_of_the_year() -> list[DateSelector]:
+    return [
+                DateSelector('jan', 'January', True),
+                DateSelector('feb', 'February', True),
+                DateSelector('mar', 'March', True),
+                DateSelector('apr', 'April', True),
+                DateSelector('jun', 'June', True),
+                DateSelector('jul', 'July', True),
+                DateSelector('aug', 'August', True),
+                DateSelector('sep', 'September', True),
+                DateSelector('oct', 'October', True),
+                DateSelector('nov', 'November', True),
+                DateSelector('dec', 'December', True),
+            ]
+
+def days_of_the_month() -> list[DateSelector]:
+    return [
+                DateSelector('01', '1', True),
+                DateSelector('02', '2', True),
+                DateSelector('03', '3', True),
+                DateSelector('04', '4', True),
+                DateSelector('05', '5', True),
+                DateSelector('06', '6', True),
+                DateSelector('07', '7', True),
+                DateSelector('08', '8', True),
+                DateSelector('09', '9', True),
+                DateSelector('10', '10', True),
+                DateSelector('11', '11', True),
+                DateSelector('12', '12', True),
+                DateSelector('13', '13', True),
+                DateSelector('14', '14', True),
+                DateSelector('15', '15', True),
+                DateSelector('16', '16', True),
+                DateSelector('17', '17', True),
+                DateSelector('18', '18', True),
+                DateSelector('19', '19', True),
+                DateSelector('20', '20', True),
+                DateSelector('21', '21', True),
+                DateSelector('22', '22', True),
+                DateSelector('23', '23', True),
+                DateSelector('24', '24', True),
+                DateSelector('25', '25', True),
+                DateSelector('26', '26', True),
+                DateSelector('27', '27', True),
+                DateSelector('28', '28', True),
+                DateSelector('29', '29', True),
+                DateSelector('30', '30', True),
+            ]
+
 class TelegramGroup:
     telegram_name: str
     friendly_name: str
