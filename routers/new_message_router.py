@@ -108,15 +108,16 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         try:
             selected_months = data['selected_moy']
         except KeyError:
-            selected_months = days_of_the_week()
+            selected_months = months_of_the_year()
             await state.set_data({'selected_moy': selected_months})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_months, row_size=4)
+        await state.set_state(NewMessage.new_msg_interval_type_months_in_the_year)
     elif code == "days_of_the_month":
         text = 'Выберите дни месяца, в которые будет отправляться сообщение'
         try:
             selected_days = data['selected_dom']
         except KeyError:
-            selected_days = days_of_the_week()
+            selected_days = days_of_the_month()
             await state.set_data({'selected_dom': selected_days})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_days, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_days_in_the_month)
@@ -138,6 +139,19 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             state.set_data({'selected_tod': selected_times})
         inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
+    elif code == 'confirm':
+        text = 'Данные приняты, сообщение настроено на периодическое отправление'
+        try:
+            selected_months = data['selected_moy']
+            selected_days = data['selected_dom']
+            selected_days = data['selected_dow']
+            selected_times = data['selected_tod']
+            sumbit_message_for_periodic_send()
+        except KeyError:
+            logging.error("Unknown error loading interval data")
+        inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
+        await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
+
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
@@ -189,14 +203,14 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
     else:
         data = await state.get_data()
         changed_time = callback_query.data
-        logging.info(f'Changed day is {changed_time}')
+        logging.info(f'Changed time is {changed_time}')
 
         try:
             selected_times = data['selected_tod']
             logging.info('Selected times are loaded successfully')
         except KeyError:
             logging.warn('Error loading selected times')
-            selected_times = days_of_the_week()
+            selected_times = times_of_the_day()
             await state.set_data({'selected_tod': selected_times})   
 
         # Toggle selection
@@ -267,7 +281,7 @@ async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMCon
             logging.info('Selected days are loaded successfully')
         except KeyError:
             logging.warn('Error loading selected days')
-            selected_days = months_of_the_year()
+            selected_days = days_of_the_month()
             await state.set_data({'selected_dom': selected_days})   
 
         # Toggle selection
