@@ -1,10 +1,11 @@
 import logging
 import asyncio
+import os
 from dataclasses import dataclass, field
-from os import getenv
 from typing import Any
-# from dotenv import load_dotenv
-# load_dotenv()
+from db.storage import SQLAlchemyStorage
+from dotenv import load_dotenv
+load_dotenv()
 
 # aiogram
 from aiogram import Bot, Dispatcher, types, F, Router, html
@@ -23,8 +24,9 @@ from routers.new_message_router import new_message_router
 
 ############################################################################
 
-API_TOKEN = '6853220461:AAGIJo2a3GIMMqgz1w9iISW3Lv7ZnvAoRa8'
-CHAT_ID = '-1002060021902'
+# Access the variables
+API_TOKEN = os.getenv('BOT_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +44,7 @@ def create_dispatcher():
     # Event isolation is needed to correctly handle fast user responses
     dispatcher = Dispatcher(
         events_isolation=SimpleEventIsolation(),
+        storage=SQLAlchemyStorage()
     )
     dispatcher.include_router(new_message_router)
 

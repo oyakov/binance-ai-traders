@@ -10,6 +10,9 @@ python = "^3.12"
 aiogram = { version = "^3.6.0", extras = ["fsm_storage"] }
 asyncio = "^3.4.3"
 logging = "^0.4.9.6"
+sqlalchemy = "^2.0.30"
+asyncpg = "^0.29.0"
+python-dotenv = "^1.0.1"
 
 
 [build-system]
