@@ -143,22 +143,31 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
     elif code == 'confirm':
         text = 'Данные приняты, сообщение настроено на периодическое отправление'
         try:
+            logging.info('Selected months:\n')
             selected_months = data['selected_moy']
-            selected_dom = data['selected_dom']
-            selected_dow = data['selected_dow']
-            selected_times = data['selected_tod']
-            logging.info(f'''Selected months:\n
-                         {selected_months}\n
-                        Selected days in the month:\n
-                        {selected_dom}\n
-                        Selected days of the week:\n
-                        {selected_dow}\n
-                        Selected times of the day\n
-                        {selected_times}''')
+            logging.info(f'{selected_months}\n')
         except KeyError:
-            logging.error("Unknown error loading interval data")
+            logging.error("Unknown error loading moy data")
+        try:
+            logging.info('Selected days in the month:\n')
+            selected_dom = data['selected_dom']
+            logging.info(f'{selected_dom}\n')
+        except KeyError:
+            logging.error("Unknown error loading dom data")
+        try:
+            logging.info('Selected days of the week:\n')
+            selected_dow = data['selected_dow']
+            logging.info(f'{selected_dow}\n')
+        except KeyError:
+            logging.error("Unknown error loading dow data")
+        try:
+            logging.info('Selected times of the day\n')
+            selected_times = data['selected_tod']
+            logging.info(f'{selected_times}')
+        except KeyError:
+            logging.error("Unknown error loading tod data")
         inline_kb = choose_what_to_do_next()
-        await state.set_state(MainMenu.main_menu_awaiting_input
+        await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
