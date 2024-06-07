@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, Integer, String, Text
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -18,6 +19,7 @@ class FSMState(Base):
     state = Column(String, index=True)
     data = Column(Text, nullable=True)
 
+@asynccontextmanager
 async def get_db():
     async with SessionLocal() as session:
         yield session

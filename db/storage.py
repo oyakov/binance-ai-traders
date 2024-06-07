@@ -1,14 +1,14 @@
 from db.config import *
-from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType, StateData
+from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType
 from sqlalchemy.future import select
 
 
 class SQLAlchemyStorage(BaseStorage):
 
-    def __init__(self, session_maker):
-        self.session_maker = session_maker
+    def __init__(self):
+        self.session_maker = get_db
 
-    async def set_state(self, key: StorageKey, state: StateType = None):
+    async def set_state(self, key: StorageKey, state: StateType = None) -> None:
         async with self.session_maker() as session:
             async with session.begin():
                 stmt = select(FSMState).where(FSMState.user_id == key.user_id)
@@ -21,14 +21,14 @@ class SQLAlchemyStorage(BaseStorage):
                     session.add(new_state)
                 await session.commit()
 
-    async def get_state(self, key: StorageKey):
+    async def get_state(self, key: StorageKey) -> str | None: 
         async with self.session_maker() as session:
             stmt = select(FSMState.state).where(FSMState.user_id == key.user_id)
             result = await session.execute(stmt)
             state = result.scalar_one_or_none()
             return state
 
-    async def set_data(self, key: StorageKey, data: StateData):
+    async def set_data(self, key: StorageKey, data: dict[str, any]) -> None:
         async with self.session_maker() as session:
             async with session.begin():
                 stmt = select(FSMState).where(FSMState.user_id == key.user_id)
@@ -41,7 +41,7 @@ class SQLAlchemyStorage(BaseStorage):
                     session.add(new_state)
                 await session.commit()
 
-    async def get_data(self, key: StorageKey):
+    async def get_data(self, key: StorageKey) -> dict[str, any]:
         async with self.session_maker() as session:
             stmt = select(FSMState.data).where(FSMState.user_id == key.user_id)
             result = await session.execute(stmt)
@@ -57,3 +57,6 @@ class SQLAlchemyStorage(BaseStorage):
                 if fsm_state:
                     await session.delete(fsm_state)
                     await session.commit()
+
+    async def close(self) -> None:
+        await self.session_maker.close_all()

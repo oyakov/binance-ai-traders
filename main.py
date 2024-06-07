@@ -11,6 +11,7 @@ load_dotenv()
 from aiogram import Bot, Dispatcher, types, F, Router, html
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.scene import SceneRegistry, on
+
 from aiogram.fsm.storage.memory import SimpleEventIsolation
 from aiogram.utils.formatting import (
     Bold,
@@ -23,6 +24,7 @@ from aiogram.utils.formatting import (
 from routers.new_message_router import new_message_router
 
 ############################################################################
+
 
 # Access the variables
 API_TOKEN = os.getenv('BOT_TOKEN')
@@ -44,12 +46,15 @@ def create_dispatcher():
     # Event isolation is needed to correctly handle fast user responses
     dispatcher = Dispatcher(
         events_isolation=SimpleEventIsolation(),
-        storage=SQLAlchemyStorage()
+        # This is to enable DB Storage, temporarily commented out, needs some more work
+        # storage=SQLAlchemyStorage()
     )
     dispatcher.include_router(new_message_router)
 
     # To use scenes, you should create a SceneRegistry and register your scenes there
+    # Scenes are not currently used as an implementation pattern, use FSM isntead
     scene_registry = SceneRegistry(dispatcher)
+
     return dispatcher
 
 async def main() -> None:
@@ -58,6 +63,7 @@ async def main() -> None:
     # loop.create_task(send_periodic_message(bot=spammer_bot))
     # loop.get_debug()
     dispatcher = create_dispatcher()
+    # Launch bot
     await dispatcher.start_polling(spammer_bot)
 
 if __name__ == '__main__':

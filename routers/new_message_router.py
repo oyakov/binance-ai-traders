@@ -13,6 +13,7 @@ from markup.reply.main_menu_reply_keyboard import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
 from markup.inline.keyboards import *
+from routers.main_menu import MainMenu
 
 new_message_router = Router()
 
@@ -89,7 +90,7 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
     if code == 'now':
         text = 'Вы выбрали отправку сообщения сейчас, сообщение отправлено.'
         inline_kb = choose_what_to_do_next()
-        await state.set_state(NewMessage.new_msg_now)
+        await state.set_state(MainMenu.main_menu_awaiting_input)
     elif code == 'interval':
         text = 'Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже'
         inline_kb = choose_date_type_inline()
@@ -143,15 +144,21 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         text = 'Данные приняты, сообщение настроено на периодическое отправление'
         try:
             selected_months = data['selected_moy']
-            selected_days = data['selected_dom']
-            selected_days = data['selected_dow']
+            selected_dom = data['selected_dom']
+            selected_dow = data['selected_dow']
             selected_times = data['selected_tod']
-            sumbit_message_for_periodic_send()
+            logging.info(f'''Selected months:\n
+                         {selected_months}\n
+                        Selected days in the month:\n
+                        {selected_dom}\n
+                        Selected days of the week:\n
+                        {selected_dow}\n
+                        Selected times of the day\n
+                        {selected_times}''')
         except KeyError:
             logging.error("Unknown error loading interval data")
-        inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
-        await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
-
+        inline_kb = choose_what_to_do_next()
+        await state.set_state(MainMenu.main_menu_awaiting_input
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=text, reply_markup=create_reply_kbd())
