@@ -33,6 +33,13 @@ class NewMessage(StatesGroup):
 @new_message_router.message(F.text.casefold() == "Новое сообщение")
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.set_state(NewMessage.new_msg_input_text)
+
+    # Inititalize message state
+    await state.set_data({'selected_tod': times_of_the_day(), 
+                          'selected_dow': days_of_the_week(),
+                          'selected_moy': months_of_the_year(),
+                          'selected_dom': days_of_the_month()})
+
     await message.answer(
         "Введите текст сообщения:",
         reply_markup=create_reply_kbd()
@@ -110,7 +117,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             selected_months = data['selected_moy']
         except KeyError:
             selected_months = months_of_the_year()
-            await state.set_data({'selected_moy': selected_months})     
+            await state.update_data({'selected_moy': selected_months})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_months, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_months_in_the_year)
     elif code == "days_of_the_month":
@@ -119,7 +126,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             selected_days = data['selected_dom']
         except KeyError:
             selected_days = days_of_the_month()
-            await state.set_data({'selected_dom': selected_days})     
+            await state.update_data({'selected_dom': selected_days})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_days, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_days_in_the_month)
     elif code == "days_of_the_week":
@@ -128,7 +135,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             selected_days = data['selected_dow']
         except KeyError:
             selected_days = days_of_the_week()
-            await state.set_data({'selected_dow': selected_days})            
+            await state.update_data({'selected_dow': selected_days})            
         inline_kb = date_selector_picker_inline(date_selectors=selected_days, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_days_in_the_week)
     elif code == 'time_of_the_day':
@@ -137,7 +144,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             selected_times = data['selected_tod']
         except KeyError:
             selected_times = times_of_the_day()
-            state.set_data({'selected_tod': selected_times})
+            state.update_data({'selected_tod': selected_times})
         inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
     elif code == 'confirm':
@@ -161,7 +168,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         except KeyError:
             logging.error("Unknown error loading dow data")
         try:
-            logging.info('Selected times of the day\n')
+            logging.info('Selected times of the day:\n')
             selected_times = data['selected_tod']
             logging.info(f'{selected_times}')
         except KeyError:
@@ -191,7 +198,7 @@ async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMConte
         except KeyError:
             logging.warn('Error loading selected days')
             selected_days = days_of_the_week()
-            await state.set_data({'selected_dow': selected_days})   
+            await state.update_data({'selected_dow': selected_days})   
 
         # Toggle selection
         for day in selected_days:
@@ -227,7 +234,7 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
         except KeyError:
             logging.warn('Error loading selected times')
             selected_times = times_of_the_day()
-            await state.set_data({'selected_tod': selected_times})   
+            await state.update_data({'selected_tod': selected_times})   
 
         # Toggle selection
         for time in selected_times:
@@ -262,7 +269,7 @@ async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMCon
         except KeyError:
             logging.warn('Error loading selected months')
             selected_months = months_of_the_year()
-            await state.set_data({'selected_moy': selected_months})   
+            await state.update_data({'selected_moy': selected_months})   
 
         # Toggle selection
         for month in selected_months:
@@ -298,7 +305,7 @@ async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMCon
         except KeyError:
             logging.warn('Error loading selected days')
             selected_days = days_of_the_month()
-            await state.set_data({'selected_dom': selected_days})   
+            await state.update_data({'selected_dom': selected_days})   
 
         # Toggle selection
         for day in selected_days:
