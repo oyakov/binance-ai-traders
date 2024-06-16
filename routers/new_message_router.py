@@ -14,8 +14,12 @@ from markup.inline.time_pickers import *
 from markup.inline.types import *
 from markup.inline.keyboards import *
 from routers.main_menu import MainMenu
+from service.calendar_service import CalendarService
+from middleware.service_middleware import ServiceMiddleware
 
 new_message_router = Router()
+new_message_router.message.middleware(ServiceMiddleware(CalendarService()))
+new_message_router.callback_query.middleware(ServiceMiddleware(CalendarService()))
 
 class NewMessage(StatesGroup):
     new_msg_input_text = State()
@@ -108,9 +112,11 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
 
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
-async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext):
+async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext, message_service: CalendarService):
     code = callback_query.data
     data = await state.get_data()
+    #calendar_service = data['message_service']
+    logging.info(message_service)
     if code == "months_of_the_year":
         text = 'Выберите месяцы, в которые будет отправляться сообщение'
         try:
@@ -151,29 +157,30 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         text = 'Данные приняты, сообщение настроено на периодическое отправление'
         try:
             logging.info('Selected months:\n')
-            selected_months = data['selected_moy']
+            selected_months: list[DateSelector] = data['selected_moy']
             logging.info(f'{selected_months}\n')
         except KeyError:
             logging.error("Unknown error loading moy data")
         try:
             logging.info('Selected days in the month:\n')
-            selected_dom = data['selected_dom']
+            selected_dom: list[DateSelector] = data['selected_dom']
             logging.info(f'{selected_dom}\n')
         except KeyError:
             logging.error("Unknown error loading dom data")
         try:
             logging.info('Selected days of the week:\n')
-            selected_dow = data['selected_dow']
+            selected_dow: list[DateSelector] = data['selected_dow']
             logging.info(f'{selected_dow}\n')
         except KeyError:
             logging.error("Unknown error loading dow data")
         try:
             logging.info('Selected times of the day:\n')
-            selected_times = data['selected_tod']
+            selected_times: list[DateSelector] = data['selected_tod']
             logging.info(f'{selected_times}')
         except KeyError:
             logging.error("Unknown error loading tod data")
         inline_kb = choose_what_to_do_next()
+        await message_service.create_calendar_data('test_username', 'text', selected_dow, selected_dom, selected_months, selected_times)
         await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)

@@ -3,19 +3,25 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import update
 from db.config import Base
-from db.model import CalendarData, CalendarDoW, CalendarDoM, CalendarMoY, CalendarToD
+from markup.inline.types import DateSelector
+from db.model.calendar_data import CalendarData
+from db.model.calendar_dom import CalendarDoM
+from db.model.calendar_dow import CalendarDoW
+from db.model.calendar_moy import CalendarMoY
+from db.model.calendar_tod import CalendarToD
+from db.config import *
 
-class MessageService:
-    def __init__(self, session_maker: sessionmaker):
-        self.session_maker = session_maker
+class CalendarService:
+    def __init__(self):
+        self.session_maker = get_db
 
-    async def create_calendar_data(self, username: str, data: str = None, dow_id: int = None, dom_id: int = None, moy_id: int = None, tod_id: int = None):
+    async def create_calendar_data(self, username: str, data: str = None, dow_selectors: list[DateSelector] = None, dom_selectors: list[DateSelector] = None, moy_selectors: list[DateSelector] = None, tod_selectors: list[DateSelector] = None):
         async with self.session_maker() as session:
             # Set default values if missing
-            dow_id = dow_id or await self._get_default_dow_id(session)
-            dom_id = dom_id or await self._get_default_dom_id(session)
-            moy_id = moy_id or await self._get_default_moy_id(session)
-            tod_id = tod_id or await self._get_default_tod_id(session)
+            dow_id = await self._get_or_create_dow_id(session, dow_selectors)
+            dom_id = await self._get_or_create_dom_id(session, dom_selectors)
+            moy_id = await self._get_or_create_moy_id(session, moy_selectors)
+            tod_id = await self._get_or_create_tod_id(session, tod_selectors)
 
             new_record = CalendarData(
                 username=username,
@@ -29,7 +35,7 @@ class MessageService:
             session.add(new_record)
             await session.commit()
 
-    async def update_calendar_data(self, record_id: int, username: str = None, data: str = None, dow_id: int = None, dom_id: int = None, moy_id: int = None, tod_id: int = None):
+    async def update_calendar_data(self, record_id: int, username: str = None, data: str = None, dow_selectors: list[DateSelector] = None, dom_selectors: list[DateSelector] = None, moy_selectors: list[DateSelector] = None, tod_selectors: list[DateSelector] = None):
         async with self.session_maker() as session:
             async with session.begin():
                 stmt = select(CalendarData).where(CalendarData.id == record_id)
@@ -41,19 +47,50 @@ class MessageService:
                         record.username = username
                     if data:
                         record.data = data
-                    if dow_id:
-                        record.dow_id = dow_id
-                    if dom_id:
-                        record.dom_id = dom_id
-                    if moy_id:
-                        record.moy_id = moy_id
-                    if tod_id:
-                        record.tod_id = tod_id
+                    if dow_selectors:
+                        record.dow_id = await self._get_or_create_dow_id(session, dow_selectors)
+                    if dom_selectors:
+                        record.dom_id = await self._get_or_create_dom_id(session, dom_selectors)
+                    if moy_selectors:
+                        record.moy_id = await self._get_or_create_moy_id(session, moy_selectors)
+                    if tod_selectors:
+                        record.tod_id = await self._get_or_create_tod_id(session, tod_selectors)
 
                     await session.commit()
 
+    async def _get_or_create_dow_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
+        if not selectors:
+            return await self._get_default_dow_id(session)
+        dow = CalendarDoW(**{selector.key: selector.enabled for selector in selectors})
+        session.add(dow)
+        await session.commit()
+        return dow.id
+
+    async def _get_or_create_dom_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
+        if not selectors:
+            return await self._get_default_dom_id(session)
+        dom = CalendarDoM(**{f'day_{selector.key}': selector.enabled for selector in selectors})
+        session.add(dom)
+        await session.commit()
+        return dom.id
+
+    async def _get_or_create_moy_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
+        if not selectors:
+            return await self._get_default_moy_id(session)
+        moy = CalendarMoY(**{selector.key: selector.enabled for selector in selectors})
+        session.add(moy)
+        await session.commit()
+        return moy.id
+
+    async def _get_or_create_tod_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
+        if not selectors:
+            return await self._get_default_tod_id(session)
+        tod = CalendarToD(**{f'time_{selector.key}': selector.enabled for selector in selectors})
+        session.add(tod)
+        await session.commit()
+        return tod.id
+
     async def _get_default_dow_id(self, session: AsyncSession) -> int:
-        # Implement the logic to get or create a default CalendarDoW record
         stmt = select(CalendarDoW.id).limit(1)
         result = await session.execute(stmt)
         default_id = result.scalar_one_or_none()
@@ -65,7 +102,6 @@ class MessageService:
         return default_id
 
     async def _get_default_dom_id(self, session: AsyncSession) -> int:
-        # Implement the logic to get or create a default CalendarDoM record
         stmt = select(CalendarDoM.id).limit(1)
         result = await session.execute(stmt)
         default_id = result.scalar_one_or_none()
@@ -79,7 +115,6 @@ class MessageService:
         return default_id
 
     async def _get_default_moy_id(self, session: AsyncSession) -> int:
-        # Implement the logic to get or create a default CalendarMoY record
         stmt = select(CalendarMoY.id).limit(1)
         result = await session.execute(stmt)
         default_id = result.scalar_one_or_none()
@@ -91,7 +126,6 @@ class MessageService:
         return default_id
 
     async def _get_default_tod_id(self, session: AsyncSession) -> int:
-        # Implement the logic to get or create a default CalendarToD record
         stmt = select(CalendarToD.id).limit(1)
         result = await session.execute(stmt)
         default_id = result.scalar_one_or_none()
