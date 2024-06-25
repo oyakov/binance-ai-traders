@@ -23,25 +23,18 @@ from aiogram.utils.formatting import (
 
 from routers.new_message_router import new_message_router
 import db.config as db_config
+from subsystem.scheduler import init_scheduler
 
 ############################################################################
 # Access the variables
 API_TOKEN = os.getenv('BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 DEBUG_CORO = os.getenv('COROUTINE_DEBUG')
-
+############################################################################
 # logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-async def send_periodic_message(bot: Bot):
-    while True:
-        try:
-            await bot.send_message(chat_id=CHAT_ID, text="This is a periodic message")
-        except Exception as e:
-            logger.error(f"Error sending message: {e}")
-        await asyncio.sleep(10)  # Sleep for 1 hour
-
+############################################################################
 
 def create_dispatcher():
     # Event isolation is needed to correctly handle fast user responses
@@ -58,17 +51,26 @@ def create_dispatcher():
 
     return dispatcher
 
-async def main() -> None:
-    spammer_bot = Bot(token=API_TOKEN)
+async def initialize_bot(bot: Bot) -> None:
     await db_config.init_db()
+    logger.info(f"Database is initialized")
     dispatcher = create_dispatcher()
     # Launch bot
-    await dispatcher.start_polling(spammer_bot)
+    await dispatcher.start_polling(bot)
+
+async def main(bot: Bot) -> None:
+    # Run both the bot and scheduler concurrently
+    await asyncio.gather(
+        initialize_bot(bot=bot),
+        init_scheduler(bot=bot)
+    )
 
 if __name__ == '__main__':
-    logger.info(f"Debug coroutines: {DEBUG_CORO}")
+    logger.info(f"Debug coroutines: {DEBUG_CORO}")    
+    bot_instance = Bot(token=API_TOKEN)
+    logger.info(f"Bot instance created: {bot_instance}")
     try:
-        asyncio.run(main(), debug=DEBUG_CORO, loop_factory=None)
+        asyncio.run(main(bot=bot_instance), debug=DEBUG_CORO, loop_factory=None)
     except(SystemExit, KeyboardInterrupt) as int:
         logger.warning(f"Bot stopped with interrupt {int}")
     except() as err:

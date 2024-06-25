@@ -31,4 +31,5 @@ async def init_db():
         # While testing we will also drop all
         # TODO: remove when going to production
         await conn.run_sync(Base.metadata.drop_all)
+        # Create all tables from the model class
         await conn.run_sync(Base.metadata.create_all)

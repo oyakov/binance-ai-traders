@@ -1,4 +1,5 @@
 from db.config import *
+from db.model.fsm_state import FSMState
 from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType
 from sqlalchemy.future import select
 
