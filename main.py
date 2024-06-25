@@ -28,6 +28,7 @@ import db.config as db_config
 # Access the variables
 API_TOKEN = os.getenv('BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
+DEBUG_CORO = os.getenv('COROUTINE_DEBUG')
 
 # logging
 logging.basicConfig(level=logging.DEBUG)
@@ -65,8 +66,10 @@ async def main() -> None:
     await dispatcher.start_polling(spammer_bot)
 
 if __name__ == '__main__':
+    logger.info(f"Debug coroutines: {DEBUG_CORO}")
     try:
-        asyncio.run(main())
-    except(SystemExit, KeyboardInterrupt) as e:
-        logger.warning(f"Bot stopped with exception {e}")
-    
+        asyncio.run(main(), debug=DEBUG_CORO, loop_factory=None)
+    except(SystemExit, KeyboardInterrupt) as int:
+        logger.warning(f"Bot stopped with interrupt {int}")
+    except() as err:
+        logger.error(f"Bot stopped with errot {err}")
