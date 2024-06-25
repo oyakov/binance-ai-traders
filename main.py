@@ -22,23 +22,23 @@ from aiogram.utils.formatting import (
 )
 
 from routers.new_message_router import new_message_router
+import db.config as db_config
 
 ############################################################################
-
-
 # Access the variables
 API_TOKEN = os.getenv('BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 async def send_periodic_message(bot: Bot):
     while True:
         try:
             await bot.send_message(chat_id=CHAT_ID, text="This is a periodic message")
         except Exception as e:
-            logging.error(f"Error sending message: {e}")
+            logger.error(f"Error sending message: {e}")
         await asyncio.sleep(10)  # Sleep for 1 hour
 
 
@@ -59,13 +59,14 @@ def create_dispatcher():
 
 async def main() -> None:
     spammer_bot = Bot(token=API_TOKEN)
-    # loop = asyncio.get_event_loop();
-    # loop.create_task(send_periodic_message(bot=spammer_bot))
-    # loop.get_debug()
+    await db_config.init_db()
     dispatcher = create_dispatcher()
     # Launch bot
     await dispatcher.start_polling(spammer_bot)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except(SystemExit, KeyboardInterrupt) as e:
+        logger.warning(f"Bot stopped with exception {e}")
     

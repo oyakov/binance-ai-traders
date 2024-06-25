@@ -10,3 +10,4 @@ class CalendarToD(Base):
     time_16_00 = Column(Boolean, unique=False, index=False)
     time_18_00 = Column(Boolean, unique=False, index=False)
     time_20_00 = Column(Boolean, unique=False, index=False)
+    time_22_00 = Column(Boolean, unique=False, index=False)

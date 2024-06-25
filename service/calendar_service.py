@@ -11,17 +11,25 @@ from db.model.calendar_moy import CalendarMoY
 from db.model.calendar_tod import CalendarToD
 from db.config import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 class CalendarService:
     def __init__(self):
         self.session_maker = get_db
 
     async def create_calendar_data(self, username: str, data: str = None, dow_selectors: list[DateSelector] = None, dom_selectors: list[DateSelector] = None, moy_selectors: list[DateSelector] = None, tod_selectors: list[DateSelector] = None):
         async with self.session_maker() as session:
+            logger.info(f"Session {session}")
             # Set default values if missing
             dow_id = await self._get_or_create_dow_id(session, dow_selectors)
+            logger.info(f"DoW entry created, id {dow_id}")
             dom_id = await self._get_or_create_dom_id(session, dom_selectors)
+            logger.info(f"DoM entry created, id {dom_id}")
             moy_id = await self._get_or_create_moy_id(session, moy_selectors)
+            logger.info(f"MoY entry created, id {moy_id}")
             tod_id = await self._get_or_create_tod_id(session, tod_selectors)
+            logger.info(f"ToD entry created, id {tod_id}")
 
             new_record = CalendarData(
                 username=username,
@@ -64,7 +72,7 @@ class CalendarService:
         dow = CalendarDoW(**{selector.key: selector.enabled for selector in selectors})
         session.add(dow)
         await session.commit()
-        return dow.id
+        return await dow.awaitable_attrs.id
 
     async def _get_or_create_dom_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
         if not selectors:
@@ -72,7 +80,7 @@ class CalendarService:
         dom = CalendarDoM(**{f'day_{selector.key}': selector.enabled for selector in selectors})
         session.add(dom)
         await session.commit()
-        return dom.id
+        return await dom.awaitable_attrs.id
 
     async def _get_or_create_moy_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
         if not selectors:
@@ -80,7 +88,7 @@ class CalendarService:
         moy = CalendarMoY(**{selector.key: selector.enabled for selector in selectors})
         session.add(moy)
         await session.commit()
-        return moy.id
+        return await moy.awaitable_attrs.id
 
     async def _get_or_create_tod_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
         if not selectors:
@@ -88,7 +96,7 @@ class CalendarService:
         tod = CalendarToD(**{f'time_{selector.key}': selector.enabled for selector in selectors})
         session.add(tod)
         await session.commit()
-        return tod.id
+        return await tod.awaitable_attrs.id
 
     async def _get_default_dow_id(self, session: AsyncSession) -> int:
         stmt = select(CalendarDoW.id).limit(1)
@@ -98,7 +106,7 @@ class CalendarService:
             default_dow = CalendarDoW(monday=True, tuesday=True, wednesday=True, thursday=True, friday=True, saturday=True, sunday=True)
             session.add(default_dow)
             await session.commit()
-            return default_dow.id
+            return await default_dow.awaitable_attrs.id
         return default_id
 
     async def _get_default_dom_id(self, session: AsyncSession) -> int:
@@ -111,7 +119,7 @@ class CalendarService:
                                       day_21=True, day_22=True, day_23=True, day_24=True, day_25=True, day_26=True, day_27=True, day_28=True, day_29=True, day_30=True, day_31=True)
             session.add(default_dom)
             await session.commit()
-            return default_dom.id
+            return await default_dom.awaitable_attrs.id
         return default_id
 
     async def _get_default_moy_id(self, session: AsyncSession) -> int:
@@ -122,7 +130,7 @@ class CalendarService:
             default_moy = CalendarMoY(january=True, february=True, march=True, april=True, may=True, june=True, july=True, august=True, september=True, october=True, november=True, december=True)
             session.add(default_moy)
             await session.commit()
-            return default_moy.id
+            return await default_moy.awaitable_attrs.id
         return default_id
 
     async def _get_default_tod_id(self, session: AsyncSession) -> int:
@@ -133,5 +141,5 @@ class CalendarService:
             default_tod = CalendarToD(time_10_00=True, time_12_00=True, time_14_00=True, time_16_00=True, time_18_00=True, time_20_00=True)
             session.add(default_tod)
             await session.commit()
-            return default_tod.id
+            return await default_tod.awaitable_attrs.id
         return default_id
