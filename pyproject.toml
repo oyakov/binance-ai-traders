@@ -13,6 +13,7 @@ logging = "^0.4.9.6"
 sqlalchemy = "^2.0.30"
 asyncpg = "^0.29.0"
 python-dotenv = "^1.0.1"
+apscheduler = "^3.10.4"
 
 
 [build-system]
