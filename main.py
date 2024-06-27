@@ -1,9 +1,9 @@
 import asyncio
 import logging
 import os
+import db.config as db_config
 
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # aiogram
@@ -11,8 +11,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.scene import SceneRegistry
 from aiogram.fsm.storage.memory import SimpleEventIsolation
 
-
-import db.config as db_config
 from routers.new_message_router import new_message_router
 from subsystem.scheduler import init_scheduler
 

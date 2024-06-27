@@ -21,7 +21,7 @@ new_message_router = Router()
 new_message_router.message.middleware(ServiceMiddleware(CalendarService()))
 new_message_router.callback_query.middleware(ServiceMiddleware(CalendarService()))
 
-delimeter = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
+delimiter: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
 
 
 class NewMessage(StatesGroup):
@@ -80,7 +80,7 @@ async def process_text(message: Message, state: FSMContext) -> None:
     inline_kb = group_picker(groups=groups, row_size=2)
 
     await message.reply(text=f"Выберите целевые группы:", reply_markup=inline_kb)
-    await message.answer(text=delimeter, reply_markup=create_reply_kbd())
+    await message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
 @new_message_router.callback_query(NewMessage.new_msg_select_group)
@@ -94,7 +94,7 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
     inline_kb = now_or_later()
 
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
-    await callback_query.message.answer(text=delimeter, reply_markup=create_reply_kbd())
+    await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
 @new_message_router.callback_query(NewMessage.new_msg_now_or_interval)
@@ -111,14 +111,13 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
         await state.set_state(NewMessage.new_msg_interval_choose_type)
 
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
-    await callback_query.message.answer(text=delimeter, reply_markup=create_reply_kbd())
+    await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
 async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext, message_service: CalendarService):
     code = callback_query.data
     data = await state.get_data()
-    #calendar_service = data['message_service']
     logging.info(message_service)
     if code == "months_of_the_year":
         text = 'Выберите месяцы, в которые будет отправляться сообщение'
@@ -188,7 +187,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
         await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
-    await callback_query.message.answer(text=delimeter, reply_markup=create_reply_kbd())
+    await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_type_days_in_the_week)
@@ -197,7 +196,7 @@ async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMConte
         await state.set_state(NewMessage.new_msg_interval_choose_type)
         await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
                                             reply_markup=choose_date_type_inline())
-        await callback_query.message.reply(text=delimeter, reply_markup=create_reply_kbd())
+        await callback_query.message.reply(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
         changed_day = callback_query.data
@@ -233,7 +232,7 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
         await state.set_state(NewMessage.new_msg_interval_choose_type)
         await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
                                             reply_markup=choose_date_type_inline())
-        await callback_query.message.reply(text=delimeter, reply_markup=create_reply_kbd())
+        await callback_query.message.reply(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
         changed_time = callback_query.data
@@ -268,7 +267,7 @@ async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMCon
         await state.set_state(NewMessage.new_msg_interval_choose_type)
         await callback_query.message.reply(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
                                             reply_markup=choose_date_type_inline())
-        await callback_query.message.answer(text=delimeter, reply_markup=create_reply_kbd())
+        await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
         changed_month = callback_query.data
@@ -304,7 +303,7 @@ async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMCon
         await state.set_state(NewMessage.new_msg_interval_choose_type)
         await callback_query.message.reply(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
                                             reply_markup=choose_date_type_inline())
-        await callback_query.message.answer(text=delimeter, reply_markup=create_reply_kbd())
+        await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
         changed_day = callback_query.data

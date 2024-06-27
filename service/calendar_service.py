@@ -13,11 +13,18 @@ from markup.inline.types import DateSelector
 
 logger = logging.getLogger(__name__)
 
+
 class CalendarService:
     def __init__(self):
         self.session_maker = get_db
 
-    async def create_calendar_data(self, username: str, data: str = None, dow_selectors: list[DateSelector] = None, dom_selectors: list[DateSelector] = None, moy_selectors: list[DateSelector] = None, tod_selectors: list[DateSelector] = None):
+    async def create_calendar_data(self,
+                                   username: str,
+                                   data: str = None,
+                                   dow_selectors: list[DateSelector] = None,
+                                   dom_selectors: list[DateSelector] = None,
+                                   moy_selectors: list[DateSelector] = None,
+                                   tod_selectors: list[DateSelector] = None):
         async with self.session_maker() as session:
             logger.info(f"Session {session}")
             # Set default values if missing
