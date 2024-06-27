@@ -1,6 +1,8 @@
-from db.config import Base
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
+
+from db.config import Base
+
 
 class CalendarData(Base):
     __tablename__ = "calendar_data"

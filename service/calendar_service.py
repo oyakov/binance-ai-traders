@@ -1,17 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import update
-from db.config import Base
-from markup.inline.types import DateSelector
+import logging
+
+from sqlalchemy.future import select
+
+from db.config import *
 from db.model.calendar_data import CalendarData
 from db.model.calendar_dom import CalendarDoM
 from db.model.calendar_dow import CalendarDoW
 from db.model.calendar_moy import CalendarMoY
 from db.model.calendar_tod import CalendarToD
-from db.config import *
+from markup.inline.types import DateSelector
 
-import logging
 logger = logging.getLogger(__name__)
 
 class CalendarService:

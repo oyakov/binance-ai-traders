@@ -1,5 +1,7 @@
-from db.config import Base
 from sqlalchemy import Column, Integer, String, Text
+
+from db.config import Base
+
 
 class FSMState(Base):
     __tablename__ = "fsm_states"

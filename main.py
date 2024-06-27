@@ -1,28 +1,19 @@
-import logging
 import asyncio
+import logging
 import os
-from dataclasses import dataclass, field
-from typing import Any
-from db.storage import SQLAlchemyStorage
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # aiogram
-from aiogram import Bot, Dispatcher, types, F, Router, html
-from aiogram.filters import CommandStart, Command
-from aiogram.fsm.scene import SceneRegistry, on
-
+from aiogram import Bot, Dispatcher
+from aiogram.fsm.scene import SceneRegistry
 from aiogram.fsm.storage.memory import SimpleEventIsolation
-from aiogram.utils.formatting import (
-    Bold,
-    as_key_value,
-    as_list,
-    as_numbered_list,
-    as_section,
-)
 
-from routers.new_message_router import new_message_router
+
 import db.config as db_config
+from routers.new_message_router import new_message_router
 from subsystem.scheduler import init_scheduler
 
 ############################################################################
@@ -35,6 +26,7 @@ DEBUG_CORO = os.getenv('COROUTINE_DEBUG')
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 ############################################################################
+
 
 def create_dispatcher():
     # Event isolation is needed to correctly handle fast user responses
@@ -51,12 +43,14 @@ def create_dispatcher():
 
     return dispatcher
 
+
 async def initialize_bot(bot: Bot) -> None:
     await db_config.init_db()
     logger.info(f"Database is initialized")
     dispatcher = create_dispatcher()
     # Launch bot
     await dispatcher.start_polling(bot)
+
 
 async def main(bot: Bot) -> None:
     # Run both the bot and scheduler concurrently

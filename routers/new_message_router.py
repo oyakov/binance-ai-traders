@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import F, Router, html
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -9,13 +9,13 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from markup.reply.main_menu_reply_keyboard import *
+from markup.inline.keyboards import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
-from markup.inline.keyboards import *
+from markup.reply.main_menu_reply_keyboard import *
+from middleware.service_middleware import ServiceMiddleware
 from routers.main_menu import MainMenu
 from service.calendar_service import CalendarService
-from middleware.service_middleware import ServiceMiddleware
 
 new_message_router = Router()
 new_message_router.message.middleware(ServiceMiddleware(CalendarService()))

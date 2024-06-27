@@ -5,6 +5,7 @@ from aiogram.types import (
 
 from markup.inline.types import TelegramGroup
 
+
 def choose_date_type_inline():
     inline_btn_1 = InlineKeyboardButton(text='Месяцы', callback_data='months_of_the_year')
     inline_btn_2 = InlineKeyboardButton(text='Дни месяца', callback_data='days_of_the_month')

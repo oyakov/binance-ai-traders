@@ -1,9 +1,9 @@
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from db.model.calendar_data import CalendarData
-from service.telegram_service import send_telegram_message
 from aiogram import Bot
-from db.config import *
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy import text
+
+from db.config import *
+from service.telegram_service import send_telegram_message
 
 ############################################################################
 # logging

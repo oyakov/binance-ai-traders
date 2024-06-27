@@ -1,10 +1,11 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base, DeclarativeBase
-from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy import Column, Integer, String, Text
 import os
 from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
 load_dotenv()
 
 import logging

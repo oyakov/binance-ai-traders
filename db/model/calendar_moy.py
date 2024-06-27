@@ -1,5 +1,7 @@
-from db.config import Base
 from sqlalchemy import Column, Integer, Boolean
+
+from db.config import Base
+
 
 class CalendarMoY(Base):
     __tablename__ = "calendar_moy"

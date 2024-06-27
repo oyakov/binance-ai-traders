@@ -1,7 +1,9 @@
-from aiogram.types import Message, TelegramObject
-from aiogram.dispatcher.middlewares.base import BaseMiddleware
-from typing import Any, Awaitable, Callable, Dict, Optional
 import logging
+from typing import Any, Awaitable, Callable, Dict
+
+from aiogram.dispatcher.middlewares.base import BaseMiddleware
+from aiogram.types import TelegramObject
+
 
 # Middleware to inject the MessageService
 class ServiceMiddleware(BaseMiddleware):
