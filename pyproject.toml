@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spambot-python"
-version = "0.1.0"
+version = "0.2.1"
 description = "Python bot that spams messages periodically"
 authors = ["Cantor Dallocort"]
 readme = "README.md"
