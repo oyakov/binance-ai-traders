@@ -1,7 +1,6 @@
 import logging
 
-from sqlalchemy import select as sel
-from sqlalchemy.future import select
+from sqlalchemy import select, text
 from db.config import get_db
 from db.model.telegram_group import TelegramGroup
 
@@ -35,7 +34,7 @@ class TelegramGroupRepository:
         async with self.session_maker() as session:
             async with session.begin():
                 logger.info(f"Load Telegram chat by chat id {chat_id}")
-                stmt = sel(TelegramGroup).where(TelegramGroup.chat_id == chat_id)
+                stmt = select(TelegramGroup).where(TelegramGroup.chat_id == chat_id)
                 telegram_group = await session.execute(stmt)
                 telegram_group = telegram_group.fetchall()
                 return telegram_group
@@ -44,8 +43,16 @@ class TelegramGroupRepository:
         async with self.session_maker() as session:
             async with session.begin():
                 logger.info(f"Load all telegram chats for the owner {username}")
-                stmt = select(TelegramGroup).where(TelegramGroup.owner_username == username)
-                telegram_groups = await session.execute(stmt)
+                stmt = text('''
+                SELECT
+                    tg.chat_id,
+                    tg.display_name,
+                    tg.owner_username,
+                    tg.t_me_url
+                FROM telegram_group tg
+                WHERE owner_username = :username
+                ''')
+                telegram_groups = await session.execute(stmt, {'username': username})
                 telegram_groups = telegram_groups.fetchall()
                 return telegram_groups
 

@@ -31,7 +31,7 @@ def now_or_later():
 def group_picker(groups: list[TelegramGroup], row_size: int):
     buttons = []
     for group in groups:
-        buttons.append(InlineKeyboardButton(text=group.display_name, callback_data=f'toggle_gr_{group.chat_id}'))
+        buttons.append(InlineKeyboardButton(text=group.display_name, callback_data=f'{group.chat_id}'))
     # Split buttons into rows of size row_size
     buttons_layout: list[list[InlineKeyboardButton]] = [buttons[i:i + row_size] for i in range(0, len(buttons), row_size)]
     return InlineKeyboardMarkup(inline_keyboard=buttons_layout)

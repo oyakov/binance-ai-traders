@@ -20,10 +20,10 @@ async def check_calendar(bot: Bot):
     """
     calendar_entries = await calendar_repository.load_calendar_data_all()
     logger.info(f"calendar entries: {calendar_entries}")
-    for username, data, dow_id, dom_id, moy_id, tod_id in calendar_entries:
+    for chat_id, username, data, dow_id, dom_id, moy_id, tod_id in calendar_entries:
         # Construct the message to be sent
-        logger.info(f"Send telegram message for username {username}")
-        await send_telegram_message(bot, '-1002060021902', data)
+        logger.info(f"Send telegram message {data} to chat_id {chat_id} for customer {username}")
+        await send_telegram_message(bot, chat_id, data)
 
 
 async def initialize_scheduler(bot: Bot):
