@@ -82,22 +82,3 @@ def days_of_the_month() -> list[DateSelector]:
                 DateSelector('29', '29', True),
                 DateSelector('30', '30', True),
             ]
-
-class TelegramGroup:
-    telegram_name: str
-    friendly_name: str
-    chat_id: str
-
-    def __init__(self, telegram_name: str, friendly_name: str, chat_id: str):
-        self.telegram_name = telegram_name
-        self.friendly_name = friendly_name
-        self.chat_id = chat_id
-
-    def __str__(self) -> str:
-        return f'Telegram Group (telegram_name:{self.telegram_name}, friendly_name:{self.friendly_name}, chat id: {self.chat_id})'
-    
-def static_groups_mock():
-    return [
-        TelegramGroup('https://t.me/beograd_service', 'Белградский Консьерж', '-1002060021902'),
-        TelegramGroup('https://t.me/ruskie_v_belgrade', 'Русские в Белграде', '-1002060021902')
-    ]

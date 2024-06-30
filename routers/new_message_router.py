@@ -15,13 +15,18 @@ from markup.inline.types import *
 from markup.reply.main_menu_reply_keyboard import *
 from middleware.service_middleware import ServiceMiddleware
 from routers.main_menu import MainMenu
-from service.calendar_service import CalendarService
+from db.repository.calendar_repository import CalendarRepository
+from db.repository.telegram_group_repository import TelegramGroupRepository
 
 new_message_router = Router()
-new_message_router.message.middleware(ServiceMiddleware(CalendarService()))
-new_message_router.callback_query.middleware(ServiceMiddleware(CalendarService()))
+new_message_router.message.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))
+new_message_router.callback_query.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))
+new_message_router.message.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
+new_message_router.callback_query.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
 
 delimiter: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
+
+logger = logging.getLogger(__name__)
 
 
 class NewMessage(StatesGroup):
@@ -63,7 +68,7 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
     if current_state is None:
         return
 
-    logging.info("Cancelling state %r", current_state)
+    logger.info("Cancelling state %r", current_state)
     await state.clear()
     await message.answer(
         "Отмена",
@@ -72,14 +77,17 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
 
 
 @new_message_router.message(NewMessage.new_msg_input_text)
-async def process_text(message: Message, state: FSMContext) -> None:
+async def process_text(message: Message,
+                       state: FSMContext,
+                       tg_group_repository: TelegramGroupRepository) -> None:
     await state.update_data(text=message.text)
     await state.set_state(NewMessage.new_msg_select_group)
-    
-    groups = static_groups_mock()
+
+    # Load the Telegram groups that are attached for this user
+    groups = await tg_group_repository.load_telegram_groups_by_username(message.from_user.username)
     inline_kb = group_picker(groups=groups, row_size=2)
 
-    await message.reply(text=f"Выберите целевые группы:", reply_markup=inline_kb)
+    await message.reply(text=f"Выберите целевые группы: ", reply_markup=inline_kb)
     await message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
@@ -115,10 +123,13 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
 
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
-async def process_interval_choose_type(callback_query: CallbackQuery, state: FSMContext, message_service: CalendarService):
+async def process_interval_choose_type(callback_query: CallbackQuery,
+                                       state: FSMContext,
+                                       calendar_repository: CalendarRepository,
+                                       tg_group_repository: TelegramGroupRepository):
     code = callback_query.data
     data = await state.get_data()
-    logging.info(message_service)
+    logger.info(calendar_repository)
     if code == "months_of_the_year":
         text = 'Выберите месяцы, в которые будет отправляться сообщение'
         try:
@@ -152,38 +163,39 @@ async def process_interval_choose_type(callback_query: CallbackQuery, state: FSM
             selected_times = data['selected_tod']
         except KeyError:
             selected_times = times_of_the_day()
-            state.update_data({'selected_tod': selected_times})
+            await state.update_data({'selected_tod': selected_times})
         inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
         await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
     elif code == 'confirm':
         text = 'Данные приняты, сообщение настроено на периодическое отправление'
         try:
-            logging.info('Selected months:\n')
+            logger.info('Selected months:\n')
             selected_months: list[DateSelector] = data['selected_moy']
-            logging.info(f'{selected_months}\n')
+            logger.info(f'{selected_months}\n')
         except KeyError:
-            logging.error("Unknown error loading moy data")
+            logger.error("Unknown error loading moy data")
         try:
-            logging.info('Selected days in the month:\n')
+            logger.info('Selected days in the month:\n')
             selected_dom: list[DateSelector] = data['selected_dom']
-            logging.info(f'{selected_dom}\n')
+            logger.info(f'{selected_dom}\n')
         except KeyError:
-            logging.error("Unknown error loading dom data")
+            logger.error("Unknown error loading dom data")
         try:
-            logging.info('Selected days of the week:\n')
+            logger.info('Selected days of the week:\n')
             selected_dow: list[DateSelector] = data['selected_dow']
-            logging.info(f'{selected_dow}\n')
+            logger.info(f'{selected_dow}\n')
         except KeyError:
-            logging.error("Unknown error loading dow data")
+            logger.error("Unknown error loading dow data")
         try:
-            logging.info('Selected times of the day:\n')
+            logger.info('Selected times of the day:\n')
             selected_times: list[DateSelector] = data['selected_tod']
-            logging.info(f'{selected_times}')
+            logger.info(f'{selected_times}')
         except KeyError:
-            logging.error("Unknown error loading tod data")
+            logger.error("Unknown error loading tod data")
         inline_kb = choose_what_to_do_next()
+        group = data['group']
         # Write collected calendar data to the database
-        await message_service.create_calendar_data('test_username', 'text', selected_dow, selected_dom, selected_months, selected_times)
+        await calendar_repository.create_calendar_data('test_username', 'text', selected_dow, selected_dom, selected_months, selected_times)
         await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
@@ -200,21 +212,21 @@ async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMConte
     else:
         data = await state.get_data()
         changed_day = callback_query.data
-        logging.info(f'Changed day is {changed_day}')
+        logger.info(f'Changed day is {changed_day}')
 
         try:
             selected_days = data['selected_dow']
-            logging.info('Selected days are loaded successfully')
+            logger.info('Selected days are loaded successfully')
         except KeyError:
-            logging.warn('Error loading selected days')
+            logger.warning('Error loading selected days')
             selected_days = days_of_the_week()
             await state.update_data({'selected_dow': selected_days})   
 
         # Toggle selection
         for day in selected_days:
-            logging.info(day)
+            logger.info(day)
             if day.key == changed_day:
-                logging.info(f'Toggle day {day.key}')
+                logger.info(f'Toggle day {day.key}')
                 day.enabled = not day.enabled
 
         # Update state
@@ -236,21 +248,21 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
     else:
         data = await state.get_data()
         changed_time = callback_query.data
-        logging.info(f'Changed time is {changed_time}')
+        logger.info(f'Changed time is {changed_time}')
 
         try:
             selected_times = data['selected_tod']
-            logging.info('Selected times are loaded successfully')
+            logger.info('Selected times are loaded successfully')
         except KeyError:
-            logging.warn('Error loading selected times')
+            logger.warning('Error loading selected times')
             selected_times = times_of_the_day()
             await state.update_data({'selected_tod': selected_times})   
 
         # Toggle selection
         for time in selected_times:
-            logging.info(time)
+            logger.info(time)
             if time.key == changed_time:
-                logging.info(f'Toggle time {time.key}')
+                logger.info(f'Toggle time {time.key}')
                 time.enabled = not time.enabled
 
         # Update state
@@ -260,6 +272,7 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
         text = 'Выберите времена дня, в которые будет отправляться сообщение'
         inline_kb = date_selector_picker_inline(selected_times, row_size=4)
         await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
+
 
 @new_message_router.callback_query(NewMessage.new_msg_interval_type_months_in_the_year)
 async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMContext):
@@ -271,21 +284,21 @@ async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMCon
     else:
         data = await state.get_data()
         changed_month = callback_query.data
-        logging.info(f'Changed month is {changed_month}')
+        logger.info(f'Changed month is {changed_month}')
 
         try:
             selected_months = data['selected_moy']
-            logging.info('Selected months are loaded successfully')
+            logger.info('Selected months are loaded successfully')
         except KeyError:
-            logging.warn('Error loading selected months')
+            logger.warning('Error loading selected months')
             selected_months = months_of_the_year()
             await state.update_data({'selected_moy': selected_months})   
 
         # Toggle selection
         for month in selected_months:
-            logging.info(month)
+            logger.info(month)
             if month.key == changed_month:
-                logging.info(f'Toggle month {month.key}')
+                logger.info(f'Toggle month {month.key}')
                 month.enabled = not month.enabled
 
         # Update state
@@ -301,27 +314,27 @@ async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMCon
 async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
         await state.set_state(NewMessage.new_msg_interval_choose_type)
-        await callback_query.message.reply(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
-                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.reply(
+            text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
+            reply_markup=choose_date_type_inline())
         await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
         changed_day = callback_query.data
-        logging.info(f'Changed day is {changed_day}')
-
+        logger.info(f'Changed day is {changed_day}')
         try:
             selected_days = data['selected_dom']
-            logging.info('Selected days are loaded successfully')
+            logger.info('Selected days are loaded successfully')
         except KeyError:
-            logging.warn('Error loading selected days')
+            logger.warning('Error loading selected days')
             selected_days = days_of_the_month()
             await state.update_data({'selected_dom': selected_days})   
 
         # Toggle selection
         for day in selected_days:
-            logging.info(day)
+            logger.info(day)
             if day.key == changed_day:
-                logging.info(f'Toggle day {day.key}')
+                logger.info(f'Toggle day {day.key}')
                 day.enabled = not day.enabled
 
         # Update state

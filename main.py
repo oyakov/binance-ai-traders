@@ -2,17 +2,14 @@ import asyncio
 import logging
 import os
 import db.config as db_config
-
-from dotenv import load_dotenv
-load_dotenv()
-
-# aiogram
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.scene import SceneRegistry
-from aiogram.fsm.storage.memory import SimpleEventIsolation
-
 from routers.new_message_router import new_message_router
 from subsystem.scheduler import init_scheduler
+# aiogram
+from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import SimpleEventIsolation
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ############################################################################
 # Access the variables
@@ -37,7 +34,7 @@ def create_dispatcher():
 
     # To use scenes, you should create a SceneRegistry and register your scenes there
     # Scenes are not currently used as an implementation pattern, use FSM isntead
-    scene_registry = SceneRegistry(dispatcher)
+    # scene_registry = SceneRegistry(dispatcher)
 
     return dispatcher
 
@@ -63,7 +60,7 @@ if __name__ == '__main__':
     logger.info(f"Bot instance created: {bot_instance}")
     try:
         asyncio.run(main(bot=bot_instance), debug=DEBUG_CORO, loop_factory=None)
-    except(SystemExit, KeyboardInterrupt) as int:
-        logger.warning(f"Bot stopped with interrupt {int}")
+    except(SystemExit, KeyboardInterrupt) as ex:
+        logger.warning(f"Bot stopped with interrupt {ex}")
     except() as err:
         logger.error(f"Bot stopped with errot {err}")

@@ -1,20 +1,13 @@
 from sqlalchemy.future import select
-import logging
-
-from sqlalchemy.future import select
-
+from sqlalchemy import text, select as sel
 from db.config import *
-from db.model.calendar_data import CalendarData
-from db.model.calendar_dom import CalendarDoM
-from db.model.calendar_dow import CalendarDoW
-from db.model.calendar_moy import CalendarMoY
-from db.model.calendar_tod import CalendarToD
+from db.model.calendars import CalendarData, CalendarDoM, CalendarDoW, CalendarMoY, CalendarToD
 from markup.inline.types import DateSelector
 
 logger = logging.getLogger(__name__)
 
 
-class CalendarService:
+class CalendarRepository:
     def __init__(self):
         self.session_maker = get_db
 
@@ -71,6 +64,50 @@ class CalendarService:
                         record.tod_id = await self._get_or_create_tod_id(session, tod_selectors)
 
                     await session.commit()
+
+    async def load_calendar_data_all(self) -> list:
+        """
+        Load all periodic message schedules from the database
+        """
+        async with self.session_maker as session:
+            async with session.begin():
+                stmt = text('''
+                SELECT 
+                    cd.username as username,
+                    cd.data as data,
+                    cd.dow_id as dow_id,
+                    cd.dom_id as dom_id,
+                    cd.moy_id as moy_id,
+                    cd.tod_id as tod_id
+                from calendar_data cd''')
+                calendar_entries = await session.execute(stmt)
+                return calendar_entries.fetchall()
+
+    async def load_calendars(self, dow_id: int, dom_id: int, moy_id: int, tod_id: int):
+        """
+        Load all the calendars related to the periodic message by ids
+        """
+        async with self.session_maker as session:
+            async with session.begin():
+                logger.info("load calendars")
+                stmt = sel(CalendarDoW).where(CalendarDoW.id == dow_id)
+                calendar_dow_entries = await session.execute(stmt)
+                calendar_dow_entries = calendar_dow_entries.fetchall()
+
+                stmt = sel(CalendarDoM).where(CalendarDoM.id == dom_id)
+                calendar_dom_entries = await session.execute(stmt)
+                calendar_dom_entries = calendar_dom_entries.fetchall()
+
+                stmt = sel(CalendarMoY).where(CalendarMoY.id == moy_id)
+                calendar_moy_entries = await session.execute(stmt)
+                calendar_moy_entries = calendar_moy_entries.fetchall()
+
+                stmt = sel(CalendarToD).where(CalendarToD.id == tod_id)
+                calendar_tod_entries = await session.execute(stmt)
+                calendar_tod_entries = calendar_tod_entries.fetchall()
+
+                return calendar_dow_entries, calendar_dom_entries, calendar_moy_entries, calendar_tod_entries
+
 
     async def _get_or_create_dow_id(self, session: AsyncSession, selectors: list[DateSelector]) -> int:
         if not selectors:
