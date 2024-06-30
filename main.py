@@ -2,8 +2,9 @@ import asyncio
 import logging
 import os
 import db.config as db_config
+from db.repository.telegram_group_repository import populate_test_groups
 from routers.new_message_router import new_message_router
-from subsystem.scheduler import init_scheduler
+from subsystem.scheduler import initialize_scheduler
 # aiogram
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import SimpleEventIsolation
@@ -39,27 +40,38 @@ def create_dispatcher():
     return dispatcher
 
 
-async def initialize_bot(bot: Bot) -> None:
-    await db_config.init_db()
+async def initialize_db() -> None:
+    """Auto-create database table schema from the model classes annd populate test data"""
+    logger.info(f"Initializing the DB")
+    await db_config.create_tables()
+    logger.info("Tables are created")
+    await populate_test_groups()
     logger.info(f"Database is initialized")
+
+
+async def initialize_bot(bot: Bot) -> None:
+    logger.info(f"Initializing bot {bot}")
     dispatcher = create_dispatcher()
     # Launch bot
     await dispatcher.start_polling(bot)
 
 
 async def main(bot: Bot) -> None:
-    # Run both the bot and scheduler concurrently
+    """Initialize application subsystemms concurrently"""
     await asyncio.gather(
+        initialize_db(),
         initialize_bot(bot=bot),
-        init_scheduler(bot=bot)
-    )
+        initialize_scheduler(bot=bot))
 
+# Run the application
 if __name__ == '__main__':
     logger.info(f"Debug coroutines: {DEBUG_CORO}")    
     bot_instance = Bot(token=API_TOKEN)
     logger.info(f"Bot instance created: {bot_instance}")
     try:
-        asyncio.run(main(bot=bot_instance), debug=DEBUG_CORO, loop_factory=None)
+        asyncio.run(
+            main(bot=bot_instance),
+            debug=DEBUG_CORO)
     except(SystemExit, KeyboardInterrupt) as ex:
         logger.warning(f"Bot stopped with interrupt {ex}")
     except() as err:

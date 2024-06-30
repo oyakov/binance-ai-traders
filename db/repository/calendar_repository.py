@@ -69,7 +69,7 @@ class CalendarRepository:
         """
         Load all periodic message schedules from the database
         """
-        async with self.session_maker as session:
+        async with self.session_maker() as session:
             async with session.begin():
                 stmt = text('''
                 SELECT 
@@ -87,7 +87,7 @@ class CalendarRepository:
         """
         Load all the calendars related to the periodic message by ids
         """
-        async with self.session_maker as session:
+        async with self.session_maker() as session:
             async with session.begin():
                 logger.info("load calendars")
                 stmt = sel(CalendarDoW).where(CalendarDoW.id == dow_id)

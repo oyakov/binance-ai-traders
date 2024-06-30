@@ -44,6 +44,8 @@ class NewMessage(StatesGroup):
 @new_message_router.message(Command("new_message"))
 @new_message_router.message(F.text.casefold() == "Новое сообщение")
 async def command_start(message: Message, state: FSMContext) -> None:
+    logger.info(f"Starting new periodic message dialog. Chat ID {message.chat.id}")
+
     await state.set_state(NewMessage.new_msg_input_text)
 
     # Inititalize message state

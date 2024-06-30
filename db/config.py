@@ -28,7 +28,7 @@ async def get_db():
         yield session
 
 
-async def init_db():
+async def create_tables():
     logger.info("Init db")
     async with engine.begin() as conn:
         # While testing we will also drop all
