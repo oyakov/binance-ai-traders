@@ -12,6 +12,7 @@ class CalendarRepository:
         self.session_maker = get_db
 
     async def create_calendar_data(self,
+                                   chat_id: str,
                                    username: str,
                                    data: str = None,
                                    dow_selectors: list[DateSelector] = None,
@@ -31,6 +32,7 @@ class CalendarRepository:
             logger.info(f"ToD entry created, id {tod_id}")
 
             new_record = CalendarData(
+                chat_id=chat_id,
                 username=username,
                 data=data,
                 dow_id=dow_id,

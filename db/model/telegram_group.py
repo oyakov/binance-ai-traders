@@ -9,7 +9,7 @@ class TelegramGroup(Base):
     """
     A chats that is managed by the users
     """
-    __tablename__ = "managed_chats"
+    __tablename__ = "telegram_group"
 
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String, unique=True, index=False)

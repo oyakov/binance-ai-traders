@@ -195,9 +195,10 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
         except KeyError:
             logger.error("Unknown error loading tod data")
         inline_kb = choose_what_to_do_next()
-        group = data['group']
+        chat_id = data['group']
+        text_to_send = data['text']
         # Write collected calendar data to the database
-        await calendar_repository.create_calendar_data('test_username', 'text', selected_dow, selected_dom, selected_months, selected_times)
+        await calendar_repository.create_calendar_data(chat_id, 'username', text_to_send, selected_dow, selected_dom, selected_months, selected_times)
         await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
@@ -280,8 +281,9 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
 async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
         await state.set_state(NewMessage.new_msg_interval_choose_type)
-        await callback_query.message.reply(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
-                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.reply(
+            text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
+            reply_markup=choose_date_type_inline())
         await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()

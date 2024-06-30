@@ -1,6 +1,7 @@
 import logging
 
 from sqlalchemy import select as sel
+from sqlalchemy.future import select
 from db.config import get_db
 from db.model.telegram_group import TelegramGroup
 
@@ -10,8 +11,8 @@ logger = logging.getLogger(__name__)
 async def populate_test_groups():
     logger.info("Populate test Telegram Groups")
     initial_groups = [
-        TelegramGroup('-1002060021902', '@oyakov', 'Test Group 1', 'https://t.me/beograd_service'),
-        TelegramGroup('-4284276251', '@oyakov', 'Test Group 2', 'https://t.me/ruskie_v_belgrade')
+        TelegramGroup('-1002060021902', 'oyakov', 'Test Group 1', 'https://t.me/beograd_service'),
+        TelegramGroup('-4284276251', 'oyakov', 'Test Group 2', 'https://t.me/ruskie_v_belgrade')
     ]
     async with get_db() as session:
         session.add_all(initial_groups)
@@ -43,7 +44,7 @@ class TelegramGroupRepository:
         async with self.session_maker() as session:
             async with session.begin():
                 logger.info(f"Load all telegram chats for the owner {username}")
-                stmt = sel(TelegramGroup).where(TelegramGroup.owner_username == username)
+                stmt = select(TelegramGroup).where(TelegramGroup.owner_username == username)
                 telegram_groups = await session.execute(stmt)
                 telegram_groups = telegram_groups.fetchall()
                 return telegram_groups

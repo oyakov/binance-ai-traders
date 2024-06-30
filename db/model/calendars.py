@@ -85,15 +85,21 @@ class CalendarData(Base):
     __tablename__ = "calendar_data"
     id = Column(Integer, primary_key=True, index=True)
 
+    # Calendar data
     dow_id = Column(Integer, ForeignKey('calendar_dow.id'), nullable=False)
     dom_id = Column(Integer, ForeignKey('calendar_dom.id'), nullable=False)
     moy_id = Column(Integer, ForeignKey('calendar_moy.id'), nullable=False)
     tod_id = Column(Integer, ForeignKey('calendar_tod.id'), nullable=False)
 
-    data = Column(String, nullable=True)
+    # Telegram chat_id
+    chat_id = Column(String, ForeignKey('telegram_group.chat_id'), nullable=False)
+    # Text to post
+    data = Column(String, nullable=False)
+    # Username of the customer
     username = Column(String, nullable=False)
 
     dow = relationship("CalendarDoW")
     dom = relationship("CalendarDoM")
     moy = relationship("CalendarMoY")
     tod = relationship("CalendarToD")
+    tg_chat = relationship("TelegramGroup")
