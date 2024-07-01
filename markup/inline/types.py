@@ -9,7 +9,7 @@ class DateSelector:
         self.enabled = enabled
 
     def __str__(self) -> str:
-        return f'Date Selector (key:{self.key}, text:{self.text}, enabled:{self.enabled})'
+        return f'Date Selector (key: {self.key}, text: {self.text}, enabled: {self.enabled})'
 
 
 def days_of_the_week() -> list[DateSelector]:
@@ -23,6 +23,7 @@ def days_of_the_week() -> list[DateSelector]:
                 DateSelector('sunday', 'Воскресенье', True),
             ]
 
+
 def times_of_the_day() -> list[DateSelector]:
     return [
                 DateSelector('10_00', '10:00', True),
@@ -33,6 +34,7 @@ def times_of_the_day() -> list[DateSelector]:
                 DateSelector('20_00', '20:00', True),
                 DateSelector('22_00', '22:00', True),
             ]
+
 
 def months_of_the_year() -> list[DateSelector]:
     return [
@@ -48,6 +50,7 @@ def months_of_the_year() -> list[DateSelector]:
                 DateSelector('november', 'November', True),
                 DateSelector('december', 'December', True),
             ]
+
 
 def days_of_the_month() -> list[DateSelector]:
     return [

@@ -10,8 +10,9 @@ from db.repository.calendar_repository import CalendarRepository
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 ############################################################################
-
+# database
 calendar_repository = CalendarRepository()
+############################################################################
 
 
 async def check_calendar(bot: Bot):
@@ -26,15 +27,15 @@ async def check_calendar(bot: Bot):
         await send_telegram_message(bot, chat_id, data)
 
 
-async def initialize_scheduler(bot: Bot):
+async def initialize_message_sender_job(bot: Bot, interval_minutes: int = 1):
     """
     Initialize the periodic job for sending messages
-    Job will run approximately every minute and will check if this minute there are
-    messages which schedule has arrived and send those messages to the configured list of chats
+    Job will run approximately every interval_minutes and will check if this time there are messages
+    which schedule has arrived and send those messages to the configured list of chats
     """
     logger.info("Initialize the scheduler job")
     scheduler = AsyncIOScheduler()
     # TODO: get the interval minutes from the configuration file
-    scheduler.add_job(check_calendar, 'interval', args=[bot], minutes=1)
+    scheduler.add_job(check_calendar, 'interval', args=[bot], minutes=interval_minutes)
     scheduler.start()
-    logger.info("Scheduler initialized")
+    logger.info("Scheduler is initialized")

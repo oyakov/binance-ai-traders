@@ -127,8 +127,7 @@ async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext)
 @new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
 async def process_interval_choose_type(callback_query: CallbackQuery,
                                        state: FSMContext,
-                                       calendar_repository: CalendarRepository,
-                                       tg_group_repository: TelegramGroupRepository):
+                                       calendar_repository: CalendarRepository):
     code = callback_query.data
     data = await state.get_data()
     logger.info(calendar_repository)
@@ -209,8 +208,9 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
 async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
         await state.set_state(NewMessage.new_msg_interval_choose_type)
-        await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
-                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.answer(
+            text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
+            reply_markup=choose_date_type_inline())
         await callback_query.message.reply(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
@@ -245,8 +245,9 @@ async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMConte
 async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
         await state.set_state(NewMessage.new_msg_interval_choose_type)
-        await callback_query.message.answer(text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже', 
-                                            reply_markup=choose_date_type_inline())
+        await callback_query.message.answer(
+            text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
+            reply_markup=choose_date_type_inline())
         await callback_query.message.reply(text=delimiter, reply_markup=create_reply_kbd())
     else:
         data = await state.get_data()
