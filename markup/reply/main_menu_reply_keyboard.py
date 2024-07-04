@@ -3,11 +3,16 @@ from aiogram.types import (
 )
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+NEW_MESSAGE = "Новое сообщение"
+CONTENT_PLAN = "Контент-план"
+SETTINGS = "Настройки"
+STATISTICS = "Статистика"
+
 
 def create_reply_kbd() -> ReplyKeyboardMarkup:
     markup = ReplyKeyboardBuilder()
-    markup.button(text="Новое сообщение")
-    markup.button(text="Контент-план")
-    markup.button(text="Настройки")
-    markup.button(text="Статистика")
+    markup.button(text=NEW_MESSAGE)
+    markup.button(text=CONTENT_PLAN)
+    markup.button(text=SETTINGS)
+    markup.button(text=STATISTICS)
     return markup.adjust(2).as_markup(resize_keyboard=True)

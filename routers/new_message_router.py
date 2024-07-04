@@ -42,13 +42,13 @@ class NewMessage(StatesGroup):
 
 
 @new_message_router.message(Command("new_message"))
-@new_message_router.message(F.text.casefold() == "Новое сообщение")
+@new_message_router.message(F.text == NEW_MESSAGE)
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new periodic message dialog. Chat ID {message.chat.id}")
 
     await state.set_state(NewMessage.new_msg_input_text)
 
-    # Inititalize message state
+    # Inititalize default calenndar objects for the new message
     await state.set_data({'selected_tod': times_of_the_day(), 
                           'selected_dow': days_of_the_week(),
                           'selected_moy': months_of_the_year(),
@@ -61,7 +61,7 @@ async def command_start(message: Message, state: FSMContext) -> None:
 
 
 @new_message_router.message(Command("cancel"))
-@new_message_router.message(F.text.casefold() == "cancel")
+@new_message_router.message(F.text == "cancel")
 async def cancel_handler(message: Message, state: FSMContext) -> None:
     """
     Allow user to cancel any action
@@ -197,7 +197,14 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
         chat_id = data['group']
         text_to_send = data['text']
         # Write collected calendar data to the database
-        await calendar_repository.create_calendar_data(chat_id, 'username', text_to_send, selected_dow, selected_dom, selected_months, selected_times)
+        await calendar_repository.create_calendar_data(
+            chat_id,
+            'username',
+            text_to_send,
+            selected_dow,
+            selected_dom,
+            selected_months,
+            selected_times)
         await state.set_state(MainMenu.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)

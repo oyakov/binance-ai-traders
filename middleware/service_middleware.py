@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 # Middleware to inject the services into context
 class ServiceMiddleware(BaseMiddleware):
+    """Middleware to inject any given service instance to the aiogram callback or message handlers"""
     def __init__(self, key: str, service):
         super().__init__()
         self.key = key
