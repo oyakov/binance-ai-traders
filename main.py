@@ -49,10 +49,14 @@ def create_dispatcher() -> Dispatcher:
 async def initialize_database() -> None:
     """Auto-create database table schema from the model classes and populate test data"""
     logger.info(f"Initializing the DB")
-    await db_config.create_tables()
-    logger.info(f"Tables are created")
-    await populate_test_groups()
-    logger.info(f"Database is initialized")
+    try:
+        await db_config.create_tables()
+        logger.info(f"Tables are created")
+        await populate_test_groups()
+        logger.info(f"Database is initialized")
+    except() as exception:
+        logger.error(f"Error initializing the database {exception}")
+
 
 
 async def initialize_bot(bot: Bot) -> None:
