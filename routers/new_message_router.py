@@ -9,12 +9,12 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from markup.inline.keyboards import *
+from markup.inline.keyboards.new_message_keyboards import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
 from markup.reply.main_menu_reply_keyboard import *
 from middleware.service_middleware import ServiceMiddleware
-from routers.main_menu import MainMenu
+from routers.main_menu import MainMenuStates
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
 
@@ -29,7 +29,7 @@ delimiter: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊�
 logger = logging.getLogger(__name__)
 
 
-class NewMessage(StatesGroup):
+class NewMessageStates(StatesGroup):
     new_msg_input_text = State()
     new_msg_select_group = State()
     new_msg_now_or_interval = State()
@@ -46,7 +46,7 @@ class NewMessage(StatesGroup):
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new periodic message dialog. Chat ID {message.chat.id}")
 
-    await state.set_state(NewMessage.new_msg_input_text)
+    await state.set_state(NewMessageStates.new_msg_input_text)
 
     # Inititalize default calenndar objects for the new message
     await state.set_data({'selected_tod': times_of_the_day(), 
@@ -78,12 +78,12 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
     )
 
 
-@new_message_router.message(NewMessage.new_msg_input_text)
+@new_message_router.message(NewMessageStates.new_msg_input_text)
 async def process_text(message: Message,
                        state: FSMContext,
                        tg_group_repository: TelegramGroupRepository) -> None:
     await state.update_data(text=message.text)
-    await state.set_state(NewMessage.new_msg_select_group)
+    await state.set_state(NewMessageStates.new_msg_select_group)
 
     # Load the Telegram groups that are attached for this user
     groups = await tg_group_repository.load_telegram_groups_by_username(message.from_user.username)
@@ -93,11 +93,11 @@ async def process_text(message: Message,
     await message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
-@new_message_router.callback_query(NewMessage.new_msg_select_group)
+@new_message_router.callback_query(NewMessageStates.new_msg_select_group)
 async def process_group(callback_query: CallbackQuery, state: FSMContext):    
     code = callback_query.data
     await state.update_data(group=code)
-    await state.set_state(NewMessage.new_msg_now_or_interval)
+    await state.set_state(NewMessageStates.new_msg_now_or_interval)
 
     text = f'Вы выбрали группу с chat id {code}\n'    
     text += 'Отправим сообщение сейчас или запланируем?'
@@ -107,24 +107,24 @@ async def process_group(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
-@new_message_router.callback_query(NewMessage.new_msg_now_or_interval)
+@new_message_router.callback_query(NewMessageStates.new_msg_now_or_interval)
 async def process_now_or_later(callback_query: CallbackQuery, state: FSMContext):
     code = callback_query.data
     await state.update_data(type=code)
     if code == 'now':
         text = 'Вы выбрали отправку сообщения сейчас, сообщение отправлено.'
         inline_kb = choose_what_to_do_next()
-        await state.set_state(MainMenu.main_menu_awaiting_input)
+        await state.set_state(MainMenuStates.main_menu_awaiting_input)
     elif code == 'interval':
         text = 'Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже'
         inline_kb = choose_date_type_inline()
-        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await state.set_state(NewMessageStates.new_msg_interval_choose_type)
 
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
-@new_message_router.callback_query(NewMessage.new_msg_interval_choose_type)
+@new_message_router.callback_query(NewMessageStates.new_msg_interval_choose_type)
 async def process_interval_choose_type(callback_query: CallbackQuery,
                                        state: FSMContext,
                                        calendar_repository: CalendarRepository):
@@ -139,7 +139,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
             selected_months = months_of_the_year()
             await state.update_data({'selected_moy': selected_months})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_months, row_size=4)
-        await state.set_state(NewMessage.new_msg_interval_type_months_in_the_year)
+        await state.set_state(NewMessageStates.new_msg_interval_type_months_in_the_year)
     elif code == "days_of_the_month":
         text = 'Выберите дни месяца, в которые будет отправляться сообщение'
         try:
@@ -148,7 +148,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
             selected_days = days_of_the_month()
             await state.update_data({'selected_dom': selected_days})     
         inline_kb = date_selector_picker_inline(date_selectors=selected_days, row_size=4)
-        await state.set_state(NewMessage.new_msg_interval_type_days_in_the_month)
+        await state.set_state(NewMessageStates.new_msg_interval_type_days_in_the_month)
     elif code == "days_of_the_week":
         text = 'Выберите дни недели, в которые будет отправляться сообщение'
         try:
@@ -157,7 +157,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
             selected_days = days_of_the_week()
             await state.update_data({'selected_dow': selected_days})            
         inline_kb = date_selector_picker_inline(date_selectors=selected_days, row_size=4)
-        await state.set_state(NewMessage.new_msg_interval_type_days_in_the_week)
+        await state.set_state(NewMessageStates.new_msg_interval_type_days_in_the_week)
     elif code == 'time_of_the_day':
         text = 'Выберите времена, в течение дня, в которые будет отправляться сообщение'
         try:
@@ -166,7 +166,7 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
             selected_times = times_of_the_day()
             await state.update_data({'selected_tod': selected_times})
         inline_kb = date_selector_picker_inline(date_selectors=selected_times, row_size=4)
-        await state.set_state(NewMessage.new_msg_interval_type_time_in_the_day)
+        await state.set_state(NewMessageStates.new_msg_interval_type_time_in_the_day)
     elif code == 'confirm':
         text = 'Данные приняты, сообщение настроено на периодическое отправление'
         try:
@@ -205,16 +205,16 @@ async def process_interval_choose_type(callback_query: CallbackQuery,
             selected_dom,
             selected_months,
             selected_times)
-        await state.set_state(MainMenu.main_menu_awaiting_input)
+        await state.set_state(MainMenuStates.main_menu_awaiting_input)
     
     await callback_query.message.reply(text=text, reply_markup=inline_kb)
     await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
 
 
-@new_message_router.callback_query(NewMessage.new_msg_interval_type_days_in_the_week)
+@new_message_router.callback_query(NewMessageStates.new_msg_interval_type_days_in_the_week)
 async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
-        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await state.set_state(NewMessageStates.new_msg_interval_choose_type)
         await callback_query.message.answer(
             text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
             reply_markup=choose_date_type_inline())
@@ -248,10 +248,10 @@ async def process_day_of_the_week(callback_query: CallbackQuery, state: FSMConte
         await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
 
-@new_message_router.callback_query(NewMessage.new_msg_interval_type_time_in_the_day)
+@new_message_router.callback_query(NewMessageStates.new_msg_interval_type_time_in_the_day)
 async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
-        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await state.set_state(NewMessageStates.new_msg_interval_choose_type)
         await callback_query.message.answer(
             text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
             reply_markup=choose_date_type_inline())
@@ -285,10 +285,10 @@ async def process_times_of_the_day(callback_query: CallbackQuery, state: FSMCont
         await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
 
-@new_message_router.callback_query(NewMessage.new_msg_interval_type_months_in_the_year)
+@new_message_router.callback_query(NewMessageStates.new_msg_interval_type_months_in_the_year)
 async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
-        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await state.set_state(NewMessageStates.new_msg_interval_choose_type)
         await callback_query.message.reply(
             text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
             reply_markup=choose_date_type_inline())
@@ -322,10 +322,10 @@ async def process_month_of_the_year(callback_query: CallbackQuery, state: FSMCon
         await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
 
-@new_message_router.callback_query(NewMessage.new_msg_interval_type_days_in_the_month)
+@new_message_router.callback_query(NewMessageStates.new_msg_interval_type_days_in_the_month)
 async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMContext):
     if callback_query.data == 'back':
-        await state.set_state(NewMessage.new_msg_interval_choose_type)
+        await state.set_state(NewMessageStates.new_msg_interval_choose_type)
         await callback_query.message.reply(
             text='Вы выбрали отправку по расписанию, настройте расписание при помощи инструментов ниже',
             reply_markup=choose_date_type_inline())

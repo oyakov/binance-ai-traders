@@ -1,3 +1,5 @@
+"""Test file to check OpenAI API"""
+import os
 # Chat with an intelligent assistant in your terminal
 from openai import OpenAI
 
@@ -5,14 +7,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+OPENAI_URL = os.getenv('OPENAI_URL')
+OPENAI_TOKEN = os.getenv('OPENAI_TOKEN')
 
 # Point to the local server
-client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+client = OpenAI(base_url=OPENAI_URL, api_key=OPENAI_TOKEN)
 
 history = [
     {"role": "system",
-     "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
+     "content": "You are an intelligent assistant. "
+                "You always provide well-reasoned answers that are both correct and helpful."},
     {"role": "user",
      "content": "Hello, introduce yourself to someone opening this program for the first time. Be concise."},
 ]

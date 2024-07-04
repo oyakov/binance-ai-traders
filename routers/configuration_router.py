@@ -9,7 +9,7 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from markup.reply.main_menu_reply_keyboard import SETTINGS
+from markup.reply.main_menu_reply_keyboard import SETTINGS, create_reply_kbd
 
 configuration_router = Router()
 
@@ -17,7 +17,7 @@ configuration_router = Router()
 logger = logging.getLogger(__name__)
 
 
-class Configuration(StatesGroup):
+class ConfigurationStates(StatesGroup):
     select_configuration = State()
 
 
@@ -25,3 +25,10 @@ class Configuration(StatesGroup):
 @configuration_router.message(F.text == SETTINGS)
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new configuration dialog. Chat ID {message.chat.id}")
+
+    await state.set_state(ConfigurationStates.select_configuration)
+
+    await message.answer(
+        "Under construction",
+        reply_markup=create_reply_kbd()
+    )

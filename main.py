@@ -1,10 +1,13 @@
 import asyncio
 import logging
 import os
+# Project dependencies
 import db.config as db_config
-# project dependencies
 from db.repository.telegram_group_repository import populate_test_groups
+# Routers
 from routers.new_message_router import new_message_router
+from routers.openai_router import openai_router
+# Subsystems
 from subsystem.scheduler import initialize_message_sender_job
 # aiogram
 from aiogram import Bot, Dispatcher
@@ -34,6 +37,7 @@ def create_dispatcher() -> Dispatcher:
         # storage=SQLAlchemyStorage()
     )
     dispatcher.include_router(new_message_router)
+    dispatcher.include_router(openai_router)
 
     # To use scenes, you should create a SceneRegistry and register your scenes there
     # Scenes are not currently used as an implementation pattern, use FSM isntead
