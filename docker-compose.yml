@@ -4,16 +4,15 @@ services:
   bot:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      local-ai:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
-      - BOT_TOKEN=6853220461:AAGIJo2a3GIMMqgz1w9iISW3Lv7ZnvAoRa8
-      - COROUTINE_DEBUG=True
-      - OPENAI_URL=http://localhost:8080/v1
-      - OPENAI_TOKEN=lm-studio
-      - LLM_MODEL=lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - LOCAL_AI_URL=http://local-ai:8080
     ports:
-      - "8443:8443"  # Change the port as needed
+      - "8000:8000"
 
   db:
     image: postgres:13
@@ -25,12 +24,22 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   local-ai:
     image: localai/localai:latest-aio-cpu
     container_name: local-ai
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/models || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
