@@ -19,7 +19,10 @@ class OpenAIAPIService:
 
     def __init__(self):
         # Point to the local server
-        self.client = OpenAI(base_url=OPENAI_URL, api_key=OPENAI_TOKEN)
+        try:
+            self.client = OpenAI(base_url=OPENAI_URL, api_key=OPENAI_TOKEN)
+        except() as exception:
+            logger.error(f"Failed to initialize OpenAI module, AI functions will be unavailable. Error {exception}")
         self.role = "assistant"
         self.system_prompt = [
             {"role": "system",
