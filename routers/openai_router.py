@@ -51,7 +51,6 @@ async def display_select_action(message: Message, state: FSMContext):
 @openai_router.callback_query(OpenAIStates.openai_select_action)
 async def process_function_selection(callback_query: CallbackQuery, state: FSMContext, openai_service: OpenAIAPIService):
     code = callback_query.data
-
     logger.info(f"OpenAI action selected {code}")
 
     if code == "ai_chat":

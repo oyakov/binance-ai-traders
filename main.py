@@ -5,7 +5,9 @@ import os
 import db.config as db_config
 from db.repository.telegram_group_repository import populate_test_groups
 # Routers
+from routers.dispatcher import create_dispatcher
 from routers.new_message_router import new_message_router
+from routers.configuration_router import configuration_router
 from routers.openai_router import openai_router
 # Subsystems
 from subsystem.scheduler import initialize_message_sender_job
@@ -28,24 +30,6 @@ logger = logging.getLogger(__name__)
 ############################################################################
 
 
-def create_dispatcher() -> Dispatcher:
-    """Create aiogram root router (dispatcher) all child routers are added there"""
-    # Event isolation is needed to correctly handle fast user responses
-    dispatcher = Dispatcher(
-        events_isolation=SimpleEventIsolation(),
-        # This is to enable DB Storage, temporarily commented out, needs some more work
-        # storage=SQLAlchemyStorage()
-    )
-    dispatcher.include_router(new_message_router)
-    dispatcher.include_router(openai_router)
-
-    # To use scenes, you should create a SceneRegistry and register your scenes there
-    # Scenes are not currently used as an implementation pattern, use FSM isntead
-    # scene_registry = SceneRegistry(dispatcher)
-
-    return dispatcher
-
-
 async def initialize_database() -> None:
     """Auto-create database table schema from the model classes and populate test data"""
     logger.info(f"Initializing the DB")
@@ -58,11 +42,12 @@ async def initialize_database() -> None:
         logger.error(f"Error initializing the database {exception}")
 
 
-
 async def initialize_bot(bot: Bot) -> None:
     """Launch telegram bot API server connection"""
     logger.info(f"Initializing bot {bot}")
-    dispatcher = create_dispatcher()
+    dispatcher = create_dispatcher([new_message_router,
+                                    configuration_router,
+                                    openai_router], bot)
     # Launch bot
     await dispatcher.start_polling(bot)
 
