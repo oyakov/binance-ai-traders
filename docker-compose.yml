@@ -6,8 +6,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      local-ai:
-        condition: service_healthy
     environment:
       - BOT_TOKEN=6853220461:AAGIJo2a3GIMMqgz1w9iISW3Lv7ZnvAoRa8
       - CHAT_ID=-1002060021902
@@ -18,6 +16,8 @@ services:
       - LLM_MODEL=lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
     ports:
       - "8000:8000"
+    networks:
+      - bot_network
 
   db:
     image: postgres:13
@@ -34,6 +34,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - bot_network
 
 volumes:
   pgdata:
+
+networks:
+  bot_network:
+    external: true
