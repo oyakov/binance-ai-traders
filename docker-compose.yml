@@ -35,16 +35,5 @@ services:
       timeout: 5s
       retries: 5
 
-  local-ai:
-    image: localai/localai:latest-aio-cpu
-    container_name: local-ai
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/models || exit 1"]
-      interval: 10s
-      timeout: 500s
-      retries: 50
-
 volumes:
   pgdata:
