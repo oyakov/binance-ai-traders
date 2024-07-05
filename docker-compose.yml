@@ -9,7 +9,7 @@ services:
       local-ai:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
       - LOCAL_AI_URL=http://local-ai:8080
     ports:
       - "8000:8000"
