@@ -2,16 +2,13 @@ import asyncio
 import logging
 import os
 
-# aiogram
 from aiogram import Bot
 from dotenv import load_dotenv
 
-# Project dependencies
-import db.config as db_config
-from routers.bot_subsystem import BotSubsystem
-# Routers
 # Subsystems
-from schedule.scheduler_subsystem import SchedulerSubsystem
+from subsystem.database_subsystem import DatabaseSubsystem
+from subsystem.scheduler_subsystem import SchedulerSubsystem
+from subsystem.bot_subsystem import BotSubsystem
 
 load_dotenv()
 
@@ -30,7 +27,7 @@ logger = logging.getLogger(__name__)
 async def main(bot: Bot) -> None:
     """Initialize application subsystems concurrently"""
     subsystems = [
-        db_config.DatabaseSubsystem(),
+        DatabaseSubsystem(),
         BotSubsystem(bot),
         SchedulerSubsystem(bot, interval_minutes=1)
     ]
