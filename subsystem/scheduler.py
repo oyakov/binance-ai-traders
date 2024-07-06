@@ -2,8 +2,9 @@ import logging
 
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from service.telegram_service import send_telegram_message
+
 from db.repository.calendar_repository import CalendarRepository
+from service.telegram_service import send_telegram_message
 
 ############################################################################
 # logging

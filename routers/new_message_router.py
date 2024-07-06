@@ -9,14 +9,14 @@ from aiogram.types import (
     CallbackQuery,
 )
 
+from db.repository.calendar_repository import CalendarRepository
+from db.repository.telegram_group_repository import TelegramGroupRepository
 from markup.inline.keyboards.new_message_keyboards import *
 from markup.inline.time_pickers import *
 from markup.inline.types import *
 from markup.reply.main_menu_reply_keyboard import *
 from middleware.service_middleware import ServiceMiddleware
 from routers.main_menu import MainMenuStates
-from db.repository.calendar_repository import CalendarRepository
-from db.repository.telegram_group_repository import TelegramGroupRepository
 
 new_message_router = Router()
 new_message_router.message.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))

@@ -1,9 +1,9 @@
 """Test file to check OpenAI API"""
 import os
-# Chat with an intelligent assistant in your terminal
-from openai import OpenAI
 
 from dotenv import load_dotenv
+# Chat with an intelligent assistant in your terminal
+from openai import OpenAI
 
 load_dotenv()
 

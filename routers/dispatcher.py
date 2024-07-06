@@ -1,7 +1,8 @@
 import logging
+
 from aiogram import Dispatcher, Router, Bot
 from aiogram.fsm.storage.memory import SimpleEventIsolation
-from aiogram.types import Update, Message
+from aiogram.types import Message
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

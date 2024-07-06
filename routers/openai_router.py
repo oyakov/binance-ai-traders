@@ -10,13 +10,8 @@ from aiogram.types import (
 )
 
 from markup.inline.keyboards.openai_keyboards import *
-from markup.inline.time_pickers import *
-from markup.inline.types import *
 from markup.reply.main_menu_reply_keyboard import *
 from middleware.service_middleware import ServiceMiddleware
-from routers.main_menu import MainMenuStates
-from db.repository.calendar_repository import CalendarRepository
-from db.repository.telegram_group_repository import TelegramGroupRepository
 from service.openai.openai_api_service import OpenAIAPIService
 
 openai_router = Router()

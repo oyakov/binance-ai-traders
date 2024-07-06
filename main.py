@@ -1,20 +1,21 @@
 import asyncio
 import logging
 import os
+
+# aiogram
+from aiogram import Bot
+from dotenv import load_dotenv
+
 # Project dependencies
 import db.config as db_config
 from db.repository.telegram_group_repository import populate_test_groups
+from routers.configuration_router import configuration_router
 # Routers
 from routers.dispatcher import create_dispatcher
 from routers.new_message_router import new_message_router
-from routers.configuration_router import configuration_router
 from routers.openai_router import openai_router
 # Subsystems
 from subsystem.scheduler import initialize_message_sender_job
-# aiogram
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import SimpleEventIsolation
-from dotenv import load_dotenv
 
 load_dotenv()
 

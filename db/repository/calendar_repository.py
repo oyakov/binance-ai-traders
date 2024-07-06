@@ -1,5 +1,6 @@
-from sqlalchemy.future import select
 from sqlalchemy import text, select as sel
+from sqlalchemy.future import select
+
 from db.config import *
 from db.model.calendars import CalendarData, CalendarDoM, CalendarDoW, CalendarMoY, CalendarToD
 from markup.inline.types import DateSelector

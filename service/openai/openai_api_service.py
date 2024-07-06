@@ -1,10 +1,9 @@
-import os
 import logging
-
-# Open AI libs
-from openai import OpenAI
+import os
 
 from dotenv import load_dotenv
+# Open AI libs
+from openai import OpenAI
 
 load_dotenv()
 
