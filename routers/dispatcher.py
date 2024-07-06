@@ -7,20 +7,20 @@ from aiogram.types import Message
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-bot: Bot = None
+bot_instance: Bot = None
 
 
 async def on_new_chat_member(message: Message):
     if message.new_chat_members:
         for new_member in message.new_chat_members:
-            if new_member.id == (await bot.me).id:
+            if new_member.id == (await bot_instance.me).id:
                 group_id = message.chat.id
                 logger.info(f'Bot added to a new group: {group_id}')
                 await message.reply("Hello, group! I've been added to this group.")
 
 
 async def on_left_chat_member(message: Message):
-    if message.left_chat_member.id == (await bot.me).id:
+    if message.left_chat_member.id == (await bot_instance.me).id:
         group_id = message.chat.id
         logger.info(f'Bot removed from the group: {group_id}')
 
@@ -40,14 +40,12 @@ def create_dispatcher(routers: list[Router], bot: Bot) -> Dispatcher:
         logger.info(f"Add router {router}")
         dispatcher.include_router(router)
 
-    dispatcher.register_message_handler()
-
     # To use scenes, you should create a SceneRegistry and register your scenes there
     # Scenes are not currently used as an implementation pattern, use FSM isntead
     # scene_registry = SceneRegistry(dispatcher)
 
     logger.info(f"Dispatcher is created {dispatcher}")
-    bot = bot
+    bot_instance = bot
     return dispatcher
 
 

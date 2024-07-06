@@ -8,14 +8,10 @@ from dotenv import load_dotenv
 
 # Project dependencies
 import db.config as db_config
-from db.repository.telegram_group_repository import populate_test_groups
-from routers.configuration_router import configuration_router
+from routers.bot_subsystem import BotSubsystem
 # Routers
-from routers.dispatcher import create_dispatcher
-from routers.new_message_router import new_message_router
-from routers.openai_router import openai_router
 # Subsystems
-from subsystem.scheduler import initialize_message_sender_job
+from schedule.scheduler_subsystem import SchedulerSubsystem
 
 load_dotenv()
 
@@ -31,34 +27,14 @@ logger = logging.getLogger(__name__)
 ############################################################################
 
 
-async def initialize_database() -> None:
-    """Auto-create database table schema from the model classes and populate test data"""
-    logger.info(f"Initializing the DB")
-    try:
-        await db_config.create_tables()
-        logger.info(f"Tables are created")
-        await populate_test_groups()
-        logger.info(f"Database is initialized")
-    except() as exception:
-        logger.error(f"Error initializing the database {exception}")
-
-
-async def initialize_bot(bot: Bot) -> None:
-    """Launch telegram bot API server connection"""
-    logger.info(f"Initializing bot {bot}")
-    dispatcher = create_dispatcher([new_message_router,
-                                    configuration_router,
-                                    openai_router], bot)
-    # Launch bot
-    await dispatcher.start_polling(bot)
-
-
 async def main(bot: Bot) -> None:
     """Initialize application subsystems concurrently"""
-    await asyncio.gather(
-        initialize_database(),
-        initialize_bot(bot=bot),
-        initialize_message_sender_job(bot=bot, interval_minutes=1))
+    subsystems = [
+        db_config.DatabaseSubsystem(),
+        BotSubsystem(bot),
+        SchedulerSubsystem(bot, interval_minutes=1)
+    ]
+    await asyncio.gather(*(subsystem.initialize() for subsystem in subsystems))
 
 # Run the application
 if __name__ == '__main__':

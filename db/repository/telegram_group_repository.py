@@ -8,17 +8,6 @@ from db.model.telegram_group import TelegramGroup
 logger = logging.getLogger(__name__)
 
 
-async def populate_test_groups():
-    logger.info("Populate test Telegram Groups")
-    initial_groups = [
-        TelegramGroup('-1002060021902', 'oyakov', 'Test Group 1', 'https://t.me/beograd_service'),
-        TelegramGroup('-4284276251', 'oyakov', 'Test Group 2', 'https://t.me/ruskie_v_belgrade')
-    ]
-    async with get_db() as session:
-        session.add_all(initial_groups)
-        await session.commit()
-
-
 class TelegramGroupRepository:
 
     def __init__(self):
