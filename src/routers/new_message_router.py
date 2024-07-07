@@ -11,6 +11,7 @@ from aiogram.types import (
 
 from src.db.repository.calendar_repository import CalendarRepository
 from src.db.repository.telegram_group_repository import TelegramGroupRepository
+from src.environment import delimiter
 from src.markup.inline.keyboards.new_message_keyboards import group_picker, now_or_later, choose_what_to_do_next, \
     choose_date_type_inline
 from src.markup.inline.time_pickers import date_selector_picker_inline
@@ -25,8 +26,6 @@ new_message_router.message.middleware(ServiceMiddleware('calendar_repository', C
 new_message_router.callback_query.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))
 new_message_router.message.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
 new_message_router.callback_query.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
-
-delimiter: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
 
 logger = log_config.get_logger(__name__)
 

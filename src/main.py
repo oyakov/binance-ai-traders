@@ -2,7 +2,6 @@ import asyncio
 from src import log_config
 
 from aiogram import Bot
-from dotenv import load_dotenv
 
 # Subsystems
 from src.environment import BOT_TOKEN, COROUTINE_DEBUG
@@ -10,11 +9,9 @@ from subsystem.bot_subsystem import BotSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.scheduler_subsystem import SchedulerSubsystem
 
-load_dotenv()
-
 
 ############################################################################
-# logging
+# logging - Logger subsystem is initialized first
 subsystem = log_config.LoggerSubsystem()
 subsystem.initialize()
 logger = log_config.get_logger(__name__)
@@ -28,7 +25,7 @@ async def main(bot: Bot) -> None:
         BotSubsystem(bot),
         SchedulerSubsystem(bot, interval_minutes=1)
     ]
-    await asyncio.gather(*(subsystem.initialize() for subsystem in subsystems))
+    await asyncio.gather(*(subsys.initialize() for subsys in subsystems))
 
 # Run the application
 if __name__ == '__main__':

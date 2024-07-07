@@ -13,6 +13,7 @@ class TelegramGroup(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String, unique=True, index=False)
+    worker_bot_instance_id = Column(Integer, index=True)
     owner_username = Column(String, unique=False, index=True)
     display_name = Column(String, unique=False, index=False)
     t_me_url = Column(String, unique=False, index=False)

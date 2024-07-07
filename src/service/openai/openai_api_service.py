@@ -1,15 +1,8 @@
-from src import log_config
-import os
-
-from dotenv import load_dotenv
 # Open AI libs
-from openai import OpenAI
+from openai import OpenAI, APIConnectionError
 
-load_dotenv()
-
-OPENAI_URL = os.getenv('OPENAI_URL')
-OPENAI_TOKEN = os.getenv('OPENAI_TOKEN')
-LLM_MODEL = os.getenv('LLM_MODEL')
+from src import log_config
+from src.environment import OPENAI_TOKEN, OPENAI_URL, LLM_MODEL
 
 logger = log_config.get_logger(__name__)
 
@@ -34,12 +27,16 @@ class OpenAIAPIService:
     async def get_completion(self, history: list = None) -> list:
         """Add a reply of OpenAI assistant to the end of the provided message history"""
         if history is None: history = self.system_prompt.copy()
-        completion = self.client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=history,
-            temperature=0.7,
-            stream=True,
-        )
+        try:
+            completion = self.client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=history,
+                temperature=0.7,
+                stream=True,
+            )
+        except APIConnectionError as conn_exception:
+            logger.error(f"Failed to connect to OpenAI API: {conn_exception}")
+            return history
 
         new_message = {"role": self.role, "content": ""}
 
