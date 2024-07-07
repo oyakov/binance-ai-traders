@@ -11,8 +11,8 @@ logger.info(f"Database URL: {DATABASE_URL}, DB_CONNECTION_POOL_MIN_SIZE: {DB_CON
             f"DB_CONNECTION_POOL_MAX_SIZE: {DB_CONNECTION_POOL_MAX_SIZE}")
 
 engine = create_async_engine(url=DATABASE_URL,
-                             pool_size=DB_CONNECTION_POOL_MIN_SIZE,
-                             max_overflow=DB_CONNECTION_POOL_MAX_SIZE - DB_CONNECTION_POOL_MIN_SIZE,
+                             pool_size=int(DB_CONNECTION_POOL_MIN_SIZE),
+                             max_overflow=int(DB_CONNECTION_POOL_MAX_SIZE) - int(DB_CONNECTION_POOL_MIN_SIZE),
                              echo=True)
 logger.info(f"Engine created {engine}")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
