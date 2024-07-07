@@ -7,6 +7,7 @@ from src.db.model.fsm_state import FSMState
 
 logger = log_config.get_logger(__name__)
 
+
 class SQLAlchemyStorage(BaseStorage):
 
     def __init__(self):

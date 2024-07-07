@@ -19,13 +19,10 @@ from src.markup.inline.types import times_of_the_day, days_of_the_week, months_o
     DateSelector
 from src.markup.reply.main_menu_reply_keyboard import NEW_MESSAGE, create_reply_kbd
 from src.middleware.service_middleware import ServiceMiddleware
+from src.routers.base_router import BaseRouter
 from src.routers.main_menu import MainMenuStates
 
-new_message_router = Router()
-new_message_router.message.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))
-new_message_router.callback_query.middleware(ServiceMiddleware('calendar_repository', CalendarRepository()))
-new_message_router.message.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
-new_message_router.callback_query.middleware(ServiceMiddleware('tg_group_repository', TelegramGroupRepository()))
+new_message_router = BaseRouter()
 
 logger = log_config.get_logger(__name__)
 

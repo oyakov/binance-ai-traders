@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, Table
 from sqlalchemy.orm import relationship
@@ -19,7 +19,7 @@ class WorkerBotInstance(Base):
     id = Column(Integer, primary_key=True)
     # Define the relationship to AdminUser
     admin_users = relationship('AdminUser', secondary=worker_bot_instance_admin_user, backref='worker_bot_instances')
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     deleted_at = Column(DateTime, nullable=True)
     deleted = Column(Boolean, default=False)

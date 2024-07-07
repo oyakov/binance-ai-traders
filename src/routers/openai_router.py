@@ -13,11 +13,10 @@ from src.environment import delimiter
 from src.markup.inline.keyboards.openai_keyboards import openai_action_selector
 from src.markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
 from src.middleware.service_middleware import ServiceMiddleware
+from src.routers.base_router import BaseRouter
 from src.service.openai.openai_api_service import OpenAIAPIService
 
-openai_router = Router()
-openai_router.message.middleware(ServiceMiddleware('openai_service', OpenAIAPIService()))
-openai_router.callback_query.middleware(ServiceMiddleware('openai_service', OpenAIAPIService()))
+openai_router = BaseRouter()
 
 
 logger = log_config.get_logger(__name__)
