@@ -7,6 +7,7 @@ load_dotenv()
 ############################################################################
 # Access the variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+LOGGING_CONFIG_PATH = os.getenv('LOGGING_CONFIG_PATH')
 DATABASE_URL = os.getenv('DATABASE_URL')
 DB_CONNECTION_POOL_MIN_SIZE = os.getenv('DB_CONNECTION_POOL_MIN_SIZE')
 DB_CONNECTION_POOL_MAX_SIZE = os.getenv('DB_CONNECTION_POOL_MAX_SIZE')
@@ -17,4 +18,5 @@ OPENAI_TOKEN = os.getenv('OPENAI_TOKEN')
 LLM_MODEL = os.getenv('LLM_MODEL')
 ############################################################################
 
-delimiter: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
+DELIMITER: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
+APP_NAME: str = 'Multi-Channel Telegram Bot'

@@ -9,7 +9,7 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from src.environment import delimiter
+from src.environment import DELIMITER
 from src.markup.inline.keyboards.openai_keyboards import openai_action_selector
 from src.markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
 from src.middleware.service_middleware import ServiceMiddleware
@@ -39,7 +39,7 @@ async def display_select_action(message: Message, state: FSMContext):
     inline_kb = openai_action_selector()
 
     await message.reply(text=f"Выберите функцию OpenAI: ", reply_markup=inline_kb)
-    await message.answer(text=delimiter, reply_markup=create_reply_kbd())
+    await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
 @openai_router.callback_query(OpenAIStates.openai_select_action)
@@ -53,7 +53,7 @@ async def process_function_selection(callback_query: CallbackQuery, state: FSMCo
         history = await openai_service.get_completion(history=None)
         await state.set_data({'history': history})
         await callback_query.message.reply(text=history[-1]['content'], reply_markup=None)
-        await callback_query.message.answer(text=delimiter, reply_markup=create_reply_kbd())
+        await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
     elif code == "ai_create_image":
         await state.set_state(OpenAIStates.openai_create_image)
 
@@ -69,4 +69,4 @@ async def process_user_input(message: Message, state: FSMContext, openai_service
     history.append(user_message)
     history = await openai_service.get_completion(history=history)
     await message.reply(text=history[-1]['content'], reply_markup=None)
-    await message.answer(text=delimiter, reply_markup=create_reply_kbd())
+    await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())

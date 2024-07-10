@@ -5,6 +5,7 @@ from src.db.repository.admin_user_repository import AdminUserRepository
 from src.db.repository.calendar_repository import CalendarRepository
 from src.db.repository.telegram_group_repository import TelegramGroupRepository
 from src.db.repository.worker_bot_instance_repository import WorkerBotInstanceRepository
+from src.middleware.chat_id_middleware import ChatIDMiddleware
 from src.middleware.service_middleware import ServiceMiddleware
 from src.service.openai.openai_api_service import OpenAIAPIService
 from src.service.telegram_service import TelegramService
@@ -48,9 +49,9 @@ class BaseRouter(Router):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.configure_common_middlewares()
+        self.install_injection_middlewares()
 
-    def configure_common_middlewares(self):
+    def install_injection_middlewares(self):
         # Iterate over the repository configurations
         for repo in self.repositories:
             # Create an instance of the middleware
@@ -66,3 +67,10 @@ class BaseRouter(Router):
             # Add the middleware to the router
             self.message.middleware(middleware_instance)
             self.callback_query.middleware(middleware_instance)
+
+    def install_data_collection_middleware(self):
+        # Create an instance of the middleware
+        middleware_instance = ChatIDMiddleware()
+        # Add the middleware to the router
+        self.message.middleware(middleware_instance)
+        self.callback_query.middleware(middleware_instance)
