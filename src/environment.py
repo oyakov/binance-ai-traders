@@ -16,6 +16,8 @@ COROUTINE_DEBUG = os.getenv('COROUTINE_DEBUG')
 OPENAI_URL = os.getenv('OPENAI_URL')
 OPENAI_TOKEN = os.getenv('OPENAI_TOKEN')
 LLM_MODEL = os.getenv('LLM_MODEL')
+BINANCE_TOKEN = os.getenv('BINANCE_TOKEN')
+BINANCE_SECRET_TOKEN = os.getenv('BINANCE_SECRET_TOKEN')
 ############################################################################
 
 DELIMITER: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'
