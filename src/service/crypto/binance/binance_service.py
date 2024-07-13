@@ -41,7 +41,6 @@ class BinanceService:
         logger.info(f"Candlestick data for {symbol}: {df.head()}")
         return df
 
-
     async def get_all_tickers(self):
         # Get ticker information for all symbols
         tickers = self.client.get_all_tickers()
@@ -66,9 +65,11 @@ class BinanceService:
         logger.info(f"Historical trades for {symbol} with limit {limit} from ID {from_id}: {historical_trades}")
         return historical_trades
 
-    async def create_order(self, symbol, side, order_type, quantity, price=None, time_in_force=Client.TIME_IN_FORCE_GTC):
+    async def create_order(self, symbol, side, order_type, quantity, price=None,
+                           time_in_force=Client.TIME_IN_FORCE_GTC):
         # Create a new order
-        order = self.client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity, price=price, timeInForce=time_in_force)
+        order = self.client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity, price=price,
+                                         timeInForce=time_in_force)
         logger.info(f"Order created: {order}")
         return order
 
