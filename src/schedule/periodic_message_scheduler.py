@@ -18,11 +18,9 @@ async def check_calendar(bot: Bot):
     """
     Check all periodic message schedules and send only the required messages
     """
-    calendar_entries: list[CalendarData] = await calendar_repository.load_calendar_data_all()
-    logger.info(f"calendar entries: {calendar_entries}")
-    for calendar_entry in calendar_entries:
+    for calendar_entry in await calendar_repository.load_calendar_data_all():
         # Construct the message to be sent
-        logger.info(f"Send telegram message {calendar_entry.data} to chat_id {calendar_entry.chat_id} for customer {calendar_entry.username}")
+        logger.debug(f"Send telegram message {calendar_entry.data} to chat_id {calendar_entry.chat_id} for customer {calendar_entry.username}")
         await telegram_service.send_telegram_message(bot,
                                                      calendar_entry.chat_id,
                                                      calendar_entry.data)

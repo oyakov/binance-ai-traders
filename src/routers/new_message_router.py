@@ -21,7 +21,19 @@ from markup.reply.main_menu_reply_keyboard import NEW_MESSAGE, create_reply_kbd
 from routers.base_router import BaseRouter
 from routers.main_menu import MainMenuStates
 
-new_message_router = BaseRouter()
+new_message_router = BaseRouter(
+    services=[],
+    repositories=[
+        {
+            'name': 'tg_group_repository',
+            'service_class': TelegramGroupRepository
+        },
+        {
+            'name': 'calendar_repository',
+            'service_class': CalendarRepository
+        },
+    ],
+)
 
 logger = log_config.get_logger(__name__)
 

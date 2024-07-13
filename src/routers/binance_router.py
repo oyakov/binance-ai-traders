@@ -14,7 +14,13 @@ from middleware.service_middleware import ServiceMiddleware
 from routers.base_router import BaseRouter
 from service.crypto.binance.binance_service import BinanceService
 
-binance_router = BaseRouter()
+binance_router = BaseRouter(
+    services=[{
+        'name': 'binance',
+        'service_class': BinanceService
+    }, ],
+    repositories=[],
+)
 binance_router.message.middleware(ServiceMiddleware("binance", BinanceService()))
 binance_router.callback_query.middleware(ServiceMiddleware("binance", BinanceService()))
 logger = log_config.get_logger(__name__)

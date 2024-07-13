@@ -15,8 +15,13 @@ from markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
 from routers.base_router import BaseRouter
 from service.openai.openai_api_service import OpenAIAPIService
 
-openai_router = BaseRouter()
-
+openai_router = BaseRouter(
+    services=[{
+        'name': 'openai_service',
+        'service_class': OpenAIAPIService
+    }, ],
+    repositories=[],
+)
 
 logger = log_config.get_logger(__name__)
 
@@ -42,7 +47,8 @@ async def display_select_action(message: Message, state: FSMContext):
 
 
 @openai_router.callback_query(OpenAIStates.openai_select_action)
-async def process_function_selection(callback_query: CallbackQuery, state: FSMContext, openai_service: OpenAIAPIService):
+async def process_function_selection(callback_query: CallbackQuery, state: FSMContext,
+                                     openai_service: OpenAIAPIService):
     code = callback_query.data
     logger.info(f"OpenAI action selected {code}")
 

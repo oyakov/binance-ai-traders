@@ -6,7 +6,7 @@ load_dotenv()
 
 ############################################################################
 # Access the variables
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+MASTER_BOT_TOKEN = os.getenv('MASTER_BOT_TOKEN')
 LOGGING_CONFIG_PATH = os.getenv('LOGGING_CONFIG_PATH')
 DATABASE_URL = os.getenv('DATABASE_URL')
 DB_CONNECTION_POOL_MIN_SIZE = os.getenv('DB_CONNECTION_POOL_MIN_SIZE')

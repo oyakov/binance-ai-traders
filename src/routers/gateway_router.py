@@ -9,18 +9,23 @@ from routers.configuration_router import configuration_router
 from routers.new_message_router import new_message_router
 from routers.openai_router import openai_router
 
-# Gateway router aggregates filtering middlewares and other routers
-gateway_router = BaseRouter()
-gateway_router.include_router(new_message_router)
-gateway_router.include_router(configuration_router)
-gateway_router.include_router(openai_router)
-gateway_router.include_router(binance_router)
-gateway_router.message.outer_middleware(PropagationMiddleware())
-gateway_router.callback_query.outer_middleware(PropagationMiddleware())
-gateway_router.message.middleware(ChatIDMiddleware())
 logger = log_config.get_logger(__name__)
+
+
+def configure_gateway_router(routers: list[BaseRouter]):
+    """ Gateway router aggregates filtering middlewares and other routers"""
+    logger.debug(f"Configuring gateway router {routers}")
+    gateway_router = BaseRouter(
+        services=[],
+        repositories=[],
+    )
+    for router in routers:
+        gateway_router.include_router(router)
+    gateway_router.message.outer_middleware(PropagationMiddleware())
+    gateway_router.callback_query.outer_middleware(PropagationMiddleware())
+    gateway_router.message.middleware(ChatIDMiddleware())
+    return gateway_router
 
 
 class GatewayStates(StatesGroup):
     analyze_message = State()
-

@@ -15,7 +15,13 @@ from markup.inline.keyboards.configuration_keyboards import config_action_select
 from markup.reply.main_menu_reply_keyboard import SETTINGS, create_reply_kbd
 from routers.base_router import BaseRouter
 
-configuration_router = BaseRouter()
+configuration_router = BaseRouter(
+    services=[{
+        'name': 'tg_group_repository',
+        'service_class': TelegramGroupRepository
+    }, ],
+    repositories=[],
+)
 logger = log_config.get_logger(__name__)
 
 

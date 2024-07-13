@@ -39,6 +39,10 @@ class DatabaseSubsystem(Subsystem):
             await create_tables()
             logger.info(f"Tables are created")
             await populate_test_groups()
+            self.is_initialized = True
             logger.info(f"Database is initialized")
         except() as exception:
             logger.error(f"Error initializing the database {exception}")
+
+    async def shutdown(self):
+        pass
