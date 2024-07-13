@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text
 
-from src.db.model.base import Base
+from db.model.base import Base
 
 
 class FSMState(Base):

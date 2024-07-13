@@ -1,7 +1,7 @@
 import logging.config
 
-from src.environment import APP_NAME, LOGGING_CONFIG_PATH
-from src.subsystem.subsystem import Subsystem
+from oam.environment import APP_NAME, LOGGING_CONFIG_PATH
+from subsystem.subsystem import Subsystem
 
 
 class LoggerSubsystem(Subsystem):

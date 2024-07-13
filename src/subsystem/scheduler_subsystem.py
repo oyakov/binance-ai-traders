@@ -1,5 +1,5 @@
-from src.schedule.periodic_message_scheduler import initialize_message_sender_job
-from src.subsystem.subsystem import Subsystem
+from schedule.periodic_message_scheduler import initialize_message_sender_job
+from subsystem.subsystem import Subsystem
 
 
 class SchedulerSubsystem(Subsystem):

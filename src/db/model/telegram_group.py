@@ -2,7 +2,7 @@ from typing import Any
 
 from sqlalchemy import Column, Integer, String
 
-from src.db.model.base import Base
+from db.model.base import Base
 
 
 class TelegramGroup(Base):

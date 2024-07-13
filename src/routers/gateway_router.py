@@ -1,15 +1,13 @@
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message
 
-from src import log_config
-from src.middleware.chat_id_middleware import ChatIDMiddleware
-from src.middleware.propagation_middleware import PropagationMiddleware
-from src.routers.base_router import BaseRouter
-from src.routers.binance_router import binance_router
-from src.routers.configuration_router import configuration_router
-from src.routers.new_message_router import new_message_router
-from src.routers.openai_router import openai_router
+from oam import log_config
+from middleware.chat_id_middleware import ChatIDMiddleware
+from middleware.propagation_middleware import PropagationMiddleware
+from routers.base_router import BaseRouter
+from routers.binance_router import binance_router
+from routers.configuration_router import configuration_router
+from routers.new_message_router import new_message_router
+from routers.openai_router import openai_router
 
 # Gateway router aggregates filtering middlewares and other routers
 gateway_router = BaseRouter()

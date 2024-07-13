@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Boolean, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from src.db.model.base import Base
+from db.model.base import Base
 
 
 class CalendarToD(Base):

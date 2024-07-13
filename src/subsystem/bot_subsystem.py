@@ -1,8 +1,8 @@
-from src import log_config
+from oam import log_config
 
-from src.routers.dispatcher import create_dispatcher
-from src.routers.gateway_router import gateway_router
-from src.subsystem.subsystem import Subsystem
+from routers.dispatcher import create_dispatcher
+from routers.gateway_router import gateway_router
+from subsystem.subsystem import Subsystem
 
 logger = log_config.get_logger(__name__)
 

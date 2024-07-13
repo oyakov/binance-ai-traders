@@ -3,7 +3,7 @@ from aiogram.types import (
     InlineKeyboardButton,
 )
 
-from src.markup.inline.types import DateSelector
+from markup.inline.types import DateSelector
 
 
 def date_selector_picker_inline(date_selectors: list[DateSelector], row_size: int):        

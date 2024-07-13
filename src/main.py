@@ -1,10 +1,10 @@
 import asyncio
-from src import log_config
+from oam import log_config
 
 from aiogram import Bot
 
 # Subsystems
-from src.environment import BOT_TOKEN, COROUTINE_DEBUG
+from oam.environment import BOT_TOKEN, COROUTINE_DEBUG
 from subsystem.bot_subsystem import BotSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.scheduler_subsystem import SchedulerSubsystem

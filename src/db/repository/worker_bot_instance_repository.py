@@ -1,5 +1,5 @@
-from src.db.config import get_db
-from src.db.model.worker_bot_instance import WorkerBotInstance
+from db.config import get_db
+from db.model.worker_bot_instance import WorkerBotInstance
 
 
 class WorkerBotInstanceRepository:

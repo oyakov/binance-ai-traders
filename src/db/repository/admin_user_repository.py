@@ -1,5 +1,5 @@
-from src.db.config import get_db
-from src.db.model.admin_user import AdminUser
+from db.config import get_db
+from db.model.admin_user import AdminUser
 
 
 class AdminUserRepository:

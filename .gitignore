@@ -110,7 +110,7 @@ Thumbs.db
 ehthumbs.db
 
 # Python-specific envs
-src/.env
+src/.env.prod
 .venv
 env/
 venv/

@@ -1,6 +1,6 @@
-from src import log_config
+from oam import log_config
 
-from aiogram import F, Router
+from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -9,12 +9,11 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from src.environment import DELIMITER
-from src.markup.inline.keyboards.openai_keyboards import openai_action_selector
-from src.markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
-from src.middleware.service_middleware import ServiceMiddleware
-from src.routers.base_router import BaseRouter
-from src.service.openai.openai_api_service import OpenAIAPIService
+from oam.environment import DELIMITER
+from markup.inline.keyboards.openai_keyboards import openai_action_selector
+from markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
+from routers.base_router import BaseRouter
+from service.openai.openai_api_service import OpenAIAPIService
 
 openai_router = BaseRouter()
 

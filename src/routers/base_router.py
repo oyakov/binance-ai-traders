@@ -1,14 +1,14 @@
 from aiogram import Router
 
-from src import log_config
-from src.db.repository.admin_user_repository import AdminUserRepository
-from src.db.repository.calendar_repository import CalendarRepository
-from src.db.repository.telegram_group_repository import TelegramGroupRepository
-from src.db.repository.worker_bot_instance_repository import WorkerBotInstanceRepository
-from src.middleware.chat_id_middleware import ChatIDMiddleware
-from src.middleware.service_middleware import ServiceMiddleware
-from src.service.openai.openai_api_service import OpenAIAPIService
-from src.service.telegram_service import TelegramService
+from oam import log_config
+from db.repository.admin_user_repository import AdminUserRepository
+from db.repository.calendar_repository import CalendarRepository
+from db.repository.telegram_group_repository import TelegramGroupRepository
+from db.repository.worker_bot_instance_repository import WorkerBotInstanceRepository
+from middleware.chat_id_middleware import ChatIDMiddleware
+from middleware.service_middleware import ServiceMiddleware
+from service.openai.openai_api_service import OpenAIAPIService
+from service.telegram_service import TelegramService
 
 logger = log_config.get_logger(__name__)
 

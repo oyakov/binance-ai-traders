@@ -7,13 +7,13 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from src import log_config
-from src.db.repository.telegram_group_repository import TelegramGroupRepository
-from src.environment import DELIMITER
-from src.markup.inline.keyboards.configuration_keyboards import config_action_selector, config_group_action_selector, \
+from oam import log_config
+from db.repository.telegram_group_repository import TelegramGroupRepository
+from oam.environment import DELIMITER
+from markup.inline.keyboards.configuration_keyboards import config_action_selector, config_group_action_selector, \
     config_misc_action_selector, config_back
-from src.markup.reply.main_menu_reply_keyboard import SETTINGS, create_reply_kbd
-from src.routers.base_router import BaseRouter
+from markup.reply.main_menu_reply_keyboard import SETTINGS, create_reply_kbd
+from routers.base_router import BaseRouter
 
 configuration_router = BaseRouter()
 logger = log_config.get_logger(__name__)

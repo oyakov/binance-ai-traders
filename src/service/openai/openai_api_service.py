@@ -1,8 +1,8 @@
 # Open AI libs
 from openai import OpenAI, APIConnectionError
 
-from src import log_config
-from src.environment import OPENAI_TOKEN, OPENAI_URL, LLM_MODEL
+from oam import log_config
+from oam.environment import OPENAI_TOKEN, OPENAI_URL, LLM_MODEL
 
 logger = log_config.get_logger(__name__)
 

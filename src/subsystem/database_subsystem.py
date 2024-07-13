@@ -1,9 +1,9 @@
-from src import log_config
+from oam import log_config
 
-from src.db.config import engine, get_db
-from src.db.model.base import Base
-from src.db.model.telegram_group import TelegramGroup
-from src.subsystem.subsystem import Subsystem
+from db.config import engine, get_db
+from db.model.base import Base
+from db.model.telegram_group import TelegramGroup
+from subsystem.subsystem import Subsystem
 
 logger = log_config.get_logger(__name__)
 

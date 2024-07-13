@@ -7,7 +7,7 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.prod
     ports:
       - "8000:8000"
     networks:
@@ -36,4 +36,4 @@ volumes:
 
 networks:
   bot_network:
-    external: true
+    external: false

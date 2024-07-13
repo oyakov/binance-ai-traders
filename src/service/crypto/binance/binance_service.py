@@ -1,8 +1,8 @@
 from binance.client import Client
 import pandas as pd
 
-from src import log_config
-from src.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN
+from oam import log_config
+from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN
 
 # Initialize logger
 logger = log_config.get_logger(__name__)

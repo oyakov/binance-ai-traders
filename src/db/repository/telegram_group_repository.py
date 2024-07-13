@@ -1,9 +1,9 @@
-from src import log_config
+from oam import log_config
 
 from sqlalchemy import select, text
 
-from src.db.config import get_db
-from src.db.model.telegram_group import TelegramGroup
+from db.config import get_db
+from db.model.telegram_group import TelegramGroup
 
 logger = log_config.get_logger(__name__)
 

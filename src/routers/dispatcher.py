@@ -1,4 +1,4 @@
-from src import log_config
+from oam import log_config
 
 from aiogram import Dispatcher, Router, Bot
 from aiogram.fsm.storage.memory import SimpleEventIsolation

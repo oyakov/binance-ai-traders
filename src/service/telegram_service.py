@@ -1,6 +1,6 @@
 from aiogram import Bot
 
-from src import log_config
+from oam import log_config
 
 logger = log_config.get_logger(__name__)
 

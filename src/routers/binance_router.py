@@ -4,15 +4,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 
-from src import log_config
-from src.environment import DELIMITER
-from src.markup.inline.keyboards.binance_keyboards import binance_action_selector
-from src.markup.inline.text.binance_formatter import format_account_info, format_ticker, format_klines, \
-    format_order_book, crop_telegram_message
-from src.markup.reply.main_menu_reply_keyboard import create_reply_kbd, SETTINGS
-from src.middleware.service_middleware import ServiceMiddleware
-from src.routers.base_router import BaseRouter
-from src.service.crypto.binance.binance_service import BinanceService
+from oam import log_config
+from oam.environment import DELIMITER
+from markup.inline.keyboards.binance_keyboards import binance_action_selector
+from markup.inline.text.binance_formatter import format_account_info, format_ticker, format_klines, \
+    format_order_book
+from markup.reply.main_menu_reply_keyboard import create_reply_kbd, SETTINGS
+from middleware.service_middleware import ServiceMiddleware
+from routers.base_router import BaseRouter
+from service.crypto.binance.binance_service import BinanceService
 
 binance_router = BaseRouter()
 binance_router.message.middleware(ServiceMiddleware("binance", BinanceService()))

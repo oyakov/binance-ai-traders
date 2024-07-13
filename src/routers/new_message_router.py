@@ -1,6 +1,6 @@
-from src import log_config
+from oam import log_config
 
-from aiogram import F, Router
+from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -9,18 +9,17 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from src.db.repository.calendar_repository import CalendarRepository
-from src.db.repository.telegram_group_repository import TelegramGroupRepository
-from src.environment import DELIMITER
-from src.markup.inline.keyboards.new_message_keyboards import group_picker, now_or_later, choose_what_to_do_next, \
+from db.repository.calendar_repository import CalendarRepository
+from db.repository.telegram_group_repository import TelegramGroupRepository
+from oam.environment import DELIMITER
+from markup.inline.keyboards.new_message_keyboards import group_picker, now_or_later, choose_what_to_do_next, \
     choose_date_type_inline
-from src.markup.inline.time_pickers import date_selector_picker_inline
-from src.markup.inline.types import times_of_the_day, days_of_the_week, months_of_the_year, days_of_the_month, \
+from markup.inline.time_pickers import date_selector_picker_inline
+from markup.inline.types import times_of_the_day, days_of_the_week, months_of_the_year, days_of_the_month, \
     DateSelector
-from src.markup.reply.main_menu_reply_keyboard import NEW_MESSAGE, create_reply_kbd
-from src.middleware.service_middleware import ServiceMiddleware
-from src.routers.base_router import BaseRouter
-from src.routers.main_menu import MainMenuStates
+from markup.reply.main_menu_reply_keyboard import NEW_MESSAGE, create_reply_kbd
+from routers.base_router import BaseRouter
+from routers.main_menu import MainMenuStates
 
 new_message_router = BaseRouter()
 

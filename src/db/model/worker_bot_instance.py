@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, Table
 from sqlalchemy.orm import relationship
 
-from src.db.model.base import Base
+from db.model.base import Base
 
 # Define the association table
 worker_bot_instance_admin_user = \

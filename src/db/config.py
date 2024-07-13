@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src import log_config
-from src.environment import DATABASE_URL, DB_CONNECTION_POOL_MIN_SIZE, DB_CONNECTION_POOL_MAX_SIZE
+from oam import log_config
+from oam.environment import DATABASE_URL, DB_CONNECTION_POOL_MIN_SIZE, DB_CONNECTION_POOL_MAX_SIZE
 
 logger = log_config.get_logger(__name__)
 logger.info(f"Database URL: {DATABASE_URL}, DB_CONNECTION_POOL_MIN_SIZE: {DB_CONNECTION_POOL_MIN_SIZE}, "

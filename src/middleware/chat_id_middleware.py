@@ -1,4 +1,4 @@
-from src import log_config
+from oam import log_config
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
