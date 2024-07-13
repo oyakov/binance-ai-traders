@@ -8,7 +8,7 @@ from subsystem.subsystem import Subsystem
 logger = log_config.get_logger(__name__)
 
 
-class MasterBotSubsystem(Subsystem):
+class SlaveBotSubsystem(Subsystem):
 
     def __init__(self, bot, routers: list[BaseRouter]):
         self.bot = bot

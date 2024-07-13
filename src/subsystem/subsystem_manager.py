@@ -23,5 +23,11 @@ class SubsystemManager(ABC):
     async def restart_failed_subsystems(self):
         await asyncio.gather(*(subsys.initialize() for subsys in self.subsystems if not subsys.is_initialized))
 
+    async def get_subsystem(self, subsystem_name: str):
+        for subsystem in self.subsystems:
+            if subsystem.__class__.__name__ == subsystem_name:
+                return subsystem
+        return None
+
 
 subsystem_manager: SubsystemManager = SubsystemManager()

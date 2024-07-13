@@ -17,6 +17,7 @@ apscheduler = "^3.10.4"
 openai = "^1.35.10"
 python-binance = "^1.0.19"
 pandas = "^2.2.2"
+elasticsearch = "^8.14.0"
 
 
 [build-system]

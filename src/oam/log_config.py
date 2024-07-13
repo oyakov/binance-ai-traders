@@ -5,15 +5,19 @@ from subsystem.subsystem import Subsystem
 
 
 class LoggerSubsystem(Subsystem):
+
     def __init__(self):
         self.logger = get_logger(__name__)
         self.initialize()
         self.app_logger = get_logger(APP_NAME)
 
-    def initialize(self):
+    async def initialize(self):
         self.logger.info(f"Initializing logger subsystem")
         logging.config.fileConfig(fname=LOGGING_CONFIG_PATH, disable_existing_loggers=False)
         self.logger.info(f"Logger subsystem is initialized")
+
+    async def shutdown(self):
+        pass
 
 
 # Get the logger specified in the file

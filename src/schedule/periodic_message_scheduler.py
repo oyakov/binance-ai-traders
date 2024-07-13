@@ -1,12 +1,9 @@
-from oam import log_config
-
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from db.model.calendars import CalendarData
 from db.repository.calendar_repository import CalendarRepository
+from oam import log_config
 from service.telegram_service import TelegramService
-
 
 logger = log_config.get_logger(__name__)
 

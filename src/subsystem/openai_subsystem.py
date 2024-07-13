@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from markup.inline.keyboards.openai_keyboards import openai_action_selector
-from markup.reply.main_menu_reply_keyboard import create_reply_kbd
+from markup.reply.main_menu_reply_keyboard import create_reply_kbd, OPENAI
 from oam import log_config
 from oam.environment import DELIMITER
 from routers.openai_router import OpenAIStates
@@ -30,7 +30,7 @@ class OpenAiSubsystem(Subsystem):
             return
         logger.info(f"OpenAI subsystem is initialized")
         self.openai_router.message(Command("openai"))(self.display_select_action)
-        self.openai_router.message(F.text == "OpenAI")(self.display_select_action)
+        self.openai_router.message(F.text == OPENAI)(self.display_select_action)
         self.openai_router.callback_query(OpenAIStates.openai_select_action)(self.process_function_selection)
         self.openai_router.message(OpenAIStates.openai_system_prompt)(self.process_user_input)
         self.openai_router.message(OpenAIStates.openai_get_completion)(self.process_user_input)
