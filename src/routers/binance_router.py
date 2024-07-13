@@ -32,11 +32,8 @@ class BinanceStates(StatesGroup):
 @binance_router.message(F.text == SETTINGS)
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new binance dialog. Chat ID {message.chat.id}")
-
     await state.set_state(BinanceStates.select_option)
-
-    inline_kb = binance_action_selector()
-    await message.reply(text=f"Выберите опцию: ", reply_markup=inline_kb)
+    await message.reply(text=f"Выберите опцию: ", reply_markup=binance_action_selector())
     await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 

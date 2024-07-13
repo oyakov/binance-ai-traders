@@ -6,14 +6,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      - BOT_TOKEN=6853220461:AAGIJo2a3GIMMqgz1w9iISW3Lv7ZnvAoRa8
-      - CHAT_ID=-1002060021902
-      - COROUTINE_DEBUG=True
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
-      - OPENAI_URL=http://local-ai:8080/v1
-      - OPENAI_TOKEN=lm-studio
-      - LLM_MODEL=gpt-4
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     networks:

@@ -41,6 +41,7 @@ class BinanceService:
         logger.info(f"Candlestick data for {symbol}: {df.head()}")
         return df
 
+
     async def get_all_tickers(self):
         # Get ticker information for all symbols
         tickers = self.client.get_all_tickers()
