@@ -31,6 +31,16 @@ services:
     networks:
       - bot_network
 
+  elasticsearch:
+    image: elasticsearch:latest
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - bot_network
+
 volumes:
   pgdata:
 
