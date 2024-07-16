@@ -8,7 +8,6 @@ class LoggerSubsystem(Subsystem):
 
     def __init__(self):
         self.logger = get_logger(__name__)
-        self.initialize()
         self.app_logger = get_logger(APP_NAME)
 
     async def initialize(self):

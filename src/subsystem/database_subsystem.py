@@ -10,15 +10,12 @@ logger = log_config.get_logger(__name__)
 
 async def create_tables():
     logger.info("create tables")
-    try:
-        async with engine.begin() as conn:
-            # While testing we will also drop all
-            # TODO: remove when going to production
-            await conn.run_sync(Base.metadata.drop_all)
-            # Create all tables from the model class
-            await conn.run_sync(Base.metadata.create_all)
-    except() as exception:
-        logger.error(f"Error creating tables in the database: {exception}")
+    async with engine.begin() as conn:
+        # While testing we will also drop all
+        # TODO: remove when going to production
+        await conn.run_sync(Base.metadata.drop_all)
+        # Create all tables from the model class
+        await conn.run_sync(Base.metadata.create_all)
 
 
 async def populate_test_groups():
@@ -41,8 +38,10 @@ class DatabaseSubsystem(Subsystem):
             await populate_test_groups()
             self.is_initialized = True
             logger.info(f"Database is initialized")
-        except() as exception:
-            logger.error(f"Error initializing the database {exception}")
+        except OSError as exception:
+            logger.error(f"Error connecting to the database: {exception}")
+        except Exception as exception:
+            logger.error(f"Error creating tables: {exception}")
 
     async def shutdown(self):
         pass

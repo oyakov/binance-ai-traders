@@ -4,7 +4,7 @@ from subsystem.subsystem import Subsystem
 
 logger = log_config.get_logger(__name__)
 
-q
+
 class SchedulerSubsystem(Subsystem):
     def __init__(self, bot, interval_minutes, new_message_router):
         self.bot = bot
