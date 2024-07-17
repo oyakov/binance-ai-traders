@@ -1,6 +1,7 @@
 from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 
 from markup.inline.keyboards.actuator_keyboards import actuator_action_selector
@@ -20,9 +21,10 @@ actuator_router = BaseRouter(services=[
 ], repositories=[])
 
 
-class ActuatorStates:
-    select_option = "select_option"
-    health_data = "health_data"
+class ActuatorStates(StatesGroup):
+    select_option = State()
+    health_data = State()
+
 
 @actuator_router.message(Command("actuator"))
 @actuator_router.message(F.text == NEW_MESSAGE)
@@ -39,5 +41,6 @@ async def selected_option_callback(callback_query: CallbackQuery, state: FSMCont
     if callback_query.data == "subsystem_health":
         await state.set_state(ActuatorStates.health_data)
         await elastic.collect_health_data()
-        await callback_query.message.reply(text="Subsystem health data collected", reply_markup=actuator_action_selector())
+        await callback_query.message.reply(text="Subsystem health data collected",
+                                           reply_markup=actuator_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())

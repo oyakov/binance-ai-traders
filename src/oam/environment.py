@@ -18,6 +18,9 @@ OPENAI_TOKEN = os.getenv('OPENAI_TOKEN')
 LLM_MODEL = os.getenv('LLM_MODEL')
 BINANCE_TOKEN = os.getenv('BINANCE_TOKEN')
 BINANCE_SECRET_TOKEN = os.getenv('BINANCE_SECRET_TOKEN')
+ELASTIC_HOSTNAME = os.getenv('ELASTIC_HOSTNAME')
+ELASTIC_PORT = os.getenv('ELASTIC_PORT')
+ELASTIC_SCHEME = os.getenv('ELASTIC_SCHEME')
 ############################################################################
 
 DELIMITER: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'

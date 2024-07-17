@@ -44,14 +44,14 @@ class BinanceDataOffloadSubsystem(Subsystem):
         try:
             account_info = await self.binance_service.get_account_info()
             ticker = await self.binance_service.get_ticker(symbol)
-            klines = await self.binance_service.get_klines(symbol)
+            # klines = await self.binance_service.get_klines(symbol)
             self.elastic_service.add_to_index(symbol, {
                 "account_info": account_info,
                 "ticker": ticker,
-                "klines": klines
+                # "klines": klines
             })
         except Exception as e:
-            logger.error(f"Error in data offload cycle: {e}")
+            logger.error(f"Error in data offload cycle: {e.__class__}\n\t{e}")
         logger.info(f"Data offload cycle for symbol {symbol} is complete")
 
     def get_binance_service(self):

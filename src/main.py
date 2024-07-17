@@ -6,6 +6,7 @@ from aiogram import Bot
 # Subsystems
 from oam.environment import MASTER_BOT_TOKEN, COROUTINE_DEBUG
 from oam.log_config import LoggerSubsystem
+from routers.actuator_router import actuator_router
 from routers.binance_router import binance_router
 from routers.configuration_router import configuration_router
 from routers.new_message_router import new_message_router
