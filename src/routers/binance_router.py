@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery
 from markup.inline.keyboards.binance_keyboards import binance_action_selector
 from markup.inline.text.binance_formatter import format_account_info, format_ticker, format_klines, \
     format_order_book
-from markup.reply.main_menu_reply_keyboard import create_reply_kbd, SETTINGS
+from markup.reply.main_menu_reply_keyboard import create_reply_kbd, BINANCE
 from oam import log_config
 from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
@@ -33,7 +33,7 @@ class BinanceStates(StatesGroup):
 
 
 @binance_router.message(Command("binance"))
-@binance_router.message(F.text == SETTINGS)
+@binance_router.message(F.text == BINANCE)
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new binance dialog. Chat ID {message.chat.id}")
     await state.set_state(BinanceStates.select_option)

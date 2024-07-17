@@ -5,7 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 
 from markup.inline.keyboards.actuator_keyboards import actuator_action_selector
-from markup.reply.main_menu_reply_keyboard import create_reply_kbd, NEW_MESSAGE
+from markup.reply.main_menu_reply_keyboard import create_reply_kbd, NEW_MESSAGE, MONITORING
 from oam import log_config
 from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
@@ -27,7 +27,7 @@ class ActuatorStates(StatesGroup):
 
 
 @actuator_router.message(Command("actuator"))
-@actuator_router.message(F.text == NEW_MESSAGE)
+@actuator_router.message(F.text == MONITORING)
 async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new actuator dialog. Chat ID {message.chat.id}")
     await state.set_state(ActuatorStates.select_option)
@@ -40,7 +40,10 @@ async def selected_option_callback(callback_query: CallbackQuery, state: FSMCont
     logger.info(f"Selected option callback. Chat ID {callback_query.message.chat.id}")
     if callback_query.data == "subsystem_health":
         await state.set_state(ActuatorStates.health_data)
-        await elastic.collect_health_data()
+        # Collect health data from Subsystem manager
+        # TODO: Implement health data collection
+        # Write health data to elastic
+        # elastic.store_data("subsystem_health", health_data)
         await callback_query.message.reply(text="Subsystem health data collected",
                                            reply_markup=actuator_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
