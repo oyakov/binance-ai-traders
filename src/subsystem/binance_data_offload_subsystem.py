@@ -9,14 +9,6 @@ from subsystem.subsystem import Subsystem
 logger = log_config.get_logger(__name__)
 
 
-async def initialize_message_sender_job(interval_minutes: int = 1):
-    """
-    Initialize the periodic job for sending messages
-    Job will run approximately every interval_minutes and will check if this time there are messages
-    which schedule has arrived and send those messages to the configured list of chats
-    """
-
-
 class BinanceDataOffloadSubsystem(Subsystem):
     def __init__(self, bot, router):
         self.bot = bot
@@ -31,13 +23,15 @@ class BinanceDataOffloadSubsystem(Subsystem):
             self.binance_service = BinanceService()
             logger.info(f"Initializing ElasticService")
             self.elastic_service = ElasticService()
-            logger.info("Initialize the scheduler job")
+            logger.info("Initialize the data offload cycle job")
             scheduler = AsyncIOScheduler()
-            scheduler.add_job(self.data_offload_cycle, 'interval', args=[], minutes=1)
+            scheduler.add_job(self.data_offload_cycle, 'interval', args=[
+                "BTCUSDT"
+            ], minutes=1)
             scheduler.start()
-            logger.info("Scheduler is initialized")
+            logger.info("Data offload cycle job is initialized")
         except Exception as e:
-            print(f"Error initializing BinanceService: {e}")
+            print(f"Error initializing Binance Data Offload subsystem: {e}")
             raise e
         self.is_initialized = True
         logger.info(f"Binance Data Offload subsystem is initialized")
@@ -47,10 +41,18 @@ class BinanceDataOffloadSubsystem(Subsystem):
 
     async def data_offload_cycle(self, symbol: str = "BTCUSDT"):
         logger.info(f"Data offload cycle for symbol {symbol}")
-        account_info = await self.binance_service.get_account_info()
-        ticker = await self.binance_service.get_ticker(symbol)
-        klines = await self.binance_service.get_klines(symbol)
-        self.elastic_service.store_data(account_info, ticker, klines)
+        try:
+            account_info = await self.binance_service.get_account_info()
+            ticker = await self.binance_service.get_ticker(symbol)
+            klines = await self.binance_service.get_klines(symbol)
+            self.elastic_service.add_to_index(symbol, {
+                "account_info": account_info,
+                "ticker": ticker,
+                "klines": klines
+            })
+        except Exception as e:
+            logger.error(f"Error in data offload cycle: {e}")
+        logger.info(f"Data offload cycle for symbol {symbol} is complete")
 
     def get_binance_service(self):
         return self.binance_service

@@ -10,6 +10,8 @@ from routers.binance_router import binance_router
 from routers.configuration_router import configuration_router
 from routers.new_message_router import new_message_router
 from routers.openai_router import openai_router
+from subsystem.actuator_subsystem import ActuatorSubsystem
+from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
 from subsystem.binance_subsystem import BinanceSubsystem
 from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 from subsystem.configuration_subsystem import ConfigurationSubsystem
@@ -29,14 +31,17 @@ async def main(bot: Bot) -> None:
     """Initialize application subsystems concurrently"""
     subsystems = [
         LoggerSubsystem(),
+        ActuatorSubsystem(bot, actuator_router, subsystem_manager),
         DatabaseSubsystem(),
         SchedulerSubsystem(bot, 1, new_message_router),
         OpenAiSubsystem(bot, openai_router),
         BinanceSubsystem(bot, binance_router),
+        BinanceDataOffloadSubsystem(bot, configuration_router),
         ConfigurationSubsystem(bot, configuration_router)
     ]
     await subsystem_manager.initialize_subsystems(subsystems)
 
+    # Start polling Telegram API
     bot_sub = SlaveBotSubsystem(bot, routers=[configuration_router, binance_router, new_message_router, openai_router])
     await subsystem_manager.initialize_subsystems([bot_sub])
 
