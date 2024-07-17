@@ -45,7 +45,7 @@ async def command_start(message: Message, state: FSMContext) -> None:
 async def selected_option_callback(callback_query: CallbackQuery, state: FSMContext, binance: BinanceService) -> None:
     logger.info(f"Selected option callback. Chat ID {callback_query.message.chat.id}")
     if callback_query.data == "account_info":
-        await state.set_state(BinanceStates.account_info)
+        await state.set_state(BinanceStates.select_option)
         account_info = await binance.get_account_info()
         await callback_query.message.reply(text=format_account_info(account_info),
                                            reply_markup=binance_action_selector(), parse_mode="Markdown")
