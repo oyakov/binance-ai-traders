@@ -1,5 +1,9 @@
 from elasticsearch import Elasticsearch
 
+from oam import log_config
+
+logger = log_config.get_logger(__name__)
+
 
 class ElasticService:
     def __init__(self):
