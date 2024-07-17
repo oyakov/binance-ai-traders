@@ -12,8 +12,6 @@ from ssl import create_default_context, PROTOCOL_TLS, TLSVersion
 logger = log_config.get_logger(__name__)
 
 
-
-
 class ElasticService:
     def __init__(self):
         logger.info(f"Creating ElasticService instance: {ssl.OPENSSL_VERSION}")

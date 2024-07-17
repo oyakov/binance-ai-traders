@@ -48,9 +48,21 @@ services:
     networks:
       - bot_network
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - bot_network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=changeit
+
 volumes:
   pgdata:
   esdata:
+  grafana-data:
 
 networks:
   bot_network:
