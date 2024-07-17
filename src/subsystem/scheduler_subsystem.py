@@ -1,5 +1,5 @@
 from oam import log_config
-from schedule.periodic_message_scheduler import initialize_message_sender_job
+from schedule.periodic_message_scheduler import initialize_advertiser
 from subsystem.subsystem import Subsystem
 
 logger = log_config.get_logger(__name__)
@@ -13,7 +13,7 @@ class SchedulerSubsystem(Subsystem):
 
     async def initialize(self):
         logger.info(f"Initializing Scheduler subsystem {self.bot}, {self.interval_minutes}")
-        await initialize_message_sender_job(bot=self.bot, interval_minutes=self.interval_minutes)
+        await initialize_advertiser(bot=self.bot, interval_minutes=self.interval_minutes)
         self.is_initialized = True
 
     async def shutdown(self):

@@ -19,7 +19,7 @@ async def create_tables():
 
 
 async def populate_test_groups():
-    logger.info("Populate test Telegram Groups")
+    logger.debug("Populate test Telegram Groups")
     initial_groups = [
         TelegramGroup('-1002060021902', 'oyakov', 'Test Group 1', 'https://t.me/beograd_service'),
         TelegramGroup('-4284276251', 'oyakov', 'Test Group 2', 'https://t.me/ruskie_v_belgrade')
@@ -34,7 +34,7 @@ class DatabaseSubsystem(Subsystem):
         logger.info(f"Initializing the DB")
         try:
             await create_tables()
-            logger.info(f"Tables are created")
+            logger.debug(f"Tables are created")
             await populate_test_groups()
             self.is_initialized = True
             logger.info(f"Database is initialized")

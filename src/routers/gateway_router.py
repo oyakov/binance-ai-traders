@@ -1,13 +1,9 @@
 from aiogram.fsm.state import StatesGroup, State
 
-from oam import log_config
 from middleware.chat_id_middleware import ChatIDMiddleware
 from middleware.propagation_middleware import PropagationMiddleware
+from oam import log_config
 from routers.base_router import BaseRouter
-from routers.binance_router import binance_router
-from routers.configuration_router import configuration_router
-from routers.new_message_router import new_message_router
-from routers.openai_router import openai_router
 
 logger = log_config.get_logger(__name__)
 

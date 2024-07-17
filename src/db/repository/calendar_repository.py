@@ -78,6 +78,7 @@ class CalendarRepository:
                 SELECT 
                     cd.username as username,
                     cd.data as data,
+                    cd.chat_id as chat_id,                  
                     cd.dow_id as dow_id,
                     cd.dom_id as dom_id,
                     cd.moy_id as moy_id,
