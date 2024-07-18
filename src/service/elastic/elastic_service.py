@@ -25,6 +25,97 @@ class ElasticService:
 
             verify_certs=False,
         )
+        # Initialize indices
+        self.initialize_index("btcu")
+
+    def initialize_index(self, index_name: str):
+        """
+        Initialize an ElasticSearch index with the correct mapping.
+        """
+        logger.info(f"Initializing index '{index_name}'")
+        try:
+            if not self.client.indices.exists(index=index_name):
+                mapping = \
+                    {"mappings": {
+                        "properties": {
+                            "timestamp": {
+                                "type": "date"
+                            },
+                            "ticker": {
+                                "properties": {
+                                    "symbol": {
+                                        "type": "keyword"
+                                    },
+                                    "priceChange": {
+                                        "type": "double"
+                                    },
+                                    "priceChangePercent": {
+                                        "type": "double"
+                                    },
+                                    "weightedAvgPrice": {
+                                        "type": "double"
+                                    },
+                                    "prevClosePrice": {
+                                        "type": "double"
+                                    },
+                                    "lastPrice": {
+                                        "type": "double"
+                                    },
+                                    "lastQty": {
+                                        "type": "double"
+                                    },
+                                    "bidPrice": {
+                                        "type": "double"
+                                    },
+                                    "bidQty": {
+                                        "type": "double"
+                                    },
+                                    "askPrice": {
+                                        "type": "double"
+                                    },
+                                    "askQty": {
+                                        "type": "double"
+                                    },
+                                    "openPrice": {
+                                        "type": "double"
+                                    },
+                                    "highPrice": {
+                                        "type": "double"
+                                    },
+                                    "lowPrice": {
+                                        "type": "double"
+                                    },
+                                    "volume": {
+                                        "type": "double"
+                                    },
+                                    "quoteVolume": {
+                                        "type": "double"
+                                    },
+                                    "openTime": {
+                                        "type": "date"
+                                    },
+                                    "closeTime": {
+                                        "type": "date"
+                                    },
+                                    "firstId": {
+                                        "type": "long"
+                                    },
+                                    "lastId": {
+                                        "type": "long"
+                                    },
+                                    "count": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        }
+                    }, }
+                self.client.indices.create(index=index_name, body=mapping)
+                logger.info(f"Created index '{index_name}' with correct mapping.")
+            else:
+                logger.info(f"Index '{index_name}' already exists.")
+        except Exception as e:
+            logger.error(f"Error creating index '{index_name}': {e}")
 
     def search(self, index: str, body: Mapping[str, Any] | None):
         return self.client.search(index=index.lower(), body=body)
@@ -40,8 +131,3 @@ class ElasticService:
 
     def delete(self, index: str, ts: str):
         return self.client.delete(index=index.lower(), id=ts)
-
-    def store_data(self, account_info, ticker, klines):
-        self.index("account_info", account_info)
-        self.index("ticker", ticker)
-        self.index("klines", klines)

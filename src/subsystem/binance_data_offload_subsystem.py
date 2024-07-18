@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -42,13 +44,10 @@ class BinanceDataOffloadSubsystem(Subsystem):
     async def data_offload_cycle(self, symbol: str = "BTCUSDT"):
         logger.info(f"Data offload cycle for symbol {symbol}")
         try:
-            account_info = await self.binance_service.get_account_info()
             ticker = await self.binance_service.get_ticker(symbol)
-            # klines = await self.binance_service.get_klines(symbol)
-            self.elastic_service.add_to_index(symbol, {
-                "account_info": account_info,
+            self.elastic_service.add_to_index("btcu", {
                 "ticker": ticker,
-                # "klines": klines
+                "timestamp": datetime.now().isoformat()
             })
         except Exception as e:
             logger.error(f"Error in data offload cycle: {e.__class__}\n\t{e}")

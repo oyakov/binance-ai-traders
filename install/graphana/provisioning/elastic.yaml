@@ -1,0 +1,20 @@
+# /etc/grafana/provisioning/datasources/datasource.yaml
+apiVersion: 1
+
+# List of data sources to delete from the database.
+deleteDatasources:
+  - name: Elasticsearch
+    orgId: 1
+
+# Mark provisioned data sources for deletion if they are no longer in a provisioning file.
+prune: true
+
+datasources:
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    isDefault: true
+    database: btcusdt
+    jsonData:
+      timeField: @timestamp
