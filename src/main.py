@@ -1,4 +1,7 @@
 import asyncio
+
+from injector import Injector, Module, singleton, provider
+
 from oam import log_config
 
 from aiogram import Bot
@@ -19,12 +22,13 @@ from subsystem.configuration_subsystem import ConfigurationSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.openai_subsystem import OpenAiSubsystem
 from subsystem.scheduler_subsystem import SchedulerSubsystem
-from subsystem.subsystem_manager import subsystem_manager
-
+from subsystem.subsystem_manager import subsystem_manager, SubsystemManager
 
 ############################################################################
 # logging - Logger subsystem is initialized first
 logger = log_config.get_logger(__name__)
+
+
 ############################################################################
 
 
@@ -46,9 +50,19 @@ async def main(bot: Bot) -> None:
     bot_sub = SlaveBotSubsystem(bot, routers=[configuration_router, binance_router, new_message_router, openai_router])
     await subsystem_manager.initialize_subsystems([bot_sub])
 
+
+class SubsystemManagerModule(Module):
+    @singleton
+    @provider
+    def provide_subsystem_manager(self) -> SubsystemManager:
+        return subsystem_manager
+
+
 # Run the application
 if __name__ == '__main__':
     logger.info(f"Debug coroutines: {COROUTINE_DEBUG}")
+    injector = Injector([SubsystemManagerModule()])
+    sub_manager = injector.get(SubsystemManager)
     master_bot_instance = Bot(token=MASTER_BOT_TOKEN)
     logger.info(f"Master Bot instantiated, running the main loop...")
     try:
