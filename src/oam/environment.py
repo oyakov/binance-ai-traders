@@ -21,6 +21,8 @@ BINANCE_SECRET_TOKEN = os.getenv('BINANCE_SECRET_TOKEN')
 ELASTIC_HOSTNAME = os.getenv('ELASTIC_HOSTNAME')
 ELASTIC_PORT = os.getenv('ELASTIC_PORT')
 ELASTIC_SCHEME = os.getenv('ELASTIC_SCHEME')
+ELASTIC_USERNAME = os.getenv('ELASTIC_USERNAME')
+ELASTIC_PASSWORD = os.getenv('ELASTIC_PASSWORD')
 ############################################################################
 
 DELIMITER: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'

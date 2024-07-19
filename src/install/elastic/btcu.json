@@ -1,0 +1,76 @@
+{
+  "mappings": {
+    "properties": {
+      "timestamp": {
+        "type": "date"
+      },
+      "ticker": {
+        "properties": {
+          "symbol": {
+            "type": "keyword"
+          },
+          "priceChange": {
+            "type": "double"
+          },
+          "priceChangePercent": {
+            "type": "double"
+          },
+          "weightedAvgPrice": {
+            "type": "double"
+          },
+          "prevClosePrice": {
+            "type": "double"
+          },
+          "lastPrice": {
+            "type": "double"
+          },
+          "lastQty": {
+            "type": "double"
+          },
+          "bidPrice": {
+            "type": "double"
+          },
+          "bidQty": {
+            "type": "double"
+          },
+          "askPrice": {
+            "type": "double"
+          },
+          "askQty": {
+            "type": "double"
+          },
+          "openPrice": {
+            "type": "double"
+          },
+          "highPrice": {
+            "type": "double"
+          },
+          "lowPrice": {
+            "type": "double"
+          },
+          "volume": {
+            "type": "double"
+          },
+          "quoteVolume": {
+            "type": "double"
+          },
+          "openTime": {
+            "type": "date"
+          },
+          "closeTime": {
+            "type": "date"
+          },
+          "firstId": {
+            "type": "long"
+          },
+          "lastId": {
+            "type": "long"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
