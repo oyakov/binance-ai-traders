@@ -5,7 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 
 from markup.inline.keyboards.actuator_keyboards import actuator_action_selector
-from markup.reply.main_menu_reply_keyboard import create_reply_kbd, NEW_MESSAGE, MONITORING
+from markup.reply.main_menu_reply_keyboard import create_reply_kbd, MONITORING
 from oam import log_config
 from oam.environment import DELIMITER
 from routers.base_router import BaseRouter

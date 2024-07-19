@@ -1,5 +1,5 @@
-from binance.client import Client
 import pandas as pd
+from binance.client import Client
 
 from oam import log_config
 from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN

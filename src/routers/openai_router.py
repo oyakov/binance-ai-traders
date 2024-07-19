@@ -1,5 +1,3 @@
-from oam import log_config
-
 from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -9,9 +7,10 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from oam.environment import DELIMITER
 from markup.inline.keyboards.openai_keyboards import openai_action_selector
 from markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
+from oam import log_config
+from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
 from service.openai.openai_api_service import OpenAIAPIService
 

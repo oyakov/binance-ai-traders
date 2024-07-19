@@ -1,8 +1,10 @@
 # bot_manager.py
 import asyncio
-from sqlalchemy.orm import sessionmaker
-from sub_bot import SubBot
+
 from db_config import engine, CustomerConfiguration
+from sqlalchemy.orm import sessionmaker
+
+from sub_bot import SubBot
 
 
 class BotManager:

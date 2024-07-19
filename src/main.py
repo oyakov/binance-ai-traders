@@ -1,11 +1,9 @@
 import asyncio
 
+from aiogram import Bot
 from injector import Injector, Module, singleton, provider
 
 from oam import log_config
-
-from aiogram import Bot
-
 # Subsystems
 from oam.environment import MASTER_BOT_TOKEN, COROUTINE_DEBUG
 from oam.log_config import LoggerSubsystem
@@ -17,11 +15,11 @@ from routers.openai_router import openai_router
 from subsystem.actuator_subsystem import ActuatorSubsystem
 from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
 from subsystem.binance_subsystem import BinanceSubsystem
-from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 from subsystem.configuration_subsystem import ConfigurationSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.openai_subsystem import OpenAiSubsystem
 from subsystem.scheduler_subsystem import SchedulerSubsystem
+from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 from subsystem.subsystem_manager import subsystem_manager, SubsystemManager
 
 ############################################################################

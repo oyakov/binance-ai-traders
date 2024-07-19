@@ -1,8 +1,8 @@
-from oam import log_config
-
 from aiogram import Dispatcher, Router, Bot
 from aiogram.fsm.storage.memory import SimpleEventIsolation
 from aiogram.types import Message
+
+from oam import log_config
 
 logger = log_config.get_logger(__name__)
 

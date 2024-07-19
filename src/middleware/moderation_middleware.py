@@ -1,8 +1,9 @@
-from oam import log_config
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.types import TelegramObject, Message
+
+from oam import log_config
 
 logger = log_config.get_logger(__name__)
 

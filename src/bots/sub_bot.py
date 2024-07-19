@@ -1,9 +1,10 @@
 # sub_bot.py
 import asyncio
-from subsystems.periodic_messages import PeriodicMessages
+
+from additional_jobs import job1, job2
 from subsystems.ai_assistant import AIAssistant
 from subsystems.binance_api import BinanceAPI
-from additional_jobs import job1, job2
+from subsystems.periodic_messages import PeriodicMessages
 
 
 class SubBot:

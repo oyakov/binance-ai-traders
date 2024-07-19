@@ -7,12 +7,12 @@ from aiogram.types import (
     CallbackQuery,
 )
 
-from oam import log_config
 from db.repository.telegram_group_repository import TelegramGroupRepository
-from oam.environment import DELIMITER
 from markup.inline.keyboards.configuration_keyboards import config_action_selector, config_group_action_selector, \
     config_misc_action_selector, config_back
 from markup.reply.main_menu_reply_keyboard import SETTINGS, create_reply_kbd
+from oam import log_config
+from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
 
 configuration_router = BaseRouter(

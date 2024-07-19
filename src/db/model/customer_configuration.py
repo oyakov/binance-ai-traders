@@ -1,7 +1,6 @@
 # db_config.py
-from sqlalchemy import create_engine, Column, Integer, String, JSON
+from sqlalchemy import Column, Integer, String, JSON
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 from db.config import get_db
 

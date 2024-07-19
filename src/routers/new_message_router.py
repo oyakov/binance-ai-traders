@@ -1,5 +1,3 @@
-from oam import log_config
-
 from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -11,13 +9,14 @@ from aiogram.types import (
 
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
-from oam.environment import DELIMITER
 from markup.inline.keyboards.new_message_keyboards import group_picker, now_or_later, choose_what_to_do_next, \
     choose_date_type_inline
 from markup.inline.time_pickers import date_selector_picker_inline
 from markup.inline.types import times_of_the_day, days_of_the_week, months_of_the_year, days_of_the_month, \
     DateSelector
 from markup.reply.main_menu_reply_keyboard import NEW_MESSAGE, create_reply_kbd
+from oam import log_config
+from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
 from routers.main_menu import MainMenuStates
 
