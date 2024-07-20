@@ -32,9 +32,9 @@ class ElasticService:
                 verify_certs=False,
             )
             # Initialize indices
-            indices_to_initialize = [f.stem for f in Path('install/elastic').glob('*.json')]
+            indices_to_initialize = [f.stem for f in Path('install/elastic/mappings').glob('*.json')]
             logger.info(f"Indices to initialize: {indices_to_initialize}, "
-                        f"based on the files available in 'install/elastic'")
+                        f"based on the files available in 'install/elastic/mappings'")
             [self.initialize_index(index) for index in indices_to_initialize]
             logger.info(f"Elastic indices are initialized")
         except Exception as e:

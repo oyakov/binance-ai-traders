@@ -45,6 +45,8 @@ services:
       - "9300:9300"
     volumes:
         - esdata:/usr/share/elasticsearch/data
+        - ./install/elastic/mappings:/usr/share/elasticsearch/mappings
+        - ./install/elastic/init_indices.sh:/docker-entrypoint-initdb.d/init_indices.sh
     networks:
       - bot_network
 
