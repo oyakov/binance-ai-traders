@@ -31,12 +31,12 @@ class ElasticService:
                 ssl_show_warn=False,
                 verify_certs=False,
             )
-            # Initialize indices
-            indices_to_initialize = [f.stem for f in Path('install/elastic/mappings').glob('*.json')]
-            logger.info(f"Indices to initialize: {indices_to_initialize}, "
-                        f"based on the files available in 'install/elastic/mappings'")
-            [self.initialize_index(index) for index in indices_to_initialize]
-            logger.info(f"Elastic indices are initialized")
+            # # Initialize indices
+            # indices_to_initialize = [f.stem for f in Path('install/elastic/mappings').glob('*.json')]
+            # logger.info(f"Indices to initialize: {indices_to_initialize}, "
+            #             f"based on the files available in 'install/elastic/mappings'")
+            # [self.initialize_index(index) for index in indices_to_initialize]
+            # logger.info(f"Elastic indices are initialized")
         except Exception as e:
             logger.error(f"Error initializing ElasticService: {e.__class__}\n{e}")
         logger.info(f"ElasticService instance is created")
@@ -91,6 +91,8 @@ class ElasticService:
         if body.get("timestamp") is None:
             # If timestamp is not provided, add the current timestamp
             body["timestamp"] = datetime.now().isoformat
+
+
 
         try:
             return self.client.index(index=index.lower(), id=ts, body=body)

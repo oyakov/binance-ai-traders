@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Elasticsearch host and port
-ES_HOST="http://localhost:9200"
+ES_HOST="http://elasticsearch:9200"
 
 # Function to create index with mapping
 create_index() {
@@ -16,11 +16,14 @@ create_index() {
   fi
 }
 
+# Wait for Elasticsearch to start
+until curl --silent "$ES_HOST" >/dev/null; do
+  echo "Waiting for Elasticsearch..."
+  sleep 5
+done
+
 # Create indices with their mappings
 create_index "btcu" "/usr/share/elasticsearch/mappings/btcu.json"
 
 # Add additional indices as needed
-#create_index "other_index" "/usr/share/elasticsearch/config/other_mapping.json"
-
-# Call the original entrypoint script
-exec /usr/local/bin/docker-entrypoint.sh elasticsearch
+#create_index "other_index" "/usr/share/elasticsearch/mappings/other_mapping.json"
