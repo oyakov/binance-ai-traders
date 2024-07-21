@@ -6,7 +6,7 @@ from oam import log_config
 
 logger = log_config.get_logger(__name__)
 
-bot_instance: Bot = None
+bot_instance: Bot | None = None
 
 
 async def on_new_chat_member(message: Message):

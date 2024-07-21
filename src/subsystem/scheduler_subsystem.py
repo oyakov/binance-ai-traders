@@ -18,3 +18,6 @@ class SchedulerSubsystem(Subsystem):
 
     async def shutdown(self):
         pass
+
+    async def get_router(self):
+        return self.new_message_router

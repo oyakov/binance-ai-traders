@@ -1,3 +1,6 @@
+from aiogram import Bot
+from injector import inject
+
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from subsystem.subsystem import Subsystem

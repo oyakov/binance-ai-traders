@@ -2,12 +2,17 @@
 import asyncio
 from abc import ABC
 
+from injector import inject
+
+from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem
 
 
 class SubsystemManager(ABC):
-    def __init__(self):
-        self.subsystems = None
+
+    @inject
+    def __init__(self, elastic_service: ElasticService):
+        self.subsystems: list[Subsystem] | None = None
 
     async def initialize_subsystems(self, subsystems: list[Subsystem]):
         await asyncio.gather(*(subsys.initialize() for subsys in subsystems))
@@ -28,6 +33,3 @@ class SubsystemManager(ABC):
             if subsystem.__class__.__name__ == subsystem_name:
                 return subsystem
         return None
-
-
-subsystem_manager: SubsystemManager = SubsystemManager()

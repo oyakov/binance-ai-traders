@@ -39,9 +39,8 @@ async def command_start(message: Message, state: FSMContext) -> None:
     logger.info(f"Starting new configuration dialog. Chat ID {message.chat.id}")
 
     await state.set_state(ConfigurationStates.select_configuration)
-
-    inline_kb = config_action_selector()
-    await message.reply(text=f"Выберите настройку: ", reply_markup=inline_kb)
+    await message.reply(text=f"Выберите настройку: ",
+                        reply_markup=config_action_selector())
     await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
@@ -52,13 +51,13 @@ async def process_configuration_selection(callback_query: CallbackQuery, state: 
 
     if code == "config_groups":
         await state.set_state(ConfigurationStates.config_groups)
-        inline_kb = config_group_action_selector()
-        await callback_query.message.reply(text=f"Выберите настройку групп: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Выберите настройку групп: ",
+                                           reply_markup=config_group_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
     elif code == "config_misc":
         await state.set_state(ConfigurationStates.config_misc)
-        inline_kb = config_misc_action_selector()
-        await callback_query.message.reply(text=f"Выберите настройку: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Выберите настройку: ",
+                                           reply_markup=config_misc_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
@@ -76,17 +75,20 @@ async def process_configuration_groups(callback_query: CallbackQuery, state: FSM
     elif code == "config_groups_list":
         await state.set_state(ConfigurationStates.config_groups_list)
         inline_kb = config_back()
-        await callback_query.message.reply(text=f"Список групп: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Список групп: ",
+                                           reply_markup=inline_kb)
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
     elif code == "config_back":
         await state.set_state(ConfigurationStates.select_configuration)
         inline_kb = config_action_selector()
-        await callback_query.message.reply(text=f"Выберите настройку: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Выберите настройку: ",
+                                           reply_markup=inline_kb)
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
 @configuration_router.message(ConfigurationStates.detect_chat_id)
-async def process_chat_id_detection(message: Message, state: FSMContext,
+async def process_chat_id_detection(message: Message,
+                                    state: FSMContext,
                                     tg_group_repository: TelegramGroupRepository) -> None:
     # Check if the message is forwarded
     if message.forward_from_chat:
@@ -100,36 +102,29 @@ async def process_chat_id_detection(message: Message, state: FSMContext,
             message.from_user.username,  # User who forwarded the message is the initial owner
             message.chat.username,       # Display name of the chat
             message.chat.username)       # T.me URL of the chat
-
-        inline_kb = config_group_action_selector()
-        await message.reply(text=f"Группа успешно добавлена. Выберите настройку групп ", reply_markup=inline_kb)
+        await message.reply(text=f"Группа успешно добавлена. Выберите настройку групп ",
+                            reply_markup=config_group_action_selector())
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
     else:
-        inline_kb = config_back()
         await message.reply(text=f"""Не получилось добавить группу. Добавьте бота в канал администратором и перешлите"""
                                  """любое сообщение из вашего канала в этот диалог: """,
-                            reply_markup=inline_kb)
+                            reply_markup=config_back())
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
 @configuration_router.callback_query(ConfigurationStates.detect_chat_id)
 async def process_chat_id_detection_cq(callback_query: CallbackQuery, state: FSMContext) -> None:
-    code = callback_query.data
-    logger.info(f"Option selected {code}")
-    if code == "config_back":
+    logger.info(f"Option selected {callback_query.data}")
+    if callback_query.data == "config_back":
         await state.set_state(ConfigurationStates.config_groups)
-        inline_kb = config_group_action_selector()
-        await callback_query.message.reply(text=f"Выберите настройку групп: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Выберите настройку групп: ", reply_markup=config_group_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
 @configuration_router.callback_query(ConfigurationStates.config_misc)
 async def process_configuration_misc(callback_query: CallbackQuery, state: FSMContext) -> None:
-    code = callback_query.data
-    logger.info(f"Configuration option selected {code}")
-
-    if code == "config_back":
+    logger.info(f"Configuration option selected {callback_query.data}")
+    if callback_query.data == "config_back":
         await state.set_state(ConfigurationStates.select_configuration)
-        inline_kb = config_action_selector()
-        await callback_query.message.reply(text=f"Выберите настройку: ", reply_markup=inline_kb)
+        await callback_query.message.reply(text=f"Выберите настройку: ", reply_markup=config_action_selector())
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())

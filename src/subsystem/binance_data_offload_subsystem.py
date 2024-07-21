@@ -11,9 +11,8 @@ logger = log_config.get_logger(__name__)
 
 
 class BinanceDataOffloadSubsystem(Subsystem):
-    def __init__(self, bot, router):
+    def __init__(self, bot):
         self.bot = bot
-        self.router = router
         self.binance_service: BinanceService | None = None
         self.elastic_service: ElasticService | None = None
 
@@ -54,6 +53,3 @@ class BinanceDataOffloadSubsystem(Subsystem):
 
     def get_binance_service(self):
         return self.binance_service
-
-    def get_router(self):
-        return self.router

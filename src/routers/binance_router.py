@@ -48,7 +48,8 @@ async def selected_option_callback(callback_query: CallbackQuery, state: FSMCont
         await state.set_state(BinanceStates.select_option)
         account_info = await binance.get_account_info()
         await callback_query.message.reply(text=format_account_info(account_info),
-                                           reply_markup=binance_action_selector(), parse_mode="Markdown")
+                                           reply_markup=binance_action_selector(),
+                                           parse_mode="Markdown")
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
     elif callback_query.data == "ticker":
         logger.info(f"Ticker callback. Chat ID {callback_query.message.chat.id}")
@@ -73,7 +74,9 @@ async def collect_symbol_read_ticker(message: Message, state: FSMContext, binanc
     symbol = message.text
     ticker = await binance.get_ticker(symbol)
     await state.set_state(BinanceStates.select_option)
-    await message.reply(text=format_ticker(ticker), reply_markup=binance_action_selector(), parse_mode="Markdown")
+    await message.reply(text=format_ticker(ticker),
+                        reply_markup=binance_action_selector(),
+                        parse_mode="Markdown")
     await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
@@ -83,7 +86,9 @@ async def collect_symbol_klines(message: Message, state: FSMContext, binance: Bi
     symbol = message.text
     klines = await binance.get_klines(symbol)
     await state.set_state(BinanceStates.select_option)
-    await message.reply(text=format_klines(klines), reply_markup=binance_action_selector(), parse_mode="Markdown")
+    await message.reply(text=format_klines(klines),
+                        reply_markup=binance_action_selector(),
+                        parse_mode="Markdown")
     await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
 
@@ -93,5 +98,7 @@ async def collect_symbol_order_book(message: Message, state: FSMContext, binance
     symbol = message.text
     order_book = await binance.get_order_book(symbol)
     await state.set_state(BinanceStates.select_option)
-    await message.reply(text=format_order_book(order_book), reply_markup=binance_action_selector(), parse_mode="Markdown")
+    await message.reply(text=format_order_book(order_book),
+                        reply_markup=binance_action_selector(),
+                        parse_mode="Markdown")
     await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
