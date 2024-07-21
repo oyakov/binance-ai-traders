@@ -32,45 +32,57 @@ class OpenAIStates(StatesGroup):
     openai_create_image = State()
 
 
-@openai_router.message(Command("openai"))
-@openai_router.message(F.text == OPENAI)
-async def display_select_action(message: Message, state: FSMContext):
-    logger.info(f"Starting new Open AI dialog. Chat ID {message.chat.id}. Display action selection dialog.")
+class OpenAIRouter(BaseRouter):
 
-    await state.set_state(OpenAIStates.openai_select_action)
+    def __init__(self, openai_service: OpenAIAPIService):
+        self.openai_service = openai_service
+        self.message(Command("openai"))(self.display_select_action)
+        self.message(F.text == OPENAI)(self.display_select_action)
+        self.message(OpenAIStates.openai_system_prompt)(self.process_user_input)
+        self.message(OpenAIStates.openai_get_completion)(self.process_user_input)
+        self.callback_query(OpenAIStates.openai_select_action)(self.process_function_selection)
+        super().__init__([], [])
 
-    inline_kb = openai_action_selector()
+    def initialize(self, subsystem_manager):
+        pass
 
-    await message.reply(text=f"Выберите функцию OpenAI: ", reply_markup=inline_kb)
-    await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
+    @openai_router.message(Command("openai"))
+    @openai_router.message(F.text == OPENAI)
+    async def display_select_action(self, message: Message, state: FSMContext):
+        logger.info(f"Starting new Open AI dialog. Chat ID {message.chat.id}. Display action selection dialog.")
 
+        await state.set_state(OpenAIStates.openai_select_action)
 
-@openai_router.callback_query(OpenAIStates.openai_select_action)
-async def process_function_selection(callback_query: CallbackQuery, state: FSMContext,
-                                     openai_service: OpenAIAPIService):
-    code = callback_query.data
-    logger.info(f"OpenAI action selected {code}")
+        inline_kb = openai_action_selector()
 
-    if code == "ai_chat":
-        await state.set_state(OpenAIStates.openai_system_prompt)
-        # Get the initial prompt from the assistant
-        history = await openai_service.get_completion(history=None)
-        await state.set_data({'history': history})
-        await callback_query.message.reply(text=history[-1]['content'], reply_markup=None)
-        await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
-    elif code == "ai_create_image":
-        await state.set_state(OpenAIStates.openai_create_image)
+        await message.reply(text=f"Выберите функцию OpenAI: ", reply_markup=inline_kb)
+        await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
+    @openai_router.callback_query(OpenAIStates.openai_select_action)
+    async def process_function_selection(self, callback_query: CallbackQuery, state: FSMContext,
+                                         openai_service: OpenAIAPIService):
+        code = callback_query.data
+        logger.info(f"OpenAI action selected {code}")
 
-@openai_router.message(OpenAIStates.openai_system_prompt)
-@openai_router.message(OpenAIStates.openai_get_completion)
-async def process_user_input(message: Message, state: FSMContext, openai_service: OpenAIAPIService):
-    logger.info(f"User replied with the message {message.text}")
-    await state.set_state(OpenAIStates.openai_get_completion)
-    user_message = {"role": "user", "content": message.text}
-    data = await state.get_data()
-    history = data['history']
-    history.append(user_message)
-    history = await openai_service.get_completion(history=history)
-    await message.reply(text=history[-1]['content'], reply_markup=None)
-    await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
+        if code == "ai_chat":
+            await state.set_state(OpenAIStates.openai_system_prompt)
+            # Get the initial prompt from the assistant
+            history = await self.openai_service.get_completion(history=None)
+            await state.set_data({'history': history})
+            await callback_query.message.reply(text=history[-1]['content'], reply_markup=None)
+            await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
+        elif code == "ai_create_image":
+            await state.set_state(OpenAIStates.openai_create_image)
+
+    @openai_router.message(OpenAIStates.openai_system_prompt)
+    @openai_router.message(OpenAIStates.openai_get_completion)
+    async def process_user_input(self, message: Message, state: FSMContext, openai_service: OpenAIAPIService):
+        logger.info(f"User replied with the message {message.text}")
+        await state.set_state(OpenAIStates.openai_get_completion)
+        user_message = {"role": "user", "content": message.text}
+        data = await state.get_data()
+        history = data['history']
+        history.append(user_message)
+        history = await self.openai_service.get_completion(history=history)
+        await message.reply(text=history[-1]['content'], reply_markup=None)
+        await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())

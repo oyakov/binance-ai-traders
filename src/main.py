@@ -6,7 +6,6 @@ from inject.bot_injector import injector
 from oam import log_config
 # Subsystems
 from oam.environment import COROUTINE_DEBUG
-from routers.actuator_router import actuator_router
 from routers.binance_router import binance_router
 from routers.configuration_router import configuration_router
 from routers.new_message_router import new_message_router

@@ -5,13 +5,14 @@ logger = log_config.get_logger(__name__)
 
 
 class ActuatorSubsystem(Subsystem):
-    def __init__(self, bot, router, subsystem_manager):
+    def __init__(self, bot, router):
         self.bot = bot
         self.router = router
-        self.subsystem_manager = subsystem_manager
+        self.subsystem_manager = None
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Actuator subsystem {self.bot}")
+        self.subsystem_manager = subsystem_manager
         self.is_initialized = True
 
     async def collect_health_data(self):

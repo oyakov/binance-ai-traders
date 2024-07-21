@@ -11,9 +11,13 @@ class BaseRouter(Router):
 
     def __init__(self, services, repositories, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.subsystem_manager = None
         self.services = services
         self.repositories = repositories
         self.install_injection_middlewares()
+
+    def initialize(self, subsystem_manager):
+        self.subsystem_manager = subsystem_manager
 
     def install_injection_middlewares(self):
         # Iterate over the repository configurations

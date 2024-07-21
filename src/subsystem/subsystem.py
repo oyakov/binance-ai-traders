@@ -7,7 +7,7 @@ class Subsystem(ABC):
 
     is_initialized: bool = False
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         raise NotImplementedError("Subclasses must override this method")
 
     async def shutdown(self):

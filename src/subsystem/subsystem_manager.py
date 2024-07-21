@@ -1,6 +1,7 @@
 # TODO: implement the subsystem manager that will allow the modular stucture to work
 import asyncio
 from abc import ABC
+from typing import Mapping, Any
 
 from injector import inject
 
@@ -15,7 +16,7 @@ class SubsystemManager(ABC):
         self.subsystems: list[Subsystem] | None = None
 
     async def initialize_subsystems(self, subsystems: list[Subsystem]):
-        await asyncio.gather(*(subsys.initialize() for subsys in subsystems))
+        await asyncio.gather(*(subsys.initialize(self) for subsys in subsystems))
         if self.subsystems is None:
             self.subsystems = subsystems
         else:
@@ -33,3 +34,6 @@ class SubsystemManager(ABC):
             if subsystem.__class__.__name__ == subsystem_name:
                 return subsystem
         return None
+
+    def collect_health_data(self) -> Mapping[str, Any]:
+        return {subsystem.__class__.__name__: subsystem.is_initialized for subsystem in self.subsystems}
