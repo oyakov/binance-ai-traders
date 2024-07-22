@@ -25,12 +25,12 @@ class ActuatorRouter(BaseRouter):
 
     @inject
     def __init__(self, elastic_service: ElasticService):
-        self.subsystem_manager = None
+        super().__init__([], [])
+        self.subsystem_manager = SubsystemManager | None
         self.elastic_service = elastic_service
         self.message(Command("actuator"))(self.command_start)
         self.message(F.text == MONITORING)(self.command_start)
         self.callback_query(ActuatorStates.select_option)(self.selected_option_callback)
-        super().__init__([], [])
 
     def initialize(self, subsystem_manager: SubsystemManager):
         self.subsystem_manager = subsystem_manager

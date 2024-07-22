@@ -29,7 +29,7 @@ async def populate_test_groups():
 
 
 class DatabaseSubsystem(Subsystem):
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing the DB")
         try:
             await create_tables()

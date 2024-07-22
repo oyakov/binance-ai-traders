@@ -11,7 +11,7 @@ class LoggerSubsystem(Subsystem):
         self.logger = get_logger(__name__)
         self.app_logger = get_logger(APP_NAME)
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         self.logger.info(f"Initializing logger subsystem")
         logging.config.fileConfig(fname=LOGGING_CONFIG_PATH, disable_existing_loggers=False)
         self.logger.info(f"Logger subsystem is initialized")

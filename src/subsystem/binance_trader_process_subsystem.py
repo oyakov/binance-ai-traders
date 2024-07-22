@@ -14,7 +14,7 @@ class BinanaceTraderProcessSubsystem(Subsystem):
         self.router = router
         self.binance_service = None
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Trader Process subsystem {self.bot}")
         self.binance_service = BinanceService()
         logger.info(f"Created new BinanceService instance")

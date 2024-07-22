@@ -1,3 +1,5 @@
+from injector import inject
+
 from oam import log_config
 from routers.base_router import BaseRouter
 
@@ -10,11 +12,12 @@ logger = log_config.get_logger(__name__)
 
 class SlaveBotSubsystem(Subsystem):
 
+    @inject
     def __init__(self, bot, routers: list[BaseRouter]):
         self.bot = bot
         self.routers = routers
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing bot {self.bot}")
         dispatcher = create_dispatcher([configure_gateway_router(self.routers)], self.bot)
         await dispatcher.start_polling(self.bot)

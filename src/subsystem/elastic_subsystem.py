@@ -12,7 +12,7 @@ class ElasticSubsystem(Subsystem):
         self.router = router
         self.elastic_service: ElasticService | None = None
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing the Elastic")
         try:
             self.elastic_service = ElasticService()

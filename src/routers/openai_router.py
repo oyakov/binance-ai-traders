@@ -6,6 +6,7 @@ from aiogram.types import (
     Message,
     CallbackQuery,
 )
+from injector import inject
 
 from markup.inline.keyboards.openai_keyboards import openai_action_selector
 from markup.reply.main_menu_reply_keyboard import OPENAI, create_reply_kbd
@@ -34,17 +35,18 @@ class OpenAIStates(StatesGroup):
 
 class OpenAIRouter(BaseRouter):
 
+    @inject
     def __init__(self, openai_service: OpenAIAPIService):
+        super().__init__([], [])
         self.openai_service = openai_service
         self.message(Command("openai"))(self.display_select_action)
         self.message(F.text == OPENAI)(self.display_select_action)
         self.message(OpenAIStates.openai_system_prompt)(self.process_user_input)
         self.message(OpenAIStates.openai_get_completion)(self.process_user_input)
         self.callback_query(OpenAIStates.openai_select_action)(self.process_function_selection)
-        super().__init__([], [])
 
     def initialize(self, subsystem_manager):
-        pass
+        self.subsystem_manager = subsystem_manager
 
     @openai_router.message(Command("openai"))
     @openai_router.message(F.text == OPENAI)
@@ -59,8 +61,7 @@ class OpenAIRouter(BaseRouter):
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
     @openai_router.callback_query(OpenAIStates.openai_select_action)
-    async def process_function_selection(self, callback_query: CallbackQuery, state: FSMContext,
-                                         openai_service: OpenAIAPIService):
+    async def process_function_selection(self, callback_query: CallbackQuery, state: FSMContext):
         code = callback_query.data
         logger.info(f"OpenAI action selected {code}")
 
@@ -76,7 +77,7 @@ class OpenAIRouter(BaseRouter):
 
     @openai_router.message(OpenAIStates.openai_system_prompt)
     @openai_router.message(OpenAIStates.openai_get_completion)
-    async def process_user_input(self, message: Message, state: FSMContext, openai_service: OpenAIAPIService):
+    async def process_user_input(self, message: Message, state: FSMContext):
         logger.info(f"User replied with the message {message.text}")
         await state.set_state(OpenAIStates.openai_get_completion)
         user_message = {"role": "user", "content": message.text}

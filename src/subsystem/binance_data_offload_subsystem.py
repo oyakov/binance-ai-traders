@@ -16,7 +16,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
         self.binance_service: BinanceService | None = None
         self.elastic_service: ElasticService | None = None
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Data Offload subsystem {self.bot}")
         try:
             logger.info(f"Initializing BinanceService")

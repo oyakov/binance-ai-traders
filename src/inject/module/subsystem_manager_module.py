@@ -1,12 +1,14 @@
 from aiogram import Bot
-from injector import Module, provider, singleton
+from injector import Module, provider, singleton, multiprovider
 
 from routers.actuator_router import ActuatorRouter
+from routers.base_router import BaseRouter
 from routers.binance_router import BinanceRouter
 from routers.configuration_router import ConfigurationRouter
 from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.elastic.elastic_service import ElasticService
+from subsystem.subsystem import Subsystem
 from subsystem.subsystem_manager import SubsystemManager
 from subsystem.actuator_subsystem import ActuatorSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
@@ -25,9 +27,8 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_actuator_subsystem(self,
                                    bot: Bot,
-                                   actuator_router: ActuatorRouter,
-                                   subsystem_manager: SubsystemManager) -> ActuatorSubsystem:
-        return ActuatorSubsystem(bot, actuator_router, subsystem_manager)
+                                   actuator_router: ActuatorRouter) -> ActuatorSubsystem:
+        return ActuatorSubsystem(bot, actuator_router)
 
     @singleton
     @provider
@@ -36,7 +37,9 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
-    def provide_configuration_subsystem(self, bot: Bot, configuration_router: ConfigurationRouter) -> ConfigurationSubsystem:
+    def provide_configuration_subsystem(self,
+                                        bot: Bot,
+                                        configuration_router: ConfigurationRouter) -> ConfigurationSubsystem:
         return ConfigurationSubsystem(bot, configuration_router)
 
     @singleton
@@ -68,14 +71,32 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_slave_bot_subsystem(self,
                                     bot: Bot,
-                                    actuator_router: ActuatorRouter,
-                                    configuration_router: ConfigurationRouter,
-                                    binance_router: BinanceRouter,
-                                    new_message_router: NewMessageRouter,
-                                    openai_router: OpenAIRouter,
+                                    routers: list[BaseRouter]
                                     ) -> SlaveBotSubsystem:
-        return SlaveBotSubsystem(bot, routers=[configuration_router, binance_router, new_message_router, openai_router,
-                                               actuator_router])
+        return SlaveBotSubsystem(bot, routers=routers)
+
+    @singleton
+    @multiprovider
+    def provide_subsystem_list(self,
+                               actuator_subsystem: ActuatorSubsystem,
+                               database_subsystem: DatabaseSubsystem,
+                               configuration_subsystem: ConfigurationSubsystem,
+                               logger_subsystem: LoggerSubsystem,
+                               scheduler_subsystem: SchedulerSubsystem,
+                               openai_subsystem: OpenAiSubsystem,
+                               binance_subsystem: BinanceSubsystem,
+                               binance_data_offload_subsystem: BinanceDataOffloadSubsystem,
+                               ) -> list[Subsystem]:
+        return [
+            actuator_subsystem,
+            database_subsystem,
+            configuration_subsystem,
+            logger_subsystem,
+            scheduler_subsystem,
+            openai_subsystem,
+            binance_subsystem,
+            binance_data_offload_subsystem,
+        ]
 
     @singleton
     @provider

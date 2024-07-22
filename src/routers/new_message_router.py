@@ -6,6 +6,7 @@ from aiogram.types import (
     Message,
     CallbackQuery,
 )
+from injector import inject
 
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
@@ -37,7 +38,9 @@ class NewMessageStates(StatesGroup):
 
 class NewMessageRouter(BaseRouter):
 
+    @inject
     def __init__(self, calendar_repository: CalendarRepository, telegram_group_repository: TelegramGroupRepository):
+        super().__init__([], [])
         self.calendar_repository = calendar_repository
         self.tg_group_repository = telegram_group_repository
         self.message(Command("new_message"))(self.command_start)
@@ -51,13 +54,10 @@ class NewMessageRouter(BaseRouter):
         self.callback_query(NewMessageStates.new_msg_interval_type_days_in_the_week)(self.process_day_of_the_week)
         self.callback_query(NewMessageStates.new_msg_interval_type_time_in_the_day)(self.process_times_of_the_day)
         self.callback_query(NewMessageStates.new_msg_interval_type_time_in_the_day)(self.process_times_of_the_day)
-        super().__init__([], [])
 
     def initialize(self, subsystem_manager):
-        pass
+        self.subsystem_manager = subsystem_manager
 
-    @new_message_router.message(Command("new_message"))
-    @new_message_router.message(F.text == NEW_MESSAGE)
     async def command_start(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Starting new periodic message dialog. Chat ID {message.chat.id}")
 
@@ -74,8 +74,6 @@ class NewMessageRouter(BaseRouter):
             reply_markup=create_reply_kbd()
         )
 
-    @new_message_router.message(Command("cancel"))
-    @new_message_router.message(F.text == "cancel")
     async def cancel_handler(self, message: Message, state: FSMContext) -> None:
         """
         Allow user to cancel any action
@@ -91,22 +89,19 @@ class NewMessageRouter(BaseRouter):
             reply_markup=create_reply_kbd(),
         )
 
-    @new_message_router.message(NewMessageStates.new_msg_input_text)
     async def process_text(self,
                            message: Message,
-                           state: FSMContext,
-                           tg_group_repository: TelegramGroupRepository) -> None:
+                           state: FSMContext) -> None:
         await state.update_data(text=message.text)
         await state.set_state(NewMessageStates.new_msg_select_group)
 
         # Load the Telegram groups that are attached for this user
-        groups = await tg_group_repository.load_telegram_groups_by_username(message.from_user.username)
+        groups = await self.tg_group_repository.load_telegram_groups_by_username(message.from_user.username)
         inline_kb = group_picker(groups=groups, row_size=2)
 
         await message.reply(text=f"Выберите целевые группы: ", reply_markup=inline_kb)
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_select_group)
     async def process_group(self, callback_query: CallbackQuery, state: FSMContext):
         code = callback_query.data
         await state.update_data(group=code)
@@ -119,7 +114,6 @@ class NewMessageRouter(BaseRouter):
         await callback_query.message.reply(text=text, reply_markup=inline_kb)
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_now_or_interval)
     async def process_now_or_later(self, callback_query: CallbackQuery, state: FSMContext):
         code = callback_query.data
         await state.update_data(type=code)
@@ -135,7 +129,6 @@ class NewMessageRouter(BaseRouter):
         await callback_query.message.reply(text=text, reply_markup=inline_kb)
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_interval_choose_type)
     async def process_interval_choose_type(self,
                                            callback_query: CallbackQuery,
                                            state: FSMContext,
@@ -222,7 +215,6 @@ class NewMessageRouter(BaseRouter):
         await callback_query.message.reply(text=text, reply_markup=inline_kb)
         await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_interval_type_days_in_the_week)
     async def process_day_of_the_week(self, callback_query: CallbackQuery, state: FSMContext):
         if callback_query.data == 'back':
             await state.set_state(NewMessageStates.new_msg_interval_choose_type)
@@ -258,7 +250,6 @@ class NewMessageRouter(BaseRouter):
             inline_kb = date_selector_picker_inline(selected_days, row_size=4)
             await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_interval_type_time_in_the_day)
     async def process_times_of_the_day(self, callback_query: CallbackQuery, state: FSMContext):
         if callback_query.data == 'back':
             await state.set_state(NewMessageStates.new_msg_interval_choose_type)
@@ -294,7 +285,6 @@ class NewMessageRouter(BaseRouter):
             inline_kb = date_selector_picker_inline(selected_times, row_size=4)
             await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_interval_type_months_in_the_year)
     async def process_month_of_the_year(self, callback_query: CallbackQuery, state: FSMContext):
         if callback_query.data == 'back':
             await state.set_state(NewMessageStates.new_msg_interval_choose_type)
@@ -330,8 +320,7 @@ class NewMessageRouter(BaseRouter):
             inline_kb = date_selector_picker_inline(selected_months, row_size=4)
             await callback_query.message.edit_reply_markup(text=text, reply_markup=inline_kb)
 
-    @new_message_router.callback_query(NewMessageStates.new_msg_interval_type_days_in_the_month)
-    async def process_days_in_the_month(callback_query: CallbackQuery, state: FSMContext):
+    async def process_days_in_the_month(self, callback_query: CallbackQuery, state: FSMContext):
         if callback_query.data == 'back':
             await state.set_state(NewMessageStates.new_msg_interval_choose_type)
             await callback_query.message.reply(

@@ -14,7 +14,7 @@ class BinanceSubsystem(Subsystem):
         self.router = router
         self.binance_service = None
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance subsystem {self.bot}")
         try:
             self.binance_service = BinanceService()

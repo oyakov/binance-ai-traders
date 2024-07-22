@@ -16,6 +16,7 @@ class ElasticService:
     """
     Service class for interacting with ElasticSearch.
     """
+
     def __init__(self):
         """
         Initialize the ElasticSearch client and create the necessary indices.
@@ -91,8 +92,6 @@ class ElasticService:
         if body.get("timestamp") is None:
             # If timestamp is not provided, add the current timestamp
             body["timestamp"] = datetime.now().isoformat
-
-
 
         try:
             return self.client.index(index=index.lower(), id=ts, body=body)

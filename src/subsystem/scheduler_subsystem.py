@@ -11,7 +11,7 @@ class SchedulerSubsystem(Subsystem):
         self.interval_minutes = interval_minutes
         self.new_message_router = new_message_router
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Scheduler subsystem {self.bot}, {self.interval_minutes}")
         await initialize_advertiser(bot=self.bot, interval_minutes=self.interval_minutes)
         self.is_initialized = True

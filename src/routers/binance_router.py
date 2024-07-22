@@ -29,6 +29,7 @@ class BinanceRouter(BaseRouter):
 
     @inject
     def __init__(self, binance: BinanceService):
+        super().__init__([], [])
         self.binance = binance
         self.message(Command("binance"))(self.command_start)
         self.message(F.text == BINANCE)(self.command_start)
@@ -36,10 +37,9 @@ class BinanceRouter(BaseRouter):
         self.message(BinanceStates.collect_symbol_read_ticker)(self.collect_symbol_read_ticker)
         self.message(BinanceStates.collect_symbol_klines)(self.collect_symbol_klines)
         self.message(BinanceStates.collect_symbol_order_book)(self.collect_symbol_order_book)
-        super().__init__([], [])
 
     def initialize(self, subsystem_manager):
-        pass
+        self.subsystem_manager = subsystem_manager
 
     async def command_start(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Starting new binance dialog. Chat ID {message.chat.id}")
@@ -47,12 +47,11 @@ class BinanceRouter(BaseRouter):
         await message.reply(text=f"Выберите опцию: ", reply_markup=binance_action_selector())
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    async def selected_option_callback(self, callback_query: CallbackQuery, state: FSMContext,
-                                       binance: BinanceService) -> None:
+    async def selected_option_callback(self, callback_query: CallbackQuery, state: FSMContext) -> None:
         logger.info(f"Selected option callback. Chat ID {callback_query.message.chat.id}")
         if callback_query.data == "account_info":
             await state.set_state(BinanceStates.select_option)
-            account_info = await binance.get_account_info()
+            account_info = await self.binance.get_account_info()
             await callback_query.message.reply(text=format_account_info(account_info),
                                                reply_markup=binance_action_selector(),
                                                parse_mode="Markdown")
@@ -73,30 +72,30 @@ class BinanceRouter(BaseRouter):
             await callback_query.message.reply(text="Введите символ (например BTCUSDT):")
             await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    async def collect_symbol_read_ticker(self, message: Message, state: FSMContext, binance: BinanceService) -> None:
+    async def collect_symbol_read_ticker(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Collecting symbol for read ticker. Chat ID {message.chat.id}")
         symbol = message.text
-        ticker = await binance.get_ticker(symbol)
+        ticker = await self.binance.get_ticker(symbol)
         await state.set_state(BinanceStates.select_option)
         await message.reply(text=format_ticker(ticker),
                             reply_markup=binance_action_selector(),
                             parse_mode="Markdown")
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    async def collect_symbol_klines(self, message: Message, state: FSMContext, binance: BinanceService) -> None:
+    async def collect_symbol_klines(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Collecting symbol for klines. Chat ID {message.chat.id}")
         symbol = message.text
-        klines = await binance.get_klines(symbol)
+        klines = await self.binance.get_klines(symbol)
         await state.set_state(BinanceStates.select_option)
         await message.reply(text=format_klines(klines),
                             reply_markup=binance_action_selector(),
                             parse_mode="Markdown")
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    async def collect_symbol_order_book(self, message: Message, state: FSMContext, binance: BinanceService) -> None:
+    async def collect_symbol_order_book(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Collecting symbol for order book. Chat ID {message.chat.id}")
         symbol = message.text
-        order_book = await binance.get_order_book(symbol)
+        order_book = await self.binance.get_order_book(symbol)
         await state.set_state(BinanceStates.select_option)
         await message.reply(text=format_order_book(order_book),
                             reply_markup=binance_action_selector(),

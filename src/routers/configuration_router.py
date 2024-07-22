@@ -16,13 +16,6 @@ from oam import log_config
 from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
 
-configuration_router = BaseRouter(
-    services=[{
-        'name': 'tg_group_repository',
-        'service_class': TelegramGroupRepository
-    }, ],
-    repositories=[],
-)
 logger = log_config.get_logger(__name__)
 
 
@@ -38,6 +31,7 @@ class ConfigurationRouter(BaseRouter):
 
     @inject
     def __init__(self, tg_group_repository: TelegramGroupRepository):
+        super().__init__([], [])
         self.tg_group_repository = tg_group_repository
         self.message(Command("config"))(self.command_start)
         self.message(F.text == SETTINGS)(self.command_start)
@@ -47,13 +41,10 @@ class ConfigurationRouter(BaseRouter):
         self.callback_query(ConfigurationStates.config_groups)(self.process_configuration_groups)
         self.message(ConfigurationStates.detect_chat_id)(self.process_chat_id_detection)
         self.callback_query(ConfigurationStates.detect_chat_id)(self.process_chat_id_detection_cq)
-        super().__init__([], [])
 
     def initialize(self, subsystem_manager):
-        pass
+        self.subsystem_manager = subsystem_manager
 
-    @configuration_router.message(Command("config"))
-    @configuration_router.message(F.text == SETTINGS)
     async def command_start(self, message: Message, state: FSMContext) -> None:
         logger.info(f"Starting new configuration dialog. Chat ID {message.chat.id}")
 
@@ -62,7 +53,6 @@ class ConfigurationRouter(BaseRouter):
                             reply_markup=config_action_selector())
         await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @configuration_router.callback_query(ConfigurationStates.select_configuration)
     async def process_configuration_selection(self, callback_query: CallbackQuery, state: FSMContext) -> None:
         code = callback_query.data
         logger.info(f"Configuration option selected {code}")
@@ -78,7 +68,6 @@ class ConfigurationRouter(BaseRouter):
                                                reply_markup=config_misc_action_selector())
             await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @configuration_router.callback_query(ConfigurationStates.config_groups)
     async def process_configuration_groups(self, callback_query: CallbackQuery, state: FSMContext) -> None:
         code = callback_query.data
         logger.info(f"Configuration option selected {code}")
@@ -102,11 +91,9 @@ class ConfigurationRouter(BaseRouter):
                                                reply_markup=inline_kb)
             await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @configuration_router.message(ConfigurationStates.detect_chat_id)
     async def process_chat_id_detection(self,
                                         message: Message,
-                                        state: FSMContext,
-                                        tg_group_repository: TelegramGroupRepository) -> None:
+                                        state: FSMContext) -> None:
         # Check if the message is forwarded
         if message.forward_from_chat:
             # Get the chat id of the original chat
@@ -114,7 +101,7 @@ class ConfigurationRouter(BaseRouter):
             logger.info(f"The message was forwarded from the chat with id: {chat_id}")
             await state.set_state(ConfigurationStates.config_groups)
             # Add the chat id to the database
-            await tg_group_repository.create_telegram_group(
+            await self.tg_group_repository.create_telegram_group(
                 str(chat_id),  # Chat ID
                 message.from_user.username,  # User who forwarded the message is the initial owner
                 message.chat.username,  # Display name of the chat
@@ -129,7 +116,6 @@ class ConfigurationRouter(BaseRouter):
                 reply_markup=config_back())
             await message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @configuration_router.callback_query(ConfigurationStates.detect_chat_id)
     async def process_chat_id_detection_cq(self, callback_query: CallbackQuery, state: FSMContext) -> None:
         logger.info(f"Option selected {callback_query.data}")
         if callback_query.data == "config_back":
@@ -138,7 +124,6 @@ class ConfigurationRouter(BaseRouter):
                                                reply_markup=config_group_action_selector())
             await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())
 
-    @configuration_router.callback_query(ConfigurationStates.config_misc)
     async def process_configuration_misc(self, callback_query: CallbackQuery, state: FSMContext) -> None:
         logger.info(f"Configuration option selected {callback_query.data}")
         if callback_query.data == "config_back":

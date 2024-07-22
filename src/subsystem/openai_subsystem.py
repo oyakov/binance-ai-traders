@@ -8,7 +8,7 @@ from markup.inline.keyboards.openai_keyboards import openai_action_selector
 from markup.reply.main_menu_reply_keyboard import create_reply_kbd, OPENAI
 from oam import log_config
 from oam.environment import DELIMITER
-from routers.openai_router import OpenAIStates, openai_router
+from routers.openai_router import OpenAIStates
 from service.openai.openai_api_service import OpenAIAPIService
 from subsystem.subsystem import Subsystem
 
@@ -18,12 +18,12 @@ logger = log_config.get_logger(__name__)
 class OpenAiSubsystem(Subsystem):
 
     @inject
-    def __init__(self, bot):
+    def __init__(self, bot, openai_router):
         self.openai_service = None
         self.bot = bot
         self.openai_router = openai_router
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing OpenAI subsystem {self.bot}")
         try:
             self.openai_service = OpenAIAPIService()

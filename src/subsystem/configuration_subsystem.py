@@ -9,7 +9,7 @@ class ConfigurationSubsystem(Subsystem):
         self.bot = bot
         self.router = router
 
-    async def initialize(self):
+    async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Configuration subsystem {self.bot}")
         self.is_initialized = True
 
