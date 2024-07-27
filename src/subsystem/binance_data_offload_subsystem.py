@@ -109,20 +109,22 @@ class BinanceDataOffloadSubsystem(Subsystem):
 
                 # Update existing documents or add new ones if not found
                 if existing_documents and 'hits' in existing_documents and existing_documents['hits']['hits']:
+                    index = 0
                     for hit in existing_documents['hits']['hits']:
                         doc_id = hit['timestamp']
                         self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
+                        index += 1
                 else:
                     # If no existing documents are found, create new ones for each minute
                     current_time = start_time
+                    index = 0
                     while current_time < end_time:
                         self.elastic_service.add_to_index(symbol.lower()[:4],
-                                                          macd_data,
+                                                          macd_data[index],
                                                           current_time.isoformat())
                         current_time += timedelta(minutes=1)
-
+                        index += 1
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")
-
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"
                          f"\n\t{e}"

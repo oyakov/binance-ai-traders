@@ -14,4 +14,4 @@ class MACD:
         self.macd: Series | None = None
         self.signal: Series | None = None
         self.histogram: Series | None = None
-        logger.info("MACD is initialized")
+        logger.debug("MACD is initialized")
