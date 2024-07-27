@@ -1,16 +1,16 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import logging
 
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from injector import inject
 
-from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
 from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem
 
-logger = log_config.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BinanceDataOffloadSubsystem(Subsystem):
@@ -36,6 +36,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                               args=[
                                   ["BTCUSDT", "ETHUSDT"]
                               ], minutes=1)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"])
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
@@ -47,14 +48,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
             logger.error(f"Error initializing Binance Data Offload subsystem: {e.__class__}\n\t{e}")
             raise e
         self.is_initialized = True
-        logger.info(f"Binance Data Offload subsystem is initialized")
 
-    async def shutdown(self):
-        logger.info(f"Shutting down Binance Data Offload subsystem")
-
-    async def data_offload_cycle(self, symbols=None):
-        if symbols is None:
-            symbols = ["BTCUSDT"]
+    async def data_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
         logger.info(f"Binance data offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
@@ -76,18 +71,58 @@ class BinanceDataOffloadSubsystem(Subsystem):
     async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
         try:
             for symbol in symbols:
+                # Fetch the past 60 minutes of klines
                 klines = await self.binance_service.get_klines(symbol, '1m', limit=60)
                 logger.info(f"Klines are loaded for symbol {symbol}")
+
+                # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
-                self.elastic_service.add_to_index(symbol.lower()[:4], {
+
+                # Prepare the MACD data to be inserted
+                macd_data = {
                     "ema_fast": macd.ema_fast,
                     "ema_slow": macd.ema_slow,
                     "macd": macd.macd,
                     "signal": macd.signal,
-                    "histogram": macd.histogram,
-                    "timestamp": datetime.now().isoformat()
-                })
+                    "histogram": macd.histogram
+                }
+
+                # Calculate the time range for the past 60 minutes
+                end_time = datetime.now()
+                start_time = end_time - timedelta(minutes=60)
+
+                # Query to fetch all documents within the past 60 minutes
+                query = {
+                    "query": {
+                        "range": {
+                            "timestamp": {
+                                "gte": start_time.isoformat(),
+                                "lt": end_time.isoformat()
+                            }
+                        }
+                    }
+                }
+
+                # Fetch existing documents within the time range
+                existing_documents = self.elastic_service.search(symbol.lower()[:4], query)
+
+                # Update existing documents or add new ones if not found
+                if existing_documents and 'hits' in existing_documents and existing_documents['hits']['hits']:
+                    for hit in existing_documents['hits']['hits']:
+                        doc_id = hit['timestamp']
+                        self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
+                else:
+                    # If no existing documents are found, create new ones for each minute
+                    current_time = start_time
+                    while current_time < end_time:
+                        self.elastic_service.add_to_index(symbol.lower()[:4],
+                                                          macd_data,
+                                                          current_time.isoformat())
+                        current_time += timedelta(minutes=1)
+
+                logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")
+
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"
                          f"\n\t{e}"

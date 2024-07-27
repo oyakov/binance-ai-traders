@@ -98,6 +98,16 @@ class ElasticService:
         except Exception as e:
             logger.error(f"Error adding document to index '{index}': {e.__class__}\n{e}")
 
+    def update_index(self, index: str, body: Mapping[str, Any] | None, ts: str):
+        """
+        Update a document in the specified index.
+        """
+        try:
+            return self.client.update(index=index.lower(), id=ts, body=body)
+        except Exception as e:
+            logger.error(f"Error updating document in index '{index}': {e.__class__}"
+                         f"\n\t{e}")
+
     def delete(self, index: str, ts: str):
         """
         Delete a document from the specified index.
