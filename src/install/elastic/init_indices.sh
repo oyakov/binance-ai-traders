@@ -23,7 +23,10 @@ until curl --silent "$ES_HOST" >/dev/null; do
 done
 
 # Create indices with their mappings
-create_index "btcu" "/usr/share/elasticsearch/mappings/btcu.json"
+for mapping_file in /usr/share/elasticsearch/mappings/*.json; do
+  index_name=$(basename "$mapping_file" .json)
+  create_index "$index_name" "$mapping_file"
+done
 
 # Add additional indices as needed
 #create_index "other_index" "/usr/share/elasticsearch/mappings/other_mapping.json"
