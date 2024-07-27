@@ -71,7 +71,7 @@ class SubsystemManagerModule(Module):
                                                elastic_service: ElasticService,
                                                binance_service: BinanceService,
                                                indicator_service: IndicatorService) -> BinanceDataOffloadSubsystem:
-        return BinanceDataOffloadSubsystem(bot, elastic_service, binance_service, indicator_service)
+        return BinanceDataOffloadSubsystem(bot, binance_service, elastic_service, indicator_service)
 
     @singleton
     @provider

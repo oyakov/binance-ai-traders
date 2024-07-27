@@ -70,7 +70,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 "timestamp": datetime.now().isoformat()
             })
         except Exception as e:
-            logger.error(f"Error in data offload cycle: {e.__class__}\n\t{e}")
+            logger.error(f"Error in data offload cycle: {e.__class__}"
+                         f"\n\t{e}"
+                         f"\n\t{e.__traceback__}")
         logger.info(f"Binance data offload cycle for symbol {symbol} has completed")
 
     def get_binance_service(self):
