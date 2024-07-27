@@ -68,6 +68,15 @@
           },
           "count": {
             "type": "integer"
+          },
+          "macd": {
+            "type": "double"
+          },
+          "signal": {
+            "type": "double"
+          },
+          "histogram": {
+            "type": "double"
           }
         }
       }

@@ -21,21 +21,47 @@ class BinanceService:
         logger.info(f"Account info: {account_info}")
         return account_info
 
+    async def get_asset_balance(self, asset):
+        # Get the balance of a specific asset
+        balance = self.client.get_asset_balance(asset=asset)
+        logger.info(f"Balance for asset {asset}: {balance}")
+        return balance
+
     async def get_ticker(self, symbol):
         # Get ticker information for a specific symbol
         ticker = self.client.get_ticker(symbol=symbol)
         logger.info(f"Ticker info for {symbol}: {ticker}")
         return ticker
 
-    async def get_klines(self, symbol):
+    async def get_klines(self,
+                         symbol,
+                         interval=Client.KLINE_INTERVAL_1HOUR,
+                         start_time=None,
+                         end_time=None,
+                         timezone='0',
+                         limit=500):
         # Get historical candlestick data for a specific symbol
-        candles = self.client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_1MINUTE)
+        candles = self.client.get_klines(symbol=symbol,
+                                         interval=interval,
+                                         startTime=None,
+                                         endTime=None,
+                                         timeZone='0',
+                                         limit=500,)
 
         # Convert to DataFrame for easier manipulation
         df = pd.DataFrame(candles, columns=[
-            'timestamp', 'open', 'high', 'low', 'close', 'volume',
-            'close_time', 'quote_asset_volume', 'number_of_trades',
-            'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+            'timestamp',
+            'open',
+            'high',
+            'low',
+            'close',
+            'volume',
+            'close_time',
+            'quote_asset_volume',
+            'number_of_trades',
+            'taker_buy_base_asset_volume',
+            'taker_buy_quote_asset_volume',
+            'ignore'
         ])
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         logger.info(f"Candlestick data for {symbol}: {df.head()}")
@@ -52,6 +78,12 @@ class BinanceService:
         order_book = self.client.get_order_book(symbol=symbol, limit=limit)
         logger.info(f"Order book for {symbol} with limit {limit}: {order_book}")
         return order_book
+
+    async def get_my_trades(self, symbol, limit=500):
+        # Get trades for the current account
+        my_trades = self.client.get_my_trades(symbol=symbol, limit=limit)
+        logger.info(f"My trades for {symbol} with limit {limit}: {my_trades}")
+        return my_trades
 
     async def get_recent_trades(self, symbol, limit=500):
         # Get recent trades for a specific symbol
@@ -73,6 +105,14 @@ class BinanceService:
         logger.info(f"Order created: {order}")
         return order
 
+    async def create_test_order(self, symbol, side, order_type, quantity, price=None,
+                                time_in_force=Client.TIME_IN_FORCE_GTC):
+        # Create a test order
+        order = self.client.create_test_order(symbol=symbol, side=side, type=order_type, quantity=quantity, price=price,
+                                              timeInForce=time_in_force)
+        logger.info(f"Test order created: {order}")
+        return order
+
     async def get_open_orders(self, symbol=None):
         # Get all open orders, or open orders for a specific symbol
         open_orders = self.client.get_open_orders(symbol=symbol)
@@ -84,6 +124,12 @@ class BinanceService:
         order = self.client.get_order(symbol=symbol, orderId=order_id)
         logger.info(f"Order details for {symbol} with order ID {order_id}: {order}")
         return order
+
+    async def get_all_orders(self, symbol, limit=500):
+        # Get all orders for a specific symbol
+        all_orders = self.client.get_all_orders(symbol=symbol, limit=limit)
+        logger.info(f"All orders for {symbol} with limit {limit}: {all_orders}")
+        return all_orders
 
     async def cancel_order(self, symbol, order_id):
         # Cancel a specific order
