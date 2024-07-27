@@ -43,10 +43,10 @@ class BinanceService:
         # Get historical candlestick data for a specific symbol
         candles = self.client.get_klines(symbol=symbol,
                                          interval=interval,
-                                         startTime=None,
-                                         endTime=None,
-                                         timeZone='0',
-                                         limit=500,)
+                                         startTime=start_time,
+                                         endTime=end_time,
+                                         timeZone=timezone,
+                                         limit=limit,)
 
         # Convert to DataFrame for easier manipulation
         df = pd.DataFrame(candles, columns=[

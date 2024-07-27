@@ -21,8 +21,8 @@ class IndicatorService:
         macd = MACD()
         macd.ema_fast = df['close'].ewm(span=fast_period, adjust=False).mean()
         macd.ema_slow = df['close'].ewm(span=slow_period, adjust=False).mean()
-        macd.macd = df['ema_fast'] - df['ema_slow']
-        macd.signal = df['macd'].ewm(span=signal_period, adjust=False).mean()
-        macd.histogram = df['macd'] - df['signal']
-        logger.info(f"MACD calculated for DataFrame: {df.head()}")
+        macd.macd = macd.ema_fast - macd.ema_slow
+        macd.signal = macd.macd.ewm(span=signal_period, adjust=False).mean()
+        macd.histogram = macd.macd - macd.signal
+        logger.info(f"MACD is calculated for DataFrame: {df.head()}")
         return macd
