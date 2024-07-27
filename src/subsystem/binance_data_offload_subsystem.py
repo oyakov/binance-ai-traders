@@ -34,8 +34,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
             scheduler.add_job(self.data_offload_cycle,
                               'interval',
                               args=[
-                                  "BTCUSDT"
+                                  ["BTCUSDT", "ETHUSDT"]
                               ], minutes=1)
+            scheduler.add_job(self.macd_offload_cycle,
+                              'interval',
+                              args=[
+                                  ["BTCUSDT", "ETHUSDT"]
+                              ], minutes=60)
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
         except Exception as e:
@@ -47,33 +52,46 @@ class BinanceDataOffloadSubsystem(Subsystem):
     async def shutdown(self):
         logger.info(f"Shutting down Binance Data Offload subsystem")
 
-    async def data_offload_cycle(self, symbol: str = "BTCUSDT"):
-        logger.info(f"Binance data offload cycle for symbol {symbol} has begun")
+    async def data_offload_cycle(self, symbols=None):
+        if symbols is None:
+            symbols = ["BTCUSDT"]
+        logger.info(f"Binance data offload cycle for symbols {symbols} has begun")
         try:
-            ticker = await self.binance_service.get_ticker(symbol)
-            logger.info(f"Ticker is loaded for symbol {symbol}")
-            klines = await self.binance_service.get_klines(symbol, '1h', limit=100)
-            logger.info(f"Klines are loaded for symbol {symbol}")
-            macd = await self.indicator_service.calculate_macd(klines)
-            logger.info(f"MACD is calculated for symbol {symbol}")
-            order_book = await self.binance_service.get_order_book(symbol)
-            logger.info(f"Order book is loaded for symbol {symbol}")
-            self.elastic_service.add_to_index("btcu", {
-                "ticker": ticker,
-                "klines": klines,
-                "macd_ema_fast": macd.ema_fast,
-                "macd_ema_slow": macd.ema_slow,
-                "macd_macd": macd.macd,
-                "macd_signal": macd.signal,
-                "macd_histogram": macd.histogram,
-                "order_book": order_book,
-                "timestamp": datetime.now().isoformat()
-            })
+            for symbol in symbols:
+                ticker = await self.binance_service.get_ticker(symbol)
+                logger.info(f"Ticker is loaded for symbol {symbol}")
+                order_book = await self.binance_service.get_order_book(symbol)
+                logger.info(f"Order book is loaded for symbols {symbol}")
+                self.elastic_service.add_to_index(symbol.lower()[:4], {
+                    "ticker": ticker,
+                    "order_book": order_book,
+                    "timestamp": datetime.now().isoformat()
+                })
         except Exception as e:
             logger.error(f"Error in data offload cycle: {e.__class__}"
                          f"\n\t{e}"
                          f"\n\t{e.__traceback__}")
-        logger.info(f"Binance data offload cycle for symbol {symbol} has completed")
+        logger.info(f"Binance data offload cycle for symbols {symbols} has completed")
+
+    async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
+        try:
+            for symbol in symbols:
+                klines = await self.binance_service.get_klines(symbol, '1h', limit=60)
+                logger.info(f"Klines are loaded for symbol {symbol}")
+                macd = await self.indicator_service.calculate_macd(klines)
+                logger.info(f"MACD is calculated for symbol {symbol}")
+                self.elastic_service.add_to_index(symbol.lower()[:4], {
+                    "ema_fast": macd.ema_fast,
+                    "ema_slow": macd.ema_slow,
+                    "macd": macd.macd,
+                    "signal": macd.signal,
+                    "histogram": macd.histogram,
+                    "timestamp": datetime.now().isoformat()
+                })
+        except Exception as e:
+            logger.error(f"Error in MACD offload cycle: {e.__class__}"
+                         f"\n\t{e}"
+                         f"\n\t{e.__traceback__}")
 
     def get_binance_service(self):
         return self.binance_service
