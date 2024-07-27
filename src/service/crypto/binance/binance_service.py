@@ -18,19 +18,16 @@ class BinanceService:
     async def get_account_info(self):
         # Get account information
         account_info = self.client.get_account()
-        logger.info(f"Account info: {account_info}")
         return account_info
 
     async def get_asset_balance(self, asset):
         # Get the balance of a specific asset
         balance = self.client.get_asset_balance(asset=asset)
-        logger.info(f"Balance for asset {asset}: {balance}")
         return balance
 
     async def get_ticker(self, symbol):
         # Get ticker information for a specific symbol
         ticker = self.client.get_ticker(symbol=symbol)
-        logger.info(f"Ticker info for {symbol}: {ticker}")
         return ticker
 
     async def get_klines(self,
@@ -64,37 +61,31 @@ class BinanceService:
             'ignore'
         ])
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        logger.info(f"Candlestick data for {symbol}: {df.head()}")
         return df
 
     async def get_all_tickers(self):
         # Get ticker information for all symbols
         tickers = self.client.get_all_tickers()
-        logger.info("All tickers: {}".format(tickers))
         return tickers
 
     async def get_order_book(self, symbol, limit=100):
         # Get the order book for a specific symbol
         order_book = self.client.get_order_book(symbol=symbol, limit=limit)
-        logger.info(f"Order book for {symbol} with limit {limit}: {order_book}")
         return order_book
 
     async def get_my_trades(self, symbol, limit=500):
         # Get trades for the current account
         my_trades = self.client.get_my_trades(symbol=symbol, limit=limit)
-        logger.info(f"My trades for {symbol} with limit {limit}: {my_trades}")
         return my_trades
 
     async def get_recent_trades(self, symbol, limit=500):
         # Get recent trades for a specific symbol
         recent_trades = self.client.get_recent_trades(symbol=symbol, limit=limit)
-        logger.info(f"Recent trades for {symbol} with limit {limit}: {recent_trades}")
         return recent_trades
 
     async def get_historical_trades(self, symbol, limit=500, from_id=None):
         # Get historical trades for a specific symbol
         historical_trades = self.client.get_historical_trades(symbol=symbol, limit=limit, fromId=from_id)
-        logger.info(f"Historical trades for {symbol} with limit {limit} from ID {from_id}: {historical_trades}")
         return historical_trades
 
     async def create_order(self, symbol, side, order_type, quantity, price=None,
