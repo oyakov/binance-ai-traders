@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timedelta
 import logging
 
@@ -112,6 +113,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     index = 0
                     for hit in existing_documents['hits']['hits']:
                         doc_id = hit['timestamp']
+                        logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
                         self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
                         index += 1
                 else:
@@ -128,7 +130,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"
                          f"\n\t{e}"
-                         f"\n\t{e.__traceback__}")
+                         f"\n\t{traceback.format_exc()}")
 
     def get_binance_service(self):
         return self.binance_service
