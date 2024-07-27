@@ -76,6 +76,8 @@ services:
       - bot_network
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=changeit
+    logging:
+      driver: "none"
 
 volumes:
   pgdata:
