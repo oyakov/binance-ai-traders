@@ -35,7 +35,7 @@ class BinanceService:
 
     async def get_klines(self,
                          symbol,
-                         interval=Client.KLINE_INTERVAL_1HOUR,
+                         interval=Client.KLINE_INTERVAL_1MINUTE,
                          start_time=None,
                          end_time=None,
                          timezone='0',

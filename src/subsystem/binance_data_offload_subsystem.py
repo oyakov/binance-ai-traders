@@ -76,7 +76,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
     async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
         try:
             for symbol in symbols:
-                klines = await self.binance_service.get_klines(symbol, '1h', limit=60)
+                klines = await self.binance_service.get_klines(symbol, '1m', limit=60)
                 logger.info(f"Klines are loaded for symbol {symbol}")
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
