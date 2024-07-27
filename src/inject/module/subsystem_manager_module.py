@@ -7,6 +7,8 @@ from routers.binance_router import BinanceRouter
 from routers.configuration_router import ConfigurationRouter
 from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
+from service.crypto.binance.binance_service import BinanceService
+from service.crypto.indicator_service import IndicatorService
 from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem
 from subsystem.subsystem_manager import SubsystemManager
@@ -64,8 +66,12 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
-    def provide_binance_data_offload_subsystem(self, bot: Bot) -> BinanceDataOffloadSubsystem:
-        return BinanceDataOffloadSubsystem(bot)
+    def provide_binance_data_offload_subsystem(self,
+                                               bot: Bot,
+                                               elastic_service: ElasticService,
+                                               binance_service: BinanceService,
+                                               indicator_service: IndicatorService) -> BinanceDataOffloadSubsystem:
+        return BinanceDataOffloadSubsystem(bot, elastic_service, binance_service, indicator_service)
 
     @singleton
     @provider
