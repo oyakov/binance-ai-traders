@@ -129,7 +129,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                 "ema_slow": float(macd.ema_slow[index]),
                                 "macd": float(macd.macd[index]),
                                 "signal": float(macd.signal[index]),
-                                "histogram": float(macd.histogram[index])
+                                "histogram": float(macd.histogram[index]),
+                                "timestamp": current_time.isoformat()
                             }
                         }
                         self.elastic_service.add_to_index(index=symbol.lower()[:4],
