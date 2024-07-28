@@ -80,15 +80,6 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
 
-                # Prepare the MACD data to be inserted
-                macd_data = {
-                    "ema_fast": macd.ema_fast,
-                    "ema_slow": macd.ema_slow,
-                    "macd": macd.macd,
-                    "signal": macd.signal,
-                    "histogram": macd.histogram
-                }
-
                 # Calculate the time range for the past 60 minutes
                 end_time = datetime.now()
                 start_time = end_time - timedelta(minutes=60)
@@ -114,6 +105,14 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     for hit in existing_documents['hits']['hits']:
                         doc_id = hit['timestamp']
                         logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
+                        # Prepare the MACD data to be inserted
+                        macd_data = {
+                            "ema_fast": macd.ema_fast[index],
+                            "ema_slow": macd.ema_slow[index],
+                            "macd": macd.macd[index],
+                            "signal": macd.signal[index],
+                            "histogram": macd.histogram[index]
+                        }
                         self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
                         index += 1
                 else:
@@ -121,8 +120,16 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     current_time = start_time
                     index = 0
                     while current_time < end_time:
+                        # Prepare the MACD data to be inserted
+                        macd_data = {
+                            "ema_fast": macd.ema_fast[index],
+                            "ema_slow": macd.ema_slow[index],
+                            "macd": macd.macd[index],
+                            "signal": macd.signal[index],
+                            "histogram": macd.histogram[index]
+                        }
                         self.elastic_service.add_to_index(symbol.lower()[:4],
-                                                          macd_data[index],
+                                                          macd_data,
                                                           current_time.isoformat())
                         current_time += timedelta(minutes=1)
                         index += 1
