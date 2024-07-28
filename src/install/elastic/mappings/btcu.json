@@ -69,14 +69,20 @@
           "count": {
             "type": "integer"
           },
+          "ema_fast": {
+            "type": "float"
+          },
+          "ema_slow": {
+            "type": "float"
+          },
           "macd": {
-            "type": "double"
+            "type": "float"
           },
           "signal": {
-            "type": "double"
+            "type": "float"
           },
           "histogram": {
-            "type": "double"
+            "type": "float"
           }
         }
       }

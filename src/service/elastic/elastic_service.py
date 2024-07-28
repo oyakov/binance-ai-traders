@@ -96,7 +96,7 @@ class ElasticService:
         try:
             return self.client.index(index=index.lower(), id=ts, body=body)
         except Exception as e:
-            logger.error(f"Error adding document to index '{index}': {e.__class__}\n{e}")
+            logger.error(f"Error adding document to index '{index}'", exc_info=e)
 
     def update_index(self, index: str, body: Mapping[str, Any] | None, ts: str):
         """

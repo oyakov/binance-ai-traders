@@ -1,17 +1,17 @@
 import traceback
 from datetime import datetime, timedelta
-import logging
 
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from injector import inject
 
+from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
 from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem
 
-logger = logging.getLogger(__name__)
+logger = log_config.get_logger(__name__)
 
 
 class BinanceDataOffloadSubsystem(Subsystem):
@@ -46,7 +46,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
         except Exception as e:
-            logger.error(f"Error initializing Binance Data Offload subsystem: {e.__class__}\n\t{e}")
+            logger.error(f"Error initializing Binance Data Offload subsystem", exc_info=e)
             raise e
         self.is_initialized = True
 
@@ -64,9 +64,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     "timestamp": datetime.now().isoformat()
                 })
         except Exception as e:
-            logger.error(f"Error in data offload cycle: {e.__class__}"
+            logger.error(f"Error in MACD offload cycle: {e.__class__}"
                          f"\n\t{e}"
-                         f"\n\t{e.__traceback__}")
+                         f"\n\t{traceback.format_exc()}")
         logger.info(f"Binance data offload cycle for symbols {symbols} has completed")
 
     async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
@@ -103,15 +103,17 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 if existing_documents and 'hits' in existing_documents and existing_documents['hits']['hits']:
                     index = 0
                     for hit in existing_documents['hits']['hits']:
-                        doc_id = hit['timestamp']
+                        doc_id = hit['_id']
                         logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
                         # Prepare the MACD data to be inserted
                         macd_data = {
-                            "ema_fast": macd.ema_fast[index],
-                            "ema_slow": macd.ema_slow[index],
-                            "macd": macd.macd[index],
-                            "signal": macd.signal[index],
-                            "histogram": macd.histogram[index]
+                            "ticker": {
+                                "ema_fast": float(macd.ema_fast[index]),
+                                "ema_slow": float(macd.ema_slow[index]),
+                                "macd": float(macd.macd[index]),
+                                "signal": float(macd.signal[index]),
+                                "histogram": float(macd.histogram[index])
+                            }
                         }
                         self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
                         index += 1
@@ -122,11 +124,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     while current_time < end_time:
                         # Prepare the MACD data to be inserted
                         macd_data = {
-                            "ema_fast": macd.ema_fast[index],
-                            "ema_slow": macd.ema_slow[index],
-                            "macd": macd.macd[index],
-                            "signal": macd.signal[index],
-                            "histogram": macd.histogram[index]
+                            "ticker": {
+                                "ema_fast": float(macd.ema_fast[index]),
+                                "ema_slow": float(macd.ema_slow[index]),
+                                "macd": float(macd.macd[index]),
+                                "signal": float(macd.signal[index]),
+                                "histogram": float(macd.histogram[index])
+                            }
                         }
                         self.elastic_service.add_to_index(symbol.lower()[:4],
                                                           macd_data,
