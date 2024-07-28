@@ -132,9 +132,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                 "histogram": float(macd.histogram[index])
                             }
                         }
-                        self.elastic_service.add_to_index(symbol.lower()[:4],
-                                                          macd_data,
-                                                          current_time.isoformat())
+                        self.elastic_service.add_to_index(index=symbol.lower()[:4],
+                                                          body=macd_data,
+                                                          ts=current_time.isoformat())
                         current_time += timedelta(minutes=1)
                         index += 1
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")

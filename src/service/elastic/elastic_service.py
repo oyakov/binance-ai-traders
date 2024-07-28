@@ -91,17 +91,23 @@ class ElasticService:
             body = {}
         if body.get("timestamp") is None:
             # If timestamp is not provided, add the current timestamp
-            body["timestamp"] = datetime.now().isoformat
+            body["timestamp"] = datetime.now().isoformat()
 
         try:
             return self.client.index(index=index.lower(), id=ts, body=body)
         except Exception as e:
             logger.error(f"Error adding document to index '{index}'", exc_info=e)
 
-    def update_index(self, index: str, body: Mapping[str, Any] | None, ts: str):
+    def update_index(self, index: str, body: Mapping[str, Any] | None, ts=None):
         """
         Update a document in the specified index.
         """
+        # Generate a new timestamp for each call if ts is not provided
+        if ts is None:
+            ts = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        if body is None:
+            logger.warning(f"Empty body is was provided for the document. Index {index}")
+            body = {}
         try:
             return self.client.update(index=index.lower(), id=ts, body=body)
         except Exception as e:
