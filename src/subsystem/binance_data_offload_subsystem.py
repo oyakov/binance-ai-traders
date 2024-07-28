@@ -107,12 +107,12 @@ class BinanceDataOffloadSubsystem(Subsystem):
                         logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
                         # Prepare the MACD data to be inserted, timestamp is not updated
                         macd_data = {
-                            "ticker": {
-                                "ema_fast": float(macd.ema_fast[index]),
-                                "ema_slow": float(macd.ema_slow[index]),
-                                "macd": float(macd.macd[index]),
-                                "signal": float(macd.signal[index]),
-                                "histogram": float(macd.histogram[index])
+                            "doc": {
+                                "ticker.ema_fast": float(macd.ema_fast[index]),
+                                "ticker.ema_slow": float(macd.ema_slow[index]),
+                                "ticker.macd": float(macd.macd[index]),
+                                "ticker.signal": float(macd.signal[index]),
+                                "ticker.histogram": float(macd.histogram[index])
                             }
                         }
                         self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
@@ -124,13 +124,12 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     while current_time < end_time:
                         # Prepare the MACD data to be inserted
                         macd_data = {
-                            "ticker": {
-                                "ema_fast": float(macd.ema_fast[index]),
-                                "ema_slow": float(macd.ema_slow[index]),
-                                "macd": float(macd.macd[index]),
-                                "signal": float(macd.signal[index]),
-                                "histogram": float(macd.histogram[index]),
-                                "timestamp": current_time.isoformat()
+                            "doc": {
+                                "ticker.ema_fast": float(macd.ema_fast[index]),
+                                "ticker.ema_slow": float(macd.ema_slow[index]),
+                                "ticker.macd": float(macd.macd[index]),
+                                "ticker.signal": float(macd.signal[index]),
+                                "ticker.histogram": float(macd.histogram[index])
                             }
                         }
                         self.elastic_service.add_to_index(index=symbol.lower()[:4],
