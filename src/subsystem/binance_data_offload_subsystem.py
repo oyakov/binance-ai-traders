@@ -105,7 +105,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     for hit in existing_documents['hits']['hits']:
                         doc_id = hit['_id']
                         logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
-                        # Prepare the MACD data to be inserted
+                        # Prepare the MACD data to be inserted, timestamp is not updated
                         macd_data = {
                             "ticker": {
                                 "ema_fast": float(macd.ema_fast[index]),
