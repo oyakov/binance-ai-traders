@@ -91,7 +91,7 @@ class ElasticService:
             body = {}
         if body.get("timestamp") is None:
             # If timestamp is not provided, add the current timestamp
-            body["timestamp"] = datetime.now().isoformat()
+            body["timestamp"] = ts
 
         try:
             return self.client.index(index=index.lower(), id=ts, body=body)
