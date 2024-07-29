@@ -115,7 +115,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                 "ticker.histogram": float(macd.histogram[index])
                             }
                         }
-                        self.elastic_service.update_index(symbol.lower()[:4], macd_data, doc_id)
+                        self.elastic_service.add_to_index(symbol.lower()[:4], macd_data, doc_id)
                         index += 1
                 else:
                     # If no existing documents are found, create new ones for each minute
