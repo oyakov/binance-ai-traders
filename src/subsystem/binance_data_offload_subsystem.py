@@ -6,6 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from injector import inject
 
 from db.repository.klines_repository import KlinesRepository
+from db.repository.macd_repository import MACDRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
@@ -23,12 +24,14 @@ class BinanceDataOffloadSubsystem(Subsystem):
                  binance_service: BinanceService,
                  elastic_service: ElasticService,
                  indicator_service: IndicatorService,
-                 klines_repository: KlinesRepository):
+                 klines_repository: KlinesRepository,
+                 macd_repository: MACDRepository):
         self.bot = bot
         self.binance_service = binance_service
         self.elastic_service = elastic_service
         self.indicator_service = indicator_service
         self.klines_repository = klines_repository
+        self.macd_repository = macd_repository
 
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Data Offload subsystem {self.bot}")
@@ -80,6 +83,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
         logger.info(f"Binance data offload cycle for symbols {symbols} has completed")
 
     async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
+        logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
                 # Fetch the past 60 minutes of klines
@@ -92,6 +96,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
+                await self.macd_repository.write_macd(symbol, '1m', macd)
 
                 # Calculate the time range for the past 60 minutes
                 end_time = datetime.now()

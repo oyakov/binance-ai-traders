@@ -2,6 +2,7 @@ from injector import Module, singleton, provider
 
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.klines_repository import KlinesRepository
+from db.repository.macd_repository import MACDRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
 
 
@@ -20,3 +21,8 @@ class RepositoryModule(Module):
     @provider
     def provide_klines_repository(self) -> KlinesRepository:
         return KlinesRepository()
+
+    @singleton
+    @provider
+    def provide_macd_repository(self) -> MACDRepository:
+        return MACDRepository()
