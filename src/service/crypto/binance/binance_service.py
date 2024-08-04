@@ -1,5 +1,6 @@
 import pandas as pd
 from binance.client import Client
+from pandas import DataFrame
 
 from oam import log_config
 from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN
@@ -25,10 +26,53 @@ class BinanceService:
         balance = self.client.get_asset_balance(asset=asset)
         return balance
 
-    async def get_ticker(self, symbol):
+    async def get_ticker(self, symbol) -> DataFrame:
         # Get ticker information for a specific symbol
         ticker = self.client.get_ticker(symbol=symbol)
-        return ticker
+        df_ticker = pd.DataFrame([ticker])
+        # Convert specified columns to float
+        df_ticker[
+            [
+                'priceChange',
+                'priceChangePercent',
+                'weightedAvgPrice',
+                'prevClosePrice',
+                'lastPrice',
+                'lastQty',
+                'bidPrice',
+                'bidQty',
+                'askPrice',
+                'askQty',
+                'openPrice',
+                'highPrice',
+                'lowPrice',
+                'volume',
+                'quoteVolume',
+                'count'
+            ]
+        ] = df_ticker[
+            [
+                'priceChange',
+                'priceChangePercent',
+                'weightedAvgPrice',
+                'prevClosePrice',
+                'lastPrice',
+                'lastQty',
+                'bidPrice',
+                'bidQty',
+                'askPrice',
+                'askQty',
+                'openPrice',
+                'highPrice',
+                'lowPrice',
+                'volume',
+                'quoteVolume',
+                'count'
+            ]
+        ].astype(float)
+        df_ticker['openTime'] = pd.to_datetime(df_ticker['openTime'], unit='ms')
+        df_ticker['closeTime'] = pd.to_datetime(df_ticker['closeTime'], unit='ms')
+        return df_ticker
 
     async def get_klines(self,
                          symbol,
@@ -43,7 +87,7 @@ class BinanceService:
                                          startTime=start_time,
                                          endTime=end_time,
                                          timeZone=timezone,
-                                         limit=limit,)
+                                         limit=limit, )
 
         # Convert to DataFrame for easier manipulation
         df = pd.DataFrame(candles, columns=[
@@ -85,8 +129,6 @@ class BinanceService:
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df['close_time'] = pd.to_datetime(df['close_time'], unit='ms')
         return df
-
-
 
     async def get_all_tickers(self):
         # Get ticker information for all symbols

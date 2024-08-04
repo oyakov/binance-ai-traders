@@ -57,7 +57,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
-
+                                  ["BTCUSDT", "ETHUSDT"],
+                                  '1m',
                               ], minutes=1)
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
@@ -115,9 +116,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
         try:
             for symbol in symbols:
                 klines = await self.klines_repository.get_klines(symbol, interval,
-                                                                 int((datetime.now() - timedelta(
-                                                                     minutes=60)).timestamp()),
-                                                                 int(datetime.now().timestamp()))
+                                                                 (datetime.now() - timedelta(
+                                                                     minutes=60)),
+                                                                 datetime.now())
                 logger.info(f"Klines are loaded for symbol {symbol}")
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
