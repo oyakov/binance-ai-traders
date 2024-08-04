@@ -3,7 +3,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -51,3 +51,6 @@ class BinanaceTraderProcessSubsystem(Subsystem):
 
     def get_router(self):
         return self.router
+
+    def get_priority(self):
+        return InitPriority.DATA_CONSUMPTION

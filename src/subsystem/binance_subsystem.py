@@ -3,7 +3,7 @@ from injector import inject
 
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -27,8 +27,11 @@ class BinanceSubsystem(Subsystem):
     async def shutdown(self):
         logger.info(f"Shutting down Binance subsystem")
 
-    def get_binance_service(self):
-        return self.binance_service
-
     def get_router(self):
         return self.router
+
+    def get_priority(self):
+        return InitPriority.DATA_SOURCE
+
+    def get_binance_service(self):
+        return self.binance_service

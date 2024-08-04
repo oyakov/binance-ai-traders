@@ -1,10 +1,8 @@
 # db_config.py
 from sqlalchemy import Column, Integer, String, JSON
-from sqlalchemy.ext.declarative import declarative_base
 
 from db.config import get_db
-
-Base = declarative_base()
+from db.model.base import Base
 
 
 class CustomerConfiguration(Base):
@@ -16,6 +14,6 @@ class CustomerConfiguration(Base):
 
 
 # Read/Write operations
-def get_customer_configs():
+async def get_customer_configs():
     async with get_db() as session:
         return session.query(CustomerConfiguration).all()

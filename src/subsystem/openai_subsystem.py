@@ -10,7 +10,7 @@ from oam import log_config
 from oam.environment import DELIMITER
 from routers.openai_router import OpenAIStates
 from service.openai.openai_api_service import OpenAIAPIService
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -41,6 +41,9 @@ class OpenAiSubsystem(Subsystem):
 
     async def shutdown(self):
         pass
+
+    def get_priority(self):
+        return InitPriority.DATA_SOURCE
 
     async def get_openai_service(self):
         return self.openai_service

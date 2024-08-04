@@ -1,5 +1,5 @@
 from oam import log_config
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -15,6 +15,15 @@ class ActuatorSubsystem(Subsystem):
         self.subsystem_manager = subsystem_manager
         self.is_initialized = True
 
+    async def shutdown(self):
+        logger.info(f"Shutting down Actuator subsystem")
+
+    def get_router(self):
+        return self.router
+
+    def get_priority(self):
+        return InitPriority.DATA_CONSUMPTION
+
     async def collect_health_data(self):
         """
         Collect and print health data from all the subsystems
@@ -22,9 +31,3 @@ class ActuatorSubsystem(Subsystem):
         logger.info("SUBSYSTEM HEALTH DATA")
         for subsystem in self.subsystem_manager.subsystems:
             logger.info(f"{subsystem.__class__} initialized: {subsystem.is_initialized }")
-
-    async def shutdown(self):
-        logger.info(f"Shutting down Actuator subsystem")
-
-    def get_router(self):
-        return self.router

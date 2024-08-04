@@ -1,6 +1,7 @@
 from aiogram import Bot
 from injector import Module, provider, singleton, multiprovider
 
+from db.repository.klines_repository import KlinesRepository
 from routers.actuator_router import ActuatorRouter
 from routers.base_router import BaseRouter
 from routers.binance_router import BinanceRouter
@@ -70,8 +71,9 @@ class SubsystemManagerModule(Module):
                                                bot: Bot,
                                                elastic_service: ElasticService,
                                                binance_service: BinanceService,
-                                               indicator_service: IndicatorService) -> BinanceDataOffloadSubsystem:
-        return BinanceDataOffloadSubsystem(bot, binance_service, elastic_service, indicator_service)
+                                               indicator_service: IndicatorService,
+                                               klines_repository: KlinesRepository) -> BinanceDataOffloadSubsystem:
+        return BinanceDataOffloadSubsystem(bot, binance_service, elastic_service, indicator_service, klines_repository)
 
     @singleton
     @provider

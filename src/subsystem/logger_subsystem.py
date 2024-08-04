@@ -2,7 +2,7 @@ import logging.config
 
 from oam.environment import APP_NAME, LOGGING_CONFIG_PATH
 from oam.log_config import get_logger
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 
 class LoggerSubsystem(Subsystem):
@@ -18,3 +18,6 @@ class LoggerSubsystem(Subsystem):
 
     async def shutdown(self):
         pass
+
+    def get_priority(self) -> InitPriority:
+        return InitPriority.CRITICAL

@@ -1,5 +1,5 @@
 from oam import log_config
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -18,3 +18,6 @@ class ConfigurationSubsystem(Subsystem):
 
     def get_router(self):
         return self.router
+
+    def get_priority(self):
+        return InitPriority.DATA_CONSUMPTION

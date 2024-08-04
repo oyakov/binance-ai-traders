@@ -5,7 +5,7 @@ from routers.base_router import BaseRouter
 
 from routers.dispatcher import create_dispatcher
 from routers.gateway_router import configure_gateway_router
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -22,6 +22,11 @@ class SlaveBotSubsystem(Subsystem):
         dispatcher = create_dispatcher([configure_gateway_router(self.routers)], self.bot)
         await dispatcher.start_polling(self.bot)
         logger.info(f"Bot is initialized")
+        self.is_initialized = True
 
     async def shutdown(self):
-        pass
+        logger.info(f"Shutting down bot {self.bot}")
+        self.is_initialized = False
+
+    def get_priority(self):
+        return InitPriority.DATA_CONSUMPTION

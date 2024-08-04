@@ -1,6 +1,6 @@
 from oam import log_config
 from schedule.periodic_message_scheduler import initialize_advertiser
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -19,5 +19,8 @@ class SchedulerSubsystem(Subsystem):
     async def shutdown(self):
         pass
 
-    async def get_router(self):
+    def get_router(self):
         return self.new_message_router
+
+    def get_priority(self):
+        return InitPriority.DATA_CONSUMPTION

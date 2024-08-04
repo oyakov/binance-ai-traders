@@ -1,8 +1,14 @@
+from sqlalchemy import text
+
 from db.config import engine, get_db
 from db.model.base import Base
+# Ensure all models are imported
+from db.model.kline import Kline
+from db.model.calendars import CalendarToD, CalendarMoY, CalendarDoW, CalendarDoM, CalendarData
 from db.model.telegram_group import TelegramGroup
+from db.model.customer_configuration import CustomerConfiguration
 from oam import log_config
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -15,6 +21,12 @@ async def create_tables():
         await conn.run_sync(Base.metadata.drop_all)
         # Create all tables from the model class
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def partition_klines_table():
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE TABLE klines_1m PARTITION OF klines FOR VALUES IN ('1m');"))
+        await conn.execute(text("CREATE TABLE klines_1h PARTITION OF klines FOR VALUES IN ('1h');"))
 
 
 async def populate_test_groups():
@@ -34,7 +46,10 @@ class DatabaseSubsystem(Subsystem):
         try:
             await create_tables()
             logger.debug(f"Tables are created")
+            # await partition_klines_table()
+            # logger.debug(f"Klines table is partitioned")
             await populate_test_groups()
+            logger.debug(f"Test groups are populated")
             self.is_initialized = True
             logger.info(f"Database is initialized")
         except OSError as exception:
@@ -44,3 +59,6 @@ class DatabaseSubsystem(Subsystem):
 
     async def shutdown(self):
         pass
+
+    def get_priority(self) -> InitPriority:
+        return InitPriority.DATA_SOURCE

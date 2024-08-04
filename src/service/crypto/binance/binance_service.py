@@ -60,7 +60,30 @@ class BinanceService:
             'taker_buy_quote_asset_volume',
             'ignore'
         ])
+
+        # Convert specified columns to float
+        df[
+            ['open',
+             'high',
+             'low',
+             'close',
+             'volume',
+             'quote_asset_volume',
+             'taker_buy_base_asset_volume',
+             'taker_buy_quote_asset_volume']
+        ] = df[
+            ['open',
+             'high',
+             'low',
+             'close',
+             'volume',
+             'quote_asset_volume',
+             'taker_buy_base_asset_volume',
+             'taker_buy_quote_asset_volume']
+        ].astype(float)
+
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df['close_time'] = pd.to_datetime(df['close_time'], unit='ms')
         return df
 
     async def get_all_tickers(self):

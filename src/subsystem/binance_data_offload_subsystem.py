@@ -5,11 +5,12 @@ from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from injector import inject
 
+from db.repository.klines_repository import KlinesRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
 from service.elastic.elastic_service import ElasticService
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -21,11 +22,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
                  bot: Bot,
                  binance_service: BinanceService,
                  elastic_service: ElasticService,
-                 indicator_service: IndicatorService):
+                 indicator_service: IndicatorService,
+                 klines_repository: KlinesRepository):
         self.bot = bot
         self.binance_service = binance_service
         self.elastic_service = elastic_service
         self.indicator_service = indicator_service
+        self.klines_repository = klines_repository
 
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Data Offload subsystem {self.bot}")
@@ -49,6 +52,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
             logger.error(f"Error initializing Binance Data Offload subsystem", exc_info=e)
             raise e
         self.is_initialized = True
+
+    async def shutdown(self):
+        logger.info(f"Shutting down Binance Data Offload subsystem")
+        self.is_initialized = False
+
+    def get_priority(self):
+        return InitPriority.DATA_OFFLOAD
 
     async def data_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
         logger.info(f"Binance data offload cycle for symbols {symbols} has begun")
@@ -75,6 +85,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 # Fetch the past 60 minutes of klines
                 klines = await self.binance_service.get_klines(symbol, '1m', limit=60)
                 logger.info(f"Klines are loaded for symbol {symbol}")
+
+                # Write the klines to the database
+                await self.klines_repository.write_klines(symbol, '1m', klines)
 
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
@@ -107,12 +120,12 @@ class BinanceDataOffloadSubsystem(Subsystem):
                         logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
                         # Prepare the MACD data to be inserted, timestamp is not updated
                         macd_data = {
-                            "doc": {
-                                "ticker.ema_fast": float(macd.ema_fast[index]),
-                                "ticker.ema_slow": float(macd.ema_slow[index]),
-                                "ticker.macd": float(macd.macd[index]),
-                                "ticker.signal": float(macd.signal[index]),
-                                "ticker.histogram": float(macd.histogram[index])
+                            "macd": {
+                                "ema_fast": float(macd.ema_fast[index]),
+                                "ema_slow": float(macd.ema_slow[index]),
+                                "macd": float(macd.macd[index]),
+                                "signal": float(macd.signal[index]),
+                                "histogram": float(macd.histogram[index])
                             }
                         }
                         self.elastic_service.add_to_index(symbol.lower()[:4], macd_data, doc_id)
@@ -124,12 +137,12 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     while current_time < end_time:
                         # Prepare the MACD data to be inserted
                         macd_data = {
-                            "doc": {
-                                "ticker.ema_fast": float(macd.ema_fast[index]),
-                                "ticker.ema_slow": float(macd.ema_slow[index]),
-                                "ticker.macd": float(macd.macd[index]),
-                                "ticker.signal": float(macd.signal[index]),
-                                "ticker.histogram": float(macd.histogram[index])
+                            "macd": {
+                                "ema_fast": float(macd.ema_fast[index]),
+                                "ema_slow": float(macd.ema_slow[index]),
+                                "macd": float(macd.macd[index]),
+                                "signal": float(macd.signal[index]),
+                                "histogram": float(macd.histogram[index])
                             }
                         }
                         self.elastic_service.add_to_index(index=symbol.lower()[:4],

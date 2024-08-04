@@ -1,6 +1,6 @@
 from oam import log_config
 from service.elastic.elastic_service import ElasticService
-from subsystem.subsystem import Subsystem
+from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
 
@@ -25,3 +25,6 @@ class ElasticSubsystem(Subsystem):
 
     async def shutdown(self):
         pass
+
+    def get_priority(self) -> InitPriority:
+        return InitPriority.DATA_SOURCE
