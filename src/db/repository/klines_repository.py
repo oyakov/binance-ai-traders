@@ -30,7 +30,7 @@ class KlinesRepository:
                                         Kline.timestamp >= start_time, Kline.timestamp <= end_time)
             result = await session.execute(stmt)
             klines = result.scalars().all()
-        klines = DataFrame([kline.to_dict() for kline in klines])
+        klines = DataFrame([kline.__dict__ for kline in klines])
         logger.debug(f"Klines for {symbol} are retrieved")
         return klines
 
