@@ -7,10 +7,11 @@ from injector import inject
 
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
+from db.repository.order_book_repository import OrderBookRepository
+from db.repository.ticker_repository import TickerRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
-from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
@@ -22,14 +23,16 @@ class BinanceDataOffloadSubsystem(Subsystem):
     def __init__(self,
                  bot: Bot,
                  binance_service: BinanceService,
-                 elastic_service: ElasticService,
                  indicator_service: IndicatorService,
+                 ticker_repository: TickerRepository,
+                 order_book_repository: OrderBookRepository,
                  klines_repository: KlinesRepository,
                  macd_repository: MACDRepository):
         self.bot = bot
         self.binance_service = binance_service
-        self.elastic_service = elastic_service
         self.indicator_service = indicator_service
+        self.ticker_repository = ticker_repository
+        self.order_book_repository = order_book_repository
         self.klines_repository = klines_repository
         self.macd_repository = macd_repository
 
@@ -38,17 +41,24 @@ class BinanceDataOffloadSubsystem(Subsystem):
         try:
             logger.info("Initialize the data offload cycle job")
             scheduler = AsyncIOScheduler()
-            scheduler.add_job(self.data_offload_cycle,
+            scheduler.add_job(self.ticker_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"]
                               ], minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"])
+            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"])
+            scheduler.add_job(self.klines_offload_cycle,
+                              'interval',
+                              args=[
+                                  ["BTCUSDT", "ETHUSDT"],
+                                  '1m',
+                                  60
+                              ], minutes=1)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
-                                  ["BTCUSDT", "ETHUSDT"]
-                              ], minutes=60)
+
+                              ], minutes=1)
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
         except Exception as e:
@@ -63,98 +73,56 @@ class BinanceDataOffloadSubsystem(Subsystem):
     def get_priority(self):
         return InitPriority.DATA_OFFLOAD
 
-    async def data_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
-        logger.info(f"Binance data offload cycle for symbols {symbols} has begun")
+    async def ticker_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
+        logger.info(f"Ticker offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
                 ticker = await self.binance_service.get_ticker(symbol)
+                await self.ticker_repository.write_ticker(symbol, ticker)
                 logger.info(f"Ticker is loaded for symbol {symbol}")
                 order_book = await self.binance_service.get_order_book(symbol)
+                await self.order_book_repository.write_order_book(symbol, order_book)
                 logger.info(f"Order book is loaded for symbols {symbol}")
-                self.elastic_service.add_to_index(symbol.lower()[:4], {
-                    "ticker": ticker,
-                    "order_book": order_book,
-                    "timestamp": datetime.now().isoformat()
-                })
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"
                          f"\n\t{e}"
                          f"\n\t{traceback.format_exc()}")
-        logger.info(f"Binance data offload cycle for symbols {symbols} has completed")
+        logger.info(f"Ticker offload cycle for symbols {symbols} has completed")
 
-    async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
+    async def klines_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m', initial_limit: int = 60):
+        logger.info(f"Klines offload cycle for symbols {symbols} has begun")
+        try:
+            for symbol in symbols:
+                last_kline = await self.klines_repository.get_latest_kline(symbol, interval)
+                if last_kline is None or last_kline.empty:
+                    logger.info(f"No klines found for symbol {symbol}")
+                    # Fetch the past 60 minutes of klines
+                    klines = await self.binance_service.get_klines(symbol, interval, limit=initial_limit)
+                else:
+                    # Fetch the klines from the last timestamp
+                    klines = await self.binance_service.get_klines(symbol, interval,
+                                                                   start_time=last_kline['timestamp'].values[0])
+                # Write the klines to the database
+                await self.klines_repository.write_klines(symbol, interval, klines)
+                logger.info(f"Klines are loaded for symbol {symbol}")
+        except Exception as e:
+            logger.error(f"Error in Klines offload cycle: {e.__class__}"
+                         f"\n\t{e}"
+                         f"\n\t{traceback.format_exc()}")
+
+    async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m'):
         logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-                # Fetch the past 60 minutes of klines
-                klines = await self.binance_service.get_klines(symbol, '1m', limit=60)
+                klines = await self.klines_repository.get_klines(symbol, interval,
+                                                                 int((datetime.now() - timedelta(
+                                                                     minutes=60)).timestamp()),
+                                                                 int(datetime.now().timestamp()))
                 logger.info(f"Klines are loaded for symbol {symbol}")
-
-                # Write the klines to the database
-                await self.klines_repository.write_klines(symbol, '1m', klines)
-
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
-                await self.macd_repository.write_macd(symbol, '1m', macd)
-
-                # Calculate the time range for the past 60 minutes
-                end_time = datetime.now()
-                start_time = end_time - timedelta(minutes=60)
-
-                # Query to fetch all documents within the past 60 minutes
-                query = {
-                    "query": {
-                        "range": {
-                            "timestamp": {
-                                "gte": start_time.isoformat(),
-                                "lt": end_time.isoformat()
-                            }
-                        }
-                    }
-                }
-
-                # Fetch existing documents within the time range
-                existing_documents = self.elastic_service.search(symbol.lower()[:4], query)
-
-                # Update existing documents or add new ones if not found
-                if existing_documents and 'hits' in existing_documents and existing_documents['hits']['hits']:
-                    index = 0
-                    for hit in existing_documents['hits']['hits']:
-                        doc_id = hit['_id']
-                        logger.debug(f"Updating MACD values for symbol {symbol} at {doc_id} {hit['_id']}")
-                        # Prepare the MACD data to be inserted, timestamp is not updated
-                        macd_data = {
-                            "macd": {
-                                "ema_fast": float(macd.ema_fast[index]),
-                                "ema_slow": float(macd.ema_slow[index]),
-                                "macd": float(macd.macd[index]),
-                                "signal": float(macd.signal[index]),
-                                "histogram": float(macd.histogram[index])
-                            }
-                        }
-                        self.elastic_service.add_to_index(symbol.lower()[:4], macd_data, doc_id)
-                        index += 1
-                else:
-                    # If no existing documents are found, create new ones for each minute
-                    current_time = start_time
-                    index = 0
-                    while current_time < end_time:
-                        # Prepare the MACD data to be inserted
-                        macd_data = {
-                            "macd": {
-                                "ema_fast": float(macd.ema_fast[index]),
-                                "ema_slow": float(macd.ema_slow[index]),
-                                "macd": float(macd.macd[index]),
-                                "signal": float(macd.signal[index]),
-                                "histogram": float(macd.histogram[index])
-                            }
-                        }
-                        self.elastic_service.add_to_index(index=symbol.lower()[:4],
-                                                          body=macd_data,
-                                                          ts=current_time.isoformat())
-                        current_time += timedelta(minutes=1)
-                        index += 1
+                await self.macd_repository.write_macd(symbol, interval, macd)
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"

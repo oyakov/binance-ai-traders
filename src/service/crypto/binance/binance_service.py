@@ -86,6 +86,8 @@ class BinanceService:
         df['close_time'] = pd.to_datetime(df['close_time'], unit='ms')
         return df
 
+
+
     async def get_all_tickers(self):
         # Get ticker information for all symbols
         tickers = self.client.get_all_tickers()

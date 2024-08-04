@@ -1,4 +1,3 @@
-# TODO: implement the subsystem manager that will allow the modular stucture to work
 import asyncio
 from abc import ABC
 from collections import defaultdict
@@ -7,7 +6,6 @@ from typing import Mapping, Any
 from injector import inject
 
 from oam import log_config
-from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
@@ -16,7 +14,7 @@ logger = log_config.get_logger(__name__)
 class SubsystemManager(ABC):
 
     @inject
-    def __init__(self, elastic_service: ElasticService):
+    def __init__(self):
         self.subsystems: list[Subsystem] | None = None
 
     async def initialize_subsystems(self, subsystems: list[Subsystem]):

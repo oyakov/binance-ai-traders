@@ -1,5 +1,7 @@
 from injector import Module, singleton, provider, multiprovider
 
+from db.repository.calendar_repository import CalendarRepository
+from db.repository.telegram_group_repository import TelegramGroupRepository
 from routers.actuator_router import ActuatorRouter
 from routers.base_router import BaseRouter
 from routers.binance_router import BinanceRouter
@@ -8,17 +10,14 @@ from routers.gateway_router import GatewayRouter
 from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
-from service.elastic.elastic_service import ElasticService
-from db.repository.calendar_repository import CalendarRepository
-from db.repository.telegram_group_repository import TelegramGroupRepository
 from service.openai.openai_api_service import OpenAIAPIService
 
 
 class RouterModule(Module):
     @singleton
     @provider
-    def provide_actuator_router(self, elastic_service: ElasticService) -> ActuatorRouter:
-        return ActuatorRouter(elastic_service)
+    def provide_actuator_router(self) -> ActuatorRouter:
+        return ActuatorRouter()
 
     @singleton
     @provider

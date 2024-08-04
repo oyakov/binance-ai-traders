@@ -10,7 +10,6 @@ from markup.reply.main_menu_reply_keyboard import create_reply_kbd, MONITORING
 from oam import log_config
 from oam.environment import DELIMITER
 from routers.base_router import BaseRouter
-from service.elastic.elastic_service import ElasticService
 from subsystem.subsystem_manager import SubsystemManager
 
 logger = log_config.get_logger(__name__)
@@ -24,10 +23,9 @@ class ActuatorStates(StatesGroup):
 class ActuatorRouter(BaseRouter):
 
     @inject
-    def __init__(self, elastic_service: ElasticService):
+    def __init__(self):
         super().__init__([], [])
         self.subsystem_manager = SubsystemManager | None
-        self.elastic_service = elastic_service
         self.message(Command("actuator"))(self.command_start)
         self.message(F.text == MONITORING)(self.command_start)
         self.callback_query(ActuatorStates.select_option)(self.selected_option_callback)
@@ -47,8 +45,7 @@ class ActuatorRouter(BaseRouter):
             await state.set_state(ActuatorStates.health_data)
             # Collect health data from Subsystem manager
             health_data = self.subsystem_manager.collect_health_data()
-            # Update health data in elastic
-            self.elastic_service.index("subsystem_health", health_data)
+            # TODO: Update health data in db
             await callback_query.message.reply(text="Subsystem health data collected",
                                                reply_markup=actuator_action_selector())
             await callback_query.message.answer(text=DELIMITER, reply_markup=create_reply_kbd())

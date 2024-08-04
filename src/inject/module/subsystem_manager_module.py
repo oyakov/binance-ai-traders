@@ -3,6 +3,8 @@ from injector import Module, provider, singleton, multiprovider
 
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
+from db.repository.order_book_repository import OrderBookRepository
+from db.repository.ticker_repository import TickerRepository
 from routers.actuator_router import ActuatorRouter
 from routers.base_router import BaseRouter
 from routers.binance_router import BinanceRouter
@@ -70,15 +72,17 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_binance_data_offload_subsystem(self,
                                                bot: Bot,
-                                               elastic_service: ElasticService,
                                                binance_service: BinanceService,
                                                indicator_service: IndicatorService,
+                                               ticker_repository: TickerRepository,
+                                               order_book_repository: OrderBookRepository,
                                                klines_repository: KlinesRepository,
                                                macd_repository: MACDRepository) -> BinanceDataOffloadSubsystem:
         return BinanceDataOffloadSubsystem(bot,
                                            binance_service,
-                                           elastic_service,
                                            indicator_service,
+                                           ticker_repository,
+                                           order_book_repository,
                                            klines_repository,
                                            macd_repository)
 
@@ -116,8 +120,6 @@ class SubsystemManagerModule(Module):
     @singleton
     @provider
     def provide_subsystem_manager(
-            self,
-            elastic_service: ElasticService,
+            self
     ) -> SubsystemManager:
-        # Inject a list of subsystems
-        return SubsystemManager(elastic_service)
+        return SubsystemManager()
