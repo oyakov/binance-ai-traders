@@ -12,7 +12,7 @@ class KlinesRepository:
     def __init__(self):
         self.session_maker = get_db
 
-    async def write_klines(self, symbol: str, interval: str, klines: pd.DataFrame) -> None:
+    async def write_klines(self, symbol: str, interval: str, klines: DataFrame) -> None:
         logger.debug(f"Writing klines for {symbol}")
 
         # Convert the DataFrame to a list of dictionaries
