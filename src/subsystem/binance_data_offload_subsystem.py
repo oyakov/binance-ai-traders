@@ -106,6 +106,9 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     klines = await self.binance_service.get_klines(symbol, interval,
                                                                    start_time=last_kline['timestamp'].values[0])
                     logger.info(f"{len(klines)} klines were loaded for symbol {symbol}")
+                if last_kline is not None and not last_kline.empty:
+                    # Drop the first row as it is the same as the last row in the previous MACD
+                    klines.drop(0, inplace=True)
                 # Write the klines to the database
                 await self.klines_repository.write_klines(symbol, interval, klines)
                 logger.info(f"Klines are loaded for symbol {symbol}")
