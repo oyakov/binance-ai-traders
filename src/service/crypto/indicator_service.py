@@ -23,7 +23,7 @@ class IndicatorService:
         macd['ema_fast'] = klines['close'].ewm(span=fast_period, adjust=False).mean()
         macd['ema_slow'] = klines['close'].ewm(span=slow_period, adjust=False).mean()
         macd['macd'] = macd['ema_fast'] - macd['ema_slow']
-        macd['signal'] = klines['close'].ewm(span=signal_period, adjust=False).mean()
+        macd['signal'] = macd['macd'].ewm(span=signal_period, adjust=False).mean()
         macd['histogram'] = macd['macd'] - macd['signal']
         macd['timestamp'] = klines['timestamp']
         macd['display_time'] = pd.to_datetime(klines['timestamp'], unit='ms')
