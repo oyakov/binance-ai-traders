@@ -8,7 +8,7 @@ class MACD(Base):
     id = Column(Integer, primary_key=True)
     symbol = Column(String)
     interval = Column(String)  # 1m, 5m, 15m, 1h, 1d
-    collection_timestamp = Column(DateTime)
+    collection_time = Column(DateTime)
     display_time = Column(DateTime)
     timestamp = Column(BigInteger)
     ema_fast = Column(Float)

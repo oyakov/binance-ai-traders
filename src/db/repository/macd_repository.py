@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pandas import DataFrame
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from db.config import get_db
 from db.model.macd import MACD
@@ -16,13 +16,28 @@ class MACDRepository:
 
     async def write_macd(self, symbol: str, interval: str, macd: DataFrame) -> None:
         logger.debug(f"Writing MACD for {symbol}")
+
+        # Add the current collection time to the DataFrame
         macd['collection_time'] = datetime.now()
-        macd = macd.to_dict(orient='records')
+
+        # Convert the DataFrame to a list of dictionaries
+        macd_records = macd.to_dict(orient='records')
+
         async with self.session_maker() as session:
-            for chunk in macd:
-                session.add(MACD(symbol=symbol, interval=interval, **chunk))
+            async with session.begin():
+                # Step 1: Delete existing MACD entries for the specified symbol and interval
+                await session.execute(
+                    delete(MACD).filter(MACD.symbol == symbol, MACD.interval == interval)
+                )
+
+                # Step 2: Insert new MACD entries
+                for record in macd_records:
+                    session.add(MACD(symbol=symbol, interval=interval, **record))
+
+            # Commit the transaction
             await session.commit()
-        logger.debug(f"MACD for {symbol} are written")
+
+        logger.debug(f"MACD for {symbol} have been written")
 
     async def get_latest_macd(self, symbol: str, interval: str) -> DataFrame:
         logger.debug(f"Reading latest MACD for symbol {symbol}")
@@ -30,9 +45,9 @@ class MACDRepository:
         async with self.session_maker() as session:
             # Step 1: Get the latest timestamp for the given symbol and interval
             subquery = (
-                select(MACD.collection_timestamp)
+                select(MACD.collection_time)
                 .filter(MACD.symbol == symbol, MACD.interval == interval)
-                .order_by(MACD.collection_timestamp.desc())
+                .order_by(MACD.collection_time.desc())
                 .limit(1)
             )
             result = await session.execute(subquery)

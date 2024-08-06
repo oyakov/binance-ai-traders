@@ -53,7 +53,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
                                   '1m',
-                                  60
+                                  360
                               ], minutes=1)
             await self.macd_offload_cycle(["BTCUSDT"])
             scheduler.add_job(self.macd_offload_cycle,
@@ -92,14 +92,14 @@ class BinanceDataOffloadSubsystem(Subsystem):
                          f"\n\t{traceback.format_exc()}")
         logger.info(f"Ticker offload cycle for symbols {symbols} has completed")
 
-    async def klines_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m', initial_limit: int = 60):
+    async def klines_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m', initial_limit: int = 360):
         logger.info(f"Klines offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
                 last_kline = await self.klines_repository.get_latest_kline(symbol, interval)
                 if last_kline is None or last_kline.empty:
                     logger.info(f"No klines found for symbol {symbol}")
-                    # Fetch the past 60 minutes of klines
+                    # Fetch the past {initial_inteval} minutes of klines
                     klines = await self.binance_service.get_klines(symbol, interval, limit=initial_limit)
                 else:
                     # Fetch the klines from the last timestamp
@@ -131,7 +131,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     last_macd_time = last_macd['timestamp'].values[0] if last_macd is not None else None
 
                 if last_macd_time is None:
-                    start_time = (datetime.now() - timedelta(minutes=61)).timestamp()
+                    start_time = (datetime.now() - timedelta(minutes=181)).timestamp()
                 else:
                     start_time = last_macd_time / 1000  # Convert from milliseconds to seconds
 
@@ -143,13 +143,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     int(start_time * 1000),
                     int(end_time * 1000))
                 logger.info(f"Klines are loaded for symbol {symbol}")
-                if last_macd is None and len(klines) < 60:
+                if last_macd is None or last_macd.empty and len(klines) < 180:
                     logger.debug(f"This is the first time and there is not enough klines "
                                  f"available in the database to make MACD calculation")
                     return
                 # Calculate MACD values
-                macd = await self.indicator_service.calculate_macd(klines, prev_ema_fast, prev_ema_slow, prev_signal)
-                if last_macd is not None:
+                macd = await self.indicator_service.calculate_macd(klines)
+                if last_macd is not None and not last_macd.empty:
                     # Drop the first row as it is the same as the last row in the previous MACD
                     macd.drop(0, inplace=True)
                 logger.info(f"MACD is calculated for symbol {symbol}")
