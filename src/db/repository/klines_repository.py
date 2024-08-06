@@ -2,7 +2,7 @@ from pandas import DataFrame
 from sqlalchemy import select, delete
 
 from db.config import get_db
-from db.model.kline import Kline
+from db.model.binance.kline import Kline
 from oam import log_config
 
 logger = log_config.get_logger(__name__)

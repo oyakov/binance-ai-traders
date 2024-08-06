@@ -4,7 +4,7 @@ from pandas import DataFrame
 from sqlalchemy import select, delete
 
 from db.config import get_db
-from db.model.macd import MACD
+from db.model.binance.macd import MACD
 from oam import log_config
 
 logger = log_config.get_logger(__name__)

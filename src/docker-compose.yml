@@ -75,7 +75,7 @@ services:
     networks:
       - bot_network
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=changeit
+      - GF_SECURITY_ADMIN_PASSWORD=G6fw$3f4!
     logging:
       driver: "none"
 

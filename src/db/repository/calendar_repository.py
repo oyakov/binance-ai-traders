@@ -2,7 +2,7 @@ from sqlalchemy import text, select as sel
 from sqlalchemy.future import select
 
 from db.config import *
-from db.model.calendars import CalendarData, CalendarDoM, CalendarDoW, CalendarMoY, CalendarToD
+from db.model.telegram.calendars import CalendarData, CalendarDoM, CalendarDoW, CalendarMoY, CalendarToD
 from markup.inline.types import DateSelector
 
 logger = log_config.get_logger(__name__)

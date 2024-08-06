@@ -1,5 +1,5 @@
 from db.config import get_db
-from db.model.order_book import OrderBook
+from db.model.binance.order_book import OrderBook
 from oam import log_config
 
 logger = log_config.get_logger(__name__)

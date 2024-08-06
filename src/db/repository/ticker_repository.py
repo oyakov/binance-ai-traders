@@ -1,7 +1,7 @@
 from pandas import DataFrame
 
 from db.config import get_db
-from db.model.ticker import Ticker
+from db.model.binance.ticker import Ticker
 from oam import log_config
 
 logger = log_config.get_logger(__name__)

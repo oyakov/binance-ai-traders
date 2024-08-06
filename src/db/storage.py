@@ -2,7 +2,7 @@ from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType
 from sqlalchemy.future import select
 
 from db.config import get_db
-from db.model.fsm_state import FSMState
+from db.model.telegram.fsm_state import FSMState
 from oam import log_config
 
 logger = log_config.get_logger(__name__)

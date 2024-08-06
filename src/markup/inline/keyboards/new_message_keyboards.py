@@ -3,7 +3,7 @@ from aiogram.types import (
     InlineKeyboardButton,
 )
 
-from db.model.telegram_group import TelegramGroup
+from db.model.telegram.telegram_group import TelegramGroup
 
 
 def choose_date_type_inline():

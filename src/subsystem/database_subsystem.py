@@ -3,7 +3,7 @@ from sqlalchemy import text
 from db.config import engine, get_db
 from db.model.base import Base
 # Ensure all models are imported
-from db.model.telegram_group import TelegramGroup
+from db.model.telegram.telegram_group import TelegramGroup
 from oam import log_config
 from subsystem.subsystem import Subsystem, InitPriority
 
