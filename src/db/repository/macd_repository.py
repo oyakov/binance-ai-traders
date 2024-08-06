@@ -60,7 +60,7 @@ class MACDRepository:
             stmt = select(MACD).filter(
                 MACD.symbol == symbol,
                 MACD.interval == interval,
-                MACD.collection_timestamp == latest_timestamp
+                MACD.collection_time == latest_timestamp
             )
             result = await session.execute(stmt)
             macd_records = result.scalars().all()
