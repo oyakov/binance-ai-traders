@@ -47,12 +47,20 @@ class BinanceDataOffloadSubsystem(Subsystem):
                               args=[
                                   ["BTCUSDT", "ETHUSDT"]
                               ], minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"])
+            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m', 360)
             scheduler.add_job(self.klines_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
                                   '1m',
+                                  360
+                              ], minutes=1)
+            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m', 360)
+            scheduler.add_job(self.klines_offload_cycle,
+                              'interval',
+                              args=[
+                                  ["BTCUSDT", "ETHUSDT"],
+                                  '15m',
                                   360
                               ], minutes=1)
             await self.macd_offload_cycle(["BTCUSDT"])
