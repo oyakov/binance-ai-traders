@@ -63,7 +63,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                   '15m',
                                   360
                               ], minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT"])
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m')
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
