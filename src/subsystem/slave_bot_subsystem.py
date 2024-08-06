@@ -29,4 +29,4 @@ class SlaveBotSubsystem(Subsystem):
         self.is_initialized = False
 
     def get_priority(self):
-        return InitPriority.DATA_CONSUMPTION
+        return InitPriority.TELEGRAM_ROUTER

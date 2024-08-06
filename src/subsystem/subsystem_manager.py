@@ -18,7 +18,6 @@ class SubsystemManager(ABC):
         self.subsystems: list[Subsystem] | None = None
 
     async def initialize_subsystems(self, subsystems: list[Subsystem]):
-
         priority_dict = self.split_subsystems_by_priority(subsystems)
         for priority in InitPriority:
             logger.info(f"Initializing subsystems with priority {priority}")

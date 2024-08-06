@@ -23,7 +23,7 @@ class KlinesRepository:
             await session.commit()
         logger.debug(f"Klines for {symbol} are written")
 
-    async def get_klines(self, symbol: str, interval: str, start_time: datetime, end_time: datetime) -> DataFrame:
+    async def get_klines(self, symbol: str, interval: str, start_time: int, end_time: int) -> DataFrame:
         logger.debug(f"Getting klines for {symbol}")
         async with self.session_maker() as session:
             stmt = select(Kline).filter(Kline.symbol == symbol, Kline.interval == interval,

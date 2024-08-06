@@ -41,6 +41,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
         try:
             logger.info("Initialize the data offload cycle job")
             scheduler = AsyncIOScheduler()
+            await self.ticker_offload_cycle(["BTCUSDT", "ETHUSDT"])
             scheduler.add_job(self.ticker_offload_cycle,
                               'interval',
                               args=[
@@ -54,6 +55,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                   '1m',
                                   60
                               ], minutes=1)
+            await self.macd_offload_cycle(["BTCUSDT"])
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
@@ -103,6 +105,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     # Fetch the klines from the last timestamp
                     klines = await self.binance_service.get_klines(symbol, interval,
                                                                    start_time=last_kline['timestamp'].values[0])
+                    logger.info(f"{len(klines)} klines were loaded for symbol {symbol}")
                 # Write the klines to the database
                 await self.klines_repository.write_klines(symbol, interval, klines)
                 logger.info(f"Klines are loaded for symbol {symbol}")
@@ -115,13 +118,40 @@ class BinanceDataOffloadSubsystem(Subsystem):
         logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-                klines = await self.klines_repository.get_klines(symbol, interval,
-                                                                 (datetime.now() - timedelta(
-                                                                     minutes=60)),
-                                                                 datetime.now())
+                last_macd = await self.macd_repository.get_latest_macd(symbol, interval)
+                if last_macd is None or last_macd.empty:
+                    last_macd_time = None
+                    prev_ema_fast = None
+                    prev_ema_slow = None
+                    prev_signal = None
+                else:
+                    prev_ema_fast = last_macd['ema_fast']
+                    prev_ema_slow = last_macd['ema_slow']
+                    prev_signal = last_macd['signal']
+                    last_macd_time = last_macd['timestamp'].values[0] if last_macd is not None else None
+
+                if last_macd_time is None:
+                    start_time = (datetime.now() - timedelta(minutes=61)).timestamp()
+                else:
+                    start_time = last_macd_time / 1000  # Convert from milliseconds to seconds
+
+                end_time = datetime.now().timestamp()
+
+                klines = await self.klines_repository.get_klines(
+                    symbol,
+                    interval,
+                    int(start_time * 1000),
+                    int(end_time * 1000))
                 logger.info(f"Klines are loaded for symbol {symbol}")
+                if last_macd is None and len(klines) < 60:
+                    logger.debug(f"This is the first time and there is not enough klines "
+                                 f"available in the database to make MACD calculation")
+                    return
                 # Calculate MACD values
-                macd = await self.indicator_service.calculate_macd(klines)
+                macd = await self.indicator_service.calculate_macd(klines, prev_ema_fast, prev_ema_slow, prev_signal)
+                if last_macd is not None:
+                    # Drop the first row as it is the same as the last row in the previous MACD
+                    macd.drop(0, inplace=True)
                 logger.info(f"MACD is calculated for symbol {symbol}")
                 await self.macd_repository.write_macd(symbol, interval, macd)
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")

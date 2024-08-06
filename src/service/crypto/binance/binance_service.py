@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 from binance.client import Client
 from pandas import DataFrame
@@ -7,6 +8,12 @@ from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN
 
 # Initialize logger
 logger = log_config.get_logger(__name__)
+
+
+# Helper function to convert camelCase to snake_case
+def camel_to_snake(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 class BinanceService:
@@ -26,52 +33,39 @@ class BinanceService:
         balance = self.client.get_asset_balance(asset=asset)
         return balance
 
-    async def get_ticker(self, symbol) -> DataFrame:
+    async def get_ticker(self, symbol) -> pd.DataFrame:
         # Get ticker information for a specific symbol
         ticker = self.client.get_ticker(symbol=symbol)
         df_ticker = pd.DataFrame([ticker])
+
         # Convert specified columns to float
-        df_ticker[
-            [
-                'priceChange',
-                'priceChangePercent',
-                'weightedAvgPrice',
-                'prevClosePrice',
-                'lastPrice',
-                'lastQty',
-                'bidPrice',
-                'bidQty',
-                'askPrice',
-                'askQty',
-                'openPrice',
-                'highPrice',
-                'lowPrice',
-                'volume',
-                'quoteVolume',
-                'count'
-            ]
-        ] = df_ticker[
-            [
-                'priceChange',
-                'priceChangePercent',
-                'weightedAvgPrice',
-                'prevClosePrice',
-                'lastPrice',
-                'lastQty',
-                'bidPrice',
-                'bidQty',
-                'askPrice',
-                'askQty',
-                'openPrice',
-                'highPrice',
-                'lowPrice',
-                'volume',
-                'quoteVolume',
-                'count'
-            ]
-        ].astype(float)
-        df_ticker['openTime'] = pd.to_datetime(df_ticker['openTime'], unit='ms')
-        df_ticker['closeTime'] = pd.to_datetime(df_ticker['closeTime'], unit='ms')
+        float_columns = [
+            'priceChange',
+            'priceChangePercent',
+            'weightedAvgPrice',
+            'prevClosePrice',
+            'lastPrice',
+            'lastQty',
+            'bidPrice',
+            'bidQty',
+            'askPrice',
+            'askQty',
+            'openPrice',
+            'highPrice',
+            'lowPrice',
+            'volume',
+            'quoteVolume',
+            'count'
+        ]
+        df_ticker[float_columns] = df_ticker[float_columns].astype(float)
+
+        # Convert time columns to datetime
+        df_ticker['dispayOpenTime'] = pd.to_datetime(df_ticker['openTime'], unit='ms')
+        df_ticker['displayCloseTime'] = pd.to_datetime(df_ticker['closeTime'], unit='ms')
+
+        # Convert column names to snake_case
+        df_ticker.columns = [camel_to_snake(col) for col in df_ticker.columns]
+
         return df_ticker
 
     async def get_klines(self,
@@ -126,8 +120,8 @@ class BinanceService:
              'taker_buy_quote_asset_volume']
         ].astype(float)
 
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        df['close_time'] = pd.to_datetime(df['close_time'], unit='ms')
+        df['display_time'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df['display_close_time'] = pd.to_datetime(df['close_time'], unit='ms')
         return df
 
     async def get_all_tickers(self):

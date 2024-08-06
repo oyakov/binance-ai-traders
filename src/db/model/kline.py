@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, DateTime, Float, String
+from sqlalchemy import Integer, Column, DateTime, Float, String, BigInteger
 
 from db.model.base import Base
 
@@ -8,13 +8,15 @@ class Kline(Base):
     id = Column(Integer, primary_key=True)
     symbol = Column(String)
     interval = Column(String)  # 1m, 5m, 15m, 1h, 1d
-    timestamp = Column(DateTime)
+    timestamp = Column(BigInteger)
+    display_time = Column(DateTime)
     open = Column(Float)
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
     volume = Column(Float)
-    close_time = Column(DateTime)
+    close_time = Column(BigInteger)
+    display_close_time = Column(DateTime)
     quote_asset_volume = Column(Float)
     number_of_trades = Column(Integer)
     taker_buy_base_asset_volume = Column(Float)

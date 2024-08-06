@@ -10,6 +10,7 @@ class InitPriority(Enum):
     DATA_OFFLOAD = "DATA_OFFLOAD"
     DATA_PROCESSING = "DATA_PROCESSING"
     DATA_CONSUMPTION = "DATA_CONSUMPTION"
+    TELEGRAM_ROUTER = "TELEGRAM_ROUTER"
 
 
 class Subsystem(ABC):
@@ -30,6 +31,6 @@ class Subsystem(ABC):
 
     def get_priority(self) -> InitPriority:
         """
-        Get the priority of the subsystem
+        Get the initialization priority of the subsystem
         """
-        return self.InitPriority.CRITICAL
+        return InitPriority.CRITICAL
