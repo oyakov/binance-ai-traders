@@ -39,7 +39,7 @@ class IndicatorService:
         else:
             alpha = 2 / (window + 1)
             ema = prices.copy()
-            ema[0] = previous_ema
+            ema.iloc[0] = previous_ema
             for i in range(1, len(prices)):
                 ema[i] = alpha * prices[i] + (1 - alpha) * ema[i - 1]
         return ema
