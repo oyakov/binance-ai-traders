@@ -44,39 +44,23 @@ class BinanceDataOffloadSubsystem(Subsystem):
             await self.ticker_offload_cycle(["BTCUSDT", "ETHUSDT"])
             scheduler.add_job(self.ticker_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"]
-                              ], minutes=1)
+                              args=[["BTCUSDT", "ETHUSDT"]], minutes=1)
             await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m', 360)
             scheduler.add_job(self.klines_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  '1m',
-                                  360
-                              ], minutes=1)
+                              args=[["BTCUSDT", "ETHUSDT"], '1m', 500], minutes=1)
             await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m', 360)
             scheduler.add_job(self.klines_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  '15m',
-                                  360
-                              ], minutes=1)
+                              args=[["BTCUSDT", "ETHUSDT"], '15m', 500], minutes=1)
             await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m')
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  '1m',
-                              ], minutes=1)
+                              args=[["BTCUSDT", "ETHUSDT"], '1m'], minutes=1)
             await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m')
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  '15m',
-                              ], minutes=1)
+                              args=[["BTCUSDT", "ETHUSDT"], '15m'], minutes=1)
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
         except Exception as e:
@@ -107,7 +91,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
                          f"\n\t{traceback.format_exc()}")
         logger.info(f"Ticker offload cycle for symbols {symbols} has completed")
 
-    async def klines_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m', initial_limit: int = 360):
+    async def klines_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m',
+                                   initial_limit: int = 500):
         logger.info(f"Klines offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
@@ -127,7 +112,6 @@ class BinanceDataOffloadSubsystem(Subsystem):
         logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-
                 start_time = (datetime.now() - timedelta(minutes=181)).timestamp()
                 end_time = datetime.now().timestamp()
 

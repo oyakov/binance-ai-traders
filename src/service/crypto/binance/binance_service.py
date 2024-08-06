@@ -45,22 +45,9 @@ class BinanceService:
 
         # Convert specified columns to float
         float_columns = [
-            'priceChange',
-            'priceChangePercent',
-            'weightedAvgPrice',
-            'prevClosePrice',
-            'lastPrice',
-            'lastQty',
-            'bidPrice',
-            'bidQty',
-            'askPrice',
-            'askQty',
-            'openPrice',
-            'highPrice',
-            'lowPrice',
-            'volume',
-            'quoteVolume',
-            'count'
+            'priceChange', 'priceChangePercent', 'weightedAvgPrice', 'prevClosePrice', 'lastPrice', 'lastQty',
+            'bidPrice', 'bidQty', 'askPrice', 'askQty', 'openPrice', 'highPrice', 'lowPrice', 'volume',
+            'quoteVolume', 'count'
         ]
         df_ticker[float_columns] = df_ticker[float_columns].astype(float)
 
@@ -68,63 +55,35 @@ class BinanceService:
         df_ticker['dispayOpenTime'] = pd.to_datetime(df_ticker['openTime'], unit='ms')
         df_ticker['displayCloseTime'] = pd.to_datetime(df_ticker['closeTime'], unit='ms')
 
-        # Convert column names to snake_case
+        # Convert column names to snake_case for consistency
         df_ticker.columns = [camel_to_snake(col) for col in df_ticker.columns]
 
         return df_ticker
 
-    async def get_klines(self,
-                         symbol,
-                         interval=Client.KLINE_INTERVAL_1MINUTE,
-                         start_time=None,
-                         end_time=None,
-                         timezone='0',
-                         limit=500):
+    async def get_symbol_ticker(self, symbol) -> float:
+        # Get ticker information for a specific symbol
+        ticker = self.client.get_symbol_ticker(symbol=symbol)
+        return ticker['price']
+
+    async def get_klines(self, symbol, interval=Client.KLINE_INTERVAL_1MINUTE,
+                         start_time=None, end_time=None, timezone='0', limit=500):
         # Get historical candlestick data for a specific symbol
-        candles = self.client.get_klines(symbol=symbol,
-                                         interval=interval,
-                                         startTime=start_time,
-                                         endTime=end_time,
-                                         timeZone=timezone,
-                                         limit=limit, )
+        candles = self.client.get_klines(symbol=symbol, interval=interval, startTime=start_time,
+                                         endTime=end_time, timeZone=timezone, limit=limit)
 
         # Convert to DataFrame for easier manipulation
         df = pd.DataFrame(candles, columns=[
-            'timestamp',
-            'open',
-            'high',
-            'low',
-            'close',
-            'volume',
-            'close_time',
-            'quote_asset_volume',
-            'number_of_trades',
-            'taker_buy_base_asset_volume',
-            'taker_buy_quote_asset_volume',
-            'ignore'
+            'timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
+            'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
         ])
 
-        # Convert specified columns to float
-        df[
-            ['open',
-             'high',
-             'low',
-             'close',
-             'volume',
-             'quote_asset_volume',
-             'taker_buy_base_asset_volume',
-             'taker_buy_quote_asset_volume']
-        ] = df[
-            ['open',
-             'high',
-             'low',
-             'close',
-             'volume',
-             'quote_asset_volume',
-             'taker_buy_base_asset_volume',
-             'taker_buy_quote_asset_volume']
-        ].astype(float)
+        float_columns = ['open', 'high', 'low', 'close', 'volume', 'quote_asset_volume',
+                         'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume']
 
+        # Convert specified columns to float
+        df[float_columns] = df[float_columns].astype(float)
+
+        # Convert time columns to datetime
         df['display_time'] = pd.to_datetime(df['timestamp'], unit='ms')
         df['display_close_time'] = pd.to_datetime(df['close_time'], unit='ms')
         return df
