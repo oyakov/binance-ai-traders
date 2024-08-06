@@ -2,6 +2,7 @@ import re
 
 import pandas as pd
 from binance.client import Client
+from pandas import DataFrame
 
 from oam import log_config
 from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN, BINANCE_TESTNET_TOKEN, BINANCE_TESTNET_SECRET_TOKEN, BINANCE_TESTNET_ENABLED
@@ -38,10 +39,10 @@ class BinanceService:
         balance = self.client.get_asset_balance(asset=asset)
         return balance
 
-    async def get_ticker(self, symbol) -> pd.DataFrame:
+    async def get_ticker(self, symbol) -> DataFrame:
         # Get ticker information for a specific symbol
         ticker = self.client.get_ticker(symbol=symbol)
-        df_ticker = pd.DataFrame([ticker])
+        df_ticker = DataFrame([ticker])
 
         # Convert specified columns to float
         float_columns = [
@@ -66,7 +67,7 @@ class BinanceService:
         return ticker['price']
 
     async def get_klines(self, symbol, interval=Client.KLINE_INTERVAL_1MINUTE,
-                         start_time=None, end_time=None, timezone='0', limit=500):
+                         start_time=None, end_time=None, timezone='0', limit=500) -> DataFrame:
         # Get historical candlestick data for a specific symbol
         candles = self.client.get_klines(symbol=symbol, interval=interval, startTime=start_time,
                                          endTime=end_time, timeZone=timezone, limit=limit)

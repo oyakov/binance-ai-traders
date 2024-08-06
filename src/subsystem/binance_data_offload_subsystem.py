@@ -39,7 +39,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Data Offload subsystem {self.bot}")
         try:
-            logger.info("Initialize the data offload cycle job")
+            logger.info("Initialize data offload cycle jobs")
             scheduler = AsyncIOScheduler()
             await self.ticker_offload_cycle(["BTCUSDT", "ETHUSDT"])
             scheduler.add_job(self.ticker_offload_cycle,
@@ -62,7 +62,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                               'interval',
                               args=[["BTCUSDT", "ETHUSDT"], '15m'], minutes=1)
             scheduler.start()
-            logger.info("Data offload cycle job is initialized")
+            logger.info("Data offload cycle jobs are initialized")
         except Exception as e:
             logger.error(f"Error initializing Binance Data Offload subsystem", exc_info=e)
             raise e
