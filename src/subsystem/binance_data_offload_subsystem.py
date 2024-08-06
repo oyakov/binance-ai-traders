@@ -70,6 +70,13 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                   ["BTCUSDT", "ETHUSDT"],
                                   '1m',
                               ], minutes=1)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m')
+            scheduler.add_job(self.macd_offload_cycle,
+                              'interval',
+                              args=[
+                                  ["BTCUSDT", "ETHUSDT"],
+                                  '15m',
+                              ], minutes=1)
             scheduler.start()
             logger.info("Data offload cycle job is initialized")
         except Exception as e:
