@@ -4,7 +4,7 @@ import pandas as pd
 from binance.client import Client
 
 from oam import log_config
-from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN
+from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN, BINANCE_TESTNET_TOKEN, BINANCE_TESTNET_SECRET_TOKEN, BINANCE_TESTNET_ENABLED
 
 # Initialize logger
 logger = log_config.get_logger(__name__)
@@ -20,8 +20,13 @@ class BinanceService:
 
     def __init__(self):
         # Initialize Binance client with API token and secret
-        self.client = Client(BINANCE_TOKEN, BINANCE_SECRET_TOKEN)
-        logger.info("Binance client initialized")
+        if BINANCE_TESTNET_ENABLED:
+            logger.info("Binance Client is initialized with Testnet configuration...")
+            self.client = Client(BINANCE_TESTNET_TOKEN, BINANCE_TESTNET_SECRET_TOKEN, testnet=True)
+        else:
+            logger.info("Binance Client is initialized with production configuration...")
+            self.client = Client(BINANCE_TOKEN, BINANCE_SECRET_TOKEN)
+        logger.info("Binance Client is initialized")
 
     async def get_account_info(self):
         # Get account information
