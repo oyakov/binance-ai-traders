@@ -1,7 +1,7 @@
 import logging.config
 import traceback
 
-from oam.environment import APP_NAME, LOGGING_CONFIG_PATH
+from oam.environment import APP_NAME
 
 
 class CustomLogger(logging.getLoggerClass()):

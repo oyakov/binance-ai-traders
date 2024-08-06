@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from pandas import DataFrame
 from sqlalchemy import select
 
 from db.config import get_db
-from db.model.kline import Kline
 from db.model.macd import MACD
 from oam import log_config
 
@@ -15,6 +16,7 @@ class MACDRepository:
 
     async def write_macd(self, symbol: str, interval: str, macd: DataFrame) -> None:
         logger.debug(f"Writing MACD for {symbol}")
+        macd['collection_time'] = datetime.now()
         macd = macd.to_dict(orient='records')
         async with self.session_maker() as session:
             for chunk in macd:
@@ -23,14 +25,36 @@ class MACDRepository:
         logger.debug(f"MACD for {symbol} are written")
 
     async def get_latest_macd(self, symbol: str, interval: str) -> DataFrame:
-        logger.debug(f"Reading latest MACD for sybol {symbol}")
+        logger.debug(f"Reading latest MACD for symbol {symbol}")
+
         async with self.session_maker() as session:
-            stmt = select(MACD).filter(MACD.symbol == symbol, MACD.interval == interval).order_by(
-                                       MACD.timestamp.desc())
+            # Step 1: Get the latest timestamp for the given symbol and interval
+            subquery = (
+                select(MACD.collection_timestamp)
+                .filter(MACD.symbol == symbol, MACD.interval == interval)
+                .order_by(MACD.collection_timestamp.desc())
+                .limit(1)
+            )
+            result = await session.execute(subquery)
+            latest_timestamp = result.scalar()
+
+            if latest_timestamp is None:
+                return DataFrame()
+
+            # Step 2: Retrieve all MACD entries with that latest timestamp
+            stmt = select(MACD).filter(
+                MACD.symbol == symbol,
+                MACD.interval == interval,
+                MACD.collection_timestamp == latest_timestamp
+            )
             result = await session.execute(stmt)
-            macd = result.scalars().first()
-        if macd is None:
+            macd_records = result.scalars().all()
+
+        if not macd_records:
             return DataFrame()
-        macd = DataFrame([macd.__dict__])
+
+        # Convert the MACD records to a DataFrame
+        macd = DataFrame([record.__dict__ for record in macd_records])
+
         logger.debug(f"Latest MACD for {symbol} is retrieved")
         return macd

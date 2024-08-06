@@ -13,18 +13,17 @@ from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
-from service.elastic.elastic_service import ElasticService
+from subsystem.actuator_subsystem import ActuatorSubsystem
+from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
+from subsystem.binance_subsystem import BinanceSubsystem
+from subsystem.configuration_subsystem import ConfigurationSubsystem
+from subsystem.database_subsystem import DatabaseSubsystem
+from subsystem.logger_subsystem import LoggerSubsystem
+from subsystem.openai_subsystem import OpenAiSubsystem
+from subsystem.scheduler_subsystem import SchedulerSubsystem
+from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 from subsystem.subsystem import Subsystem
 from subsystem.subsystem_manager import SubsystemManager
-from subsystem.actuator_subsystem import ActuatorSubsystem
-from subsystem.database_subsystem import DatabaseSubsystem
-from subsystem.configuration_subsystem import ConfigurationSubsystem
-from subsystem.logger_subsystem import LoggerSubsystem
-from subsystem.scheduler_subsystem import SchedulerSubsystem
-from subsystem.openai_subsystem import OpenAiSubsystem
-from subsystem.binance_subsystem import BinanceSubsystem
-from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
-from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 
 
 class SubsystemManagerModule(Module):

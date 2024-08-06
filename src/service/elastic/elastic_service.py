@@ -1,7 +1,6 @@
 import json
 import ssl
 from datetime import datetime
-from pathlib import Path
 from typing import Mapping, Any
 
 from elasticsearch import Elasticsearch

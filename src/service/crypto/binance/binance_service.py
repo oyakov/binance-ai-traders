@@ -1,7 +1,7 @@
 import re
+
 import pandas as pd
 from binance.client import Client
-from pandas import DataFrame
 
 from oam import log_config
 from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN

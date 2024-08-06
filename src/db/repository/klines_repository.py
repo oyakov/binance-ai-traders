@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pandas import DataFrame
 from sqlalchemy import select
 

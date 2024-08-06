@@ -1,4 +1,4 @@
-from aiogram import F, Bot
+from aiogram import F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery

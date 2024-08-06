@@ -1,13 +1,9 @@
 import asyncio
 
-from aiogram import Bot
-from injector import inject
-
 from inject.bot_injector import injector
 from oam import log_config
 # Subsystems
 from oam.environment import COROUTINE_DEBUG
-from routers.base_router import BaseRouter
 from subsystem.slave_bot_subsystem import SlaveBotSubsystem
 from subsystem.subsystem import Subsystem
 from subsystem.subsystem_manager import SubsystemManager

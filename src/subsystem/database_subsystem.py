@@ -3,10 +3,7 @@ from sqlalchemy import text
 from db.config import engine, get_db
 from db.model.base import Base
 # Ensure all models are imported
-from db.model.kline import Kline
-from db.model.calendars import CalendarToD, CalendarMoY, CalendarDoW, CalendarDoM, CalendarData
 from db.model.telegram_group import TelegramGroup
-from db.model.customer_configuration import CustomerConfiguration
 from oam import log_config
 from subsystem.subsystem import Subsystem, InitPriority
 

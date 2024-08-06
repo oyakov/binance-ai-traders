@@ -2,7 +2,6 @@ from injector import inject
 
 from oam import log_config
 from routers.base_router import BaseRouter
-
 from routers.dispatcher import create_dispatcher
 from routers.gateway_router import configure_gateway_router
 from subsystem.subsystem import Subsystem, InitPriority
