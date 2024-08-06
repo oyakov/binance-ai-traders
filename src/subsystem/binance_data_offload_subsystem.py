@@ -96,19 +96,10 @@ class BinanceDataOffloadSubsystem(Subsystem):
         logger.info(f"Klines offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-                last_kline = await self.klines_repository.get_latest_kline(symbol, interval)
-                if last_kline is None or last_kline.empty:
-                    logger.info(f"No klines found for symbol {symbol}")
-                    # Fetch the past {initial_inteval} minutes of klines
-                    klines = await self.binance_service.get_klines(symbol, interval, limit=initial_limit)
-                else:
-                    # Fetch the klines from the last timestamp
-                    klines = await self.binance_service.get_klines(symbol, interval,
-                                                                   start_time=last_kline['timestamp'].values[0])
-                    logger.info(f"{len(klines)} klines were loaded for symbol {symbol}")
-                if last_kline is not None and not last_kline.empty:
-                    # Drop the first row as it is the same as the last row in the previous MACD
-                    klines.drop(0, inplace=True)
+                logger.info(f"No klines found for symbol {symbol}")
+                # Fetch the past {initial_inteval} minutes of klines
+                klines = await self.binance_service.get_klines(symbol, interval, limit=initial_limit)
+                logger.info(f"{len(klines)} klines were loaded for symbol {symbol}")
                 # Write the klines to the database
                 await self.klines_repository.write_klines(symbol, interval, klines)
                 logger.info(f"Klines are loaded for symbol {symbol}")
@@ -121,23 +112,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
         logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-                last_macd = await self.macd_repository.get_latest_macd(symbol, interval)
-                if last_macd is None or last_macd.empty:
-                    last_macd_time = None
-                    prev_ema_fast = None
-                    prev_ema_slow = None
-                    prev_signal = None
-                else:
-                    prev_ema_fast = last_macd['ema_fast']
-                    prev_ema_slow = last_macd['ema_slow']
-                    prev_signal = last_macd['signal']
-                    last_macd_time = last_macd['timestamp'].values[0] if last_macd is not None else None
 
-                if last_macd_time is None:
-                    start_time = (datetime.now() - timedelta(minutes=181)).timestamp()
-                else:
-                    start_time = last_macd_time / 1000  # Convert from milliseconds to seconds
-
+                start_time = (datetime.now() - timedelta(minutes=181)).timestamp()
                 end_time = datetime.now().timestamp()
 
                 klines = await self.klines_repository.get_klines(
@@ -146,15 +122,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
                     int(start_time * 1000),
                     int(end_time * 1000))
                 logger.info(f"Klines are loaded for symbol {symbol}")
-                if last_macd is None or last_macd.empty and len(klines) < 180:
-                    logger.debug(f"This is the first time and there is not enough klines "
-                                 f"available in the database to make MACD calculation")
-                    return
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
-                if last_macd is not None and not last_macd.empty:
-                    # Drop the first row as it is the same as the last row in the previous MACD
-                    macd.drop(0, inplace=True)
                 logger.info(f"MACD is calculated for symbol {symbol}")
                 await self.macd_repository.write_macd(symbol, interval, macd)
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")

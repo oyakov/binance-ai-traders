@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from db.config import get_db
 from db.model.kline import Kline
@@ -12,14 +12,27 @@ class KlinesRepository:
     def __init__(self):
         self.session_maker = get_db
 
-    async def write_klines(self, symbol: str, interval: str, klines: DataFrame) -> None:
+    async def write_klines(self, symbol: str, interval: str, klines: pd.DataFrame) -> None:
         logger.debug(f"Writing klines for {symbol}")
-        klines = klines.to_dict(orient='records')
+
+        # Convert the DataFrame to a list of dictionaries
+        klines_records = klines.to_dict(orient='records')
+
         async with self.session_maker() as session:
-            for kline in klines:
-                session.add(Kline(symbol=symbol, interval=interval, **kline))
+            async with session.begin():
+                # Step 1: Delete existing Klines entries for the specified symbol and interval
+                await session.execute(
+                    delete(Kline).filter(Kline.symbol == symbol, Kline.interval == interval)
+                )
+
+                # Step 2: Insert new Klines entries
+                for record in klines_records:
+                    session.add(Kline(symbol=symbol, interval=interval, **record))
+
+            # Commit the transaction
             await session.commit()
-        logger.debug(f"Klines for {symbol} are written")
+
+        logger.debug(f"Klines for {symbol} have been written")
 
     async def get_klines(self, symbol: str, interval: str, start_time: int, end_time: int) -> DataFrame:
         logger.debug(f"Getting klines for {symbol}")
