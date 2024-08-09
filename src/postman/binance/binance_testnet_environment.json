@@ -1,0 +1,8 @@
+{
+    "name": "Binance Testnet",
+    "values": [
+        {"key": "baseUrl", "value": "https://testnet.binance.vision", "enabled":  "True"},
+        {"key": "apiKey", "value": "", "enabled": "True"},
+        {"key": "apiSecret", "value": "", "enabled": "True"}
+    ]
+}

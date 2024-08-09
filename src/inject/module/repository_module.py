@@ -4,6 +4,7 @@ from db.repository.calendar_repository import CalendarRepository
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
 from db.repository.order_book_repository import OrderBookRepository
+from db.repository.order_repository import OrderRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
 from db.repository.ticker_repository import TickerRepository
 
@@ -38,3 +39,8 @@ class RepositoryModule(Module):
     @provider
     def provide_macd_repository(self) -> MACDRepository:
         return MACDRepository()
+
+    @singleton
+    @provider
+    def provide_order_repository(self) -> OrderRepository:
+        return OrderRepository()

@@ -5,7 +5,8 @@ from binance.client import Client
 from pandas import DataFrame
 
 from oam import log_config
-from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN, BINANCE_TESTNET_TOKEN, BINANCE_TESTNET_SECRET_TOKEN, BINANCE_TESTNET_ENABLED
+from oam.environment import BINANCE_TOKEN, BINANCE_SECRET_TOKEN, BINANCE_TESTNET_TOKEN, BINANCE_TESTNET_SECRET_TOKEN, \
+    BINANCE_TESTNET_ENABLED
 
 # Initialize logger
 logger = log_config.get_logger(__name__)
@@ -15,6 +16,20 @@ logger = log_config.get_logger(__name__)
 def camel_to_snake(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def convert_dict_keys_to_snake_case(data: dict):
+    """Convert all dictionary keys from camelCase to snake_case."""
+    if isinstance(data, dict):
+        new_data = {}
+        for key, value in data.items():
+            new_key = camel_to_snake(key)
+            new_data[new_key] = convert_dict_keys_to_snake_case(value) if isinstance(value, (dict, list)) else value
+        return new_data
+    elif isinstance(data, list):
+        return [convert_dict_keys_to_snake_case(item) for item in data]
+    else:
+        return data
 
 
 class BinanceService:
@@ -116,18 +131,60 @@ class BinanceService:
 
     async def create_order(self, symbol, side, order_type, quantity, price=None,
                            time_in_force=Client.TIME_IN_FORCE_GTC):
-        # Create a new order
-        order = self.client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity, price=price,
-                                         timeInForce=time_in_force)
-        logger.info(f"Order created: {order}")
-        return order
+        params = {
+            "symbol": symbol,
+            "side": side,
+            "type": order_type,
+            "quantity": quantity
+        }
+        # Handling LIMIT orders
+        if order_type == "LIMIT":
+            if price is None:
+                raise ValueError("Price must be specified for LIMIT orders")
+            params["price"] = price
+            params["timeInForce"] = time_in_force  # or another valid option like 'IOC' or 'FOK'
 
-    async def create_test_order(self, symbol, side, order_type, quantity, price=None,
-                                time_in_force=Client.TIME_IN_FORCE_GTC):
-        # Create a test order
-        order = self.client.create_test_order(symbol=symbol, side=side, type=order_type, quantity=quantity, price=price,
-                                              timeInForce=time_in_force)
-        logger.info(f"Test order created: {order}")
+        # Handling MARKET orders
+        elif order_type == "MARKET":
+            # Ensure that price and timeInForce are not included for MARKET orders
+            if price is not None:
+                raise ValueError("Price should not be specified for MARKET orders")
+        # Create a new order
+        order = self.client.create_order(**params)
+        df_order = DataFrame([order])
+        float_columns = ['price', 'origQty', 'executedQty', 'cummulativeQuoteQty']
+        df_order[float_columns] = df_order[float_columns].astype(float)
+        logger.info(f"Order created: {df_order}")
+        # Convert column names to snake_case for consistency
+        df_order.columns = [camel_to_snake(col) for col in df_order.columns]
+        return df_order
+
+    async def create_test_order(self, symbol, side, order_type, quantity, price=None):
+        # Base parameters for the order
+        params = {
+            "symbol": symbol,
+            "side": side,
+            "type": order_type,
+            "quantity": quantity
+        }
+
+        # Handling LIMIT orders
+        if order_type == "LIMIT":
+            if price is None:
+                raise ValueError("Price must be specified for LIMIT orders")
+            params["price"] = price
+            params["timeInForce"] = "GTC"  # or another valid option like 'IOC' or 'FOK'
+
+        # Handling MARKET orders
+        elif order_type == "MARKET":
+            # Ensure that price and timeInForce are not included for MARKET orders
+            if price is not None:
+                raise ValueError("Price should not be specified for MARKET orders")
+
+        # Additional handling for other order types can be added here
+
+        # Place the test order
+        order = self.client.create_test_order(**params)
         return order
 
     async def get_open_orders(self, symbol=None):

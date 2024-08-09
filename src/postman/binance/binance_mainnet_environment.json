@@ -1,0 +1,8 @@
+{
+    "name": "Binance Mainnet",
+    "values": [
+        {"key": "baseUrl", "value": "https://api.binance.com", "enabled": "True"},
+        {"key": "apiKey", "value": "", "enabled": "True"},
+        {"key": "apiSecret", "value": "", "enabled": "True"}
+    ]
+}

@@ -4,6 +4,7 @@ from injector import Module, provider, singleton, multiprovider
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
 from db.repository.order_book_repository import OrderBookRepository
+from db.repository.order_repository import OrderRepository
 from db.repository.ticker_repository import TickerRepository
 from routers.actuator_router import ActuatorRouter
 from routers.base_router import BaseRouter
@@ -16,6 +17,7 @@ from service.crypto.indicator_service import IndicatorService
 from subsystem.actuator_subsystem import ActuatorSubsystem
 from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
 from subsystem.binance_subsystem import BinanceSubsystem
+from subsystem.binance_trader_process_subsystem import BinanceTraderProcessSubsystem
 from subsystem.configuration_subsystem import ConfigurationSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.logger_subsystem import LoggerSubsystem
@@ -30,8 +32,7 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
-    def provide_actuator_subsystem(self,
-                                   bot: Bot,
+    def provide_actuator_subsystem(self, bot: Bot,
                                    actuator_router: ActuatorRouter) -> ActuatorSubsystem:
         return ActuatorSubsystem(bot, actuator_router)
 
@@ -42,8 +43,7 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
-    def provide_configuration_subsystem(self,
-                                        bot: Bot,
+    def provide_configuration_subsystem(self, bot: Bot,
                                         configuration_router: ConfigurationRouter) -> ConfigurationSubsystem:
         return ConfigurationSubsystem(bot, configuration_router)
 
@@ -71,8 +71,7 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_binance_data_offload_subsystem(self,
                                                bot: Bot,
-                                               binance_service: BinanceService,
-                                               indicator_service: IndicatorService,
+                                               binance_service: BinanceService, indicator_service: IndicatorService,
                                                ticker_repository: TickerRepository,
                                                order_book_repository: OrderBookRepository,
                                                klines_repository: KlinesRepository,
@@ -87,23 +86,24 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
-    def provide_slave_bot_subsystem(self,
-                                    bot: Bot,
-                                    routers: list[BaseRouter]
-                                    ) -> SlaveBotSubsystem:
+    def provide_binance_trade_process_subsystem(self, bot: Bot, binance_service: BinanceService,
+                                                order_repository: OrderRepository) -> BinanceTraderProcessSubsystem:
+        return BinanceTraderProcessSubsystem(bot, binance_service, order_repository)
+
+    @singleton
+    @provider
+    def provide_slave_bot_subsystem(self, bot: Bot, routers: list[BaseRouter]) -> SlaveBotSubsystem:
         return SlaveBotSubsystem(bot, routers=routers)
 
     @singleton
     @multiprovider
     def provide_subsystem_list(self,
-                               actuator_subsystem: ActuatorSubsystem,
-                               database_subsystem: DatabaseSubsystem,
-                               configuration_subsystem: ConfigurationSubsystem,
-                               logger_subsystem: LoggerSubsystem,
-                               scheduler_subsystem: SchedulerSubsystem,
-                               openai_subsystem: OpenAiSubsystem,
+                               actuator_subsystem: ActuatorSubsystem, database_subsystem: DatabaseSubsystem,
+                               configuration_subsystem: ConfigurationSubsystem, logger_subsystem: LoggerSubsystem,
+                               scheduler_subsystem: SchedulerSubsystem, openai_subsystem: OpenAiSubsystem,
                                binance_subsystem: BinanceSubsystem,
                                binance_data_offload_subsystem: BinanceDataOffloadSubsystem,
+                               binance_trade_process_subsystem: BinanceTraderProcessSubsystem
                                ) -> list[Subsystem]:
         return [
             actuator_subsystem,
@@ -114,6 +114,7 @@ class SubsystemManagerModule(Module):
             openai_subsystem,
             binance_subsystem,
             binance_data_offload_subsystem,
+            binance_trade_process_subsystem
         ]
 
     @singleton
