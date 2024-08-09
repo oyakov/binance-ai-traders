@@ -54,7 +54,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                 logger.error(f"Error writing order to database", exc_info=e)
             logger.info(f"Order details: {order_details}")
             # Cancel the order
-            order_id = order_details['order_id']
+            order_id = order_details['order_id'].iloc[0]
             logger.info(f"Test order created")
             cancel_result = await self.binance_service.cancel_order(symbol, order_id)
             try:

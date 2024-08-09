@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, BigInteger, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, BigInteger, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -13,6 +13,7 @@ class Order(Base):
     order_list_id = Column(Integer, nullable=False, default=-1)
     client_order_id = Column(String(50), nullable=False)
     transact_time = Column(BigInteger, nullable=False)
+    display_transact_time = Column(DateTime, nullable=False)
     price = Column(Float, nullable=False, default=0.0)
     orig_qty = Column(Float, nullable=False)
     executed_qty = Column(Float, nullable=False)
@@ -22,6 +23,7 @@ class Order(Base):
     type = Column(String(20), nullable=False)
     side = Column(String(10), nullable=False)
     working_time = Column(BigInteger, nullable=False)
+    display_working_time = Column(DateTime, nullable=False)
     self_trade_prevention_mode = Column(String(20), nullable=False, default="NONE")
     # Relationship to the Fill model
     fills = relationship("Fill", back_populates="order", cascade="all, delete-orphan")

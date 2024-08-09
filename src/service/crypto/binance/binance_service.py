@@ -130,13 +130,14 @@ class BinanceService:
         return historical_trades
 
     async def create_order(self, symbol, side, order_type, quantity, price=None,
-                           time_in_force=Client.TIME_IN_FORCE_GTC):
+                           time_in_force=Client.TIME_IN_FORCE_GTC) -> DataFrame:
         params = {
             "symbol": symbol,
             "side": side,
             "type": order_type,
             "quantity": quantity
         }
+
         # Handling LIMIT orders
         if order_type == "LIMIT":
             if price is None:
@@ -149,14 +150,20 @@ class BinanceService:
             # Ensure that price and timeInForce are not included for MARKET orders
             if price is not None:
                 raise ValueError("Price should not be specified for MARKET orders")
+
         # Create a new order
         order = self.client.create_order(**params)
         df_order = DataFrame([order])
         float_columns = ['price', 'origQty', 'executedQty', 'cummulativeQuoteQty']
         df_order[float_columns] = df_order[float_columns].astype(float)
-        logger.info(f"Order created: {df_order}")
+
+        # Convert time columns to datetime
+        df_order['display_transact_time'] = pd.to_datetime(df_order['transactTime'], unit='ms')
+        df_order['display_working_time'] = pd.to_datetime(df_order['workingTime'], unit='ms')
+
         # Convert column names to snake_case for consistency
         df_order.columns = [camel_to_snake(col) for col in df_order.columns]
+        logger.info(f"Order created: {df_order}")
         return df_order
 
     async def create_test_order(self, symbol, side, order_type, quantity, price=None):
@@ -205,11 +212,18 @@ class BinanceService:
         logger.info(f"All orders for {symbol} with limit {limit}: {all_orders}")
         return all_orders
 
-    async def cancel_order(self, symbol, order_id):
+    async def cancel_order(self, symbol, order_id) -> DataFrame:
         # Cancel a specific order
         cancel_result = self.client.cancel_order(symbol=symbol, orderId=order_id)
         logger.info(f"Order cancelled for {symbol} with order ID {order_id}: {cancel_result}")
-        return cancel_result
+        df_cancel_result = DataFrame([cancel_result])
+        float_columns = ['price', 'origQty', 'executedQty', 'cummulativeQuoteQty']
+        df_cancel_result[float_columns] = df_cancel_result[float_columns].astype(float)
+        # Convert time columns to datetime
+        df_cancel_result['display_transact_time'] = pd.to_datetime(df_cancel_result['transactTime'], unit='ms')
+        # Convert column names to snake_case for consistency
+        df_cancel_result.columns = [camel_to_snake(col) for col in df_cancel_result.columns]
+        return df_cancel_result
 
     async def get_deposit_history(self, asset):
         # Get deposit history for a specific asset
