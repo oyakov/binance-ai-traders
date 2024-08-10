@@ -87,8 +87,13 @@ class SubsystemManagerModule(Module):
     @singleton
     @provider
     def provide_binance_trade_process_subsystem(self, bot: Bot, binance_service: BinanceService,
-                                                order_repository: OrderRepository) -> BinanceTraderProcessSubsystem:
-        return BinanceTraderProcessSubsystem(bot, binance_service, order_repository)
+                                                order_repository: OrderRepository,
+                                                klines_repository: KlinesRepository,
+                                                macd_repository: MACDRepository,
+                                                order_book_repository: OrderBookRepository,
+                                                ticker_repository: TickerRepository) -> BinanceTraderProcessSubsystem:
+        return BinanceTraderProcessSubsystem(bot, binance_service, order_repository, klines_repository, macd_repository,
+                                             order_book_repository, ticker_repository)
 
     @singleton
     @provider

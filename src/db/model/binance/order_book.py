@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, JSON, String, BigInteger
+from sqlalchemy import Integer, Column, JSON, String, BigInteger, DateTime
 
 from db.model.base import Base
 
@@ -8,5 +8,6 @@ class OrderBook(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     symbol = Column(String, nullable=False)
     lastUpdateId = Column('last_update_id', BigInteger, nullable=False)
+    tx_time = Column(DateTime, nullable=False)
     bids = Column(JSON, nullable=False)
     asks = Column(JSON, nullable=False)
