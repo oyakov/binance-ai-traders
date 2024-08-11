@@ -52,8 +52,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Trader Process subsystem {self.bot}")
         scheduler = AsyncIOScheduler()
-        # await self.trade_cycle("BTCUSDT")
-        # scheduler.add_job(self.trade_cycle, 'interval', args=["BTCUSDT"], minutes=1)
+        await self.trade_cycle("BTCUSDT")
+        scheduler.add_job(self.trade_cycle, 'interval', args=["BTCUSDT"], minutes=1)
         scheduler.start()
         logger.info("Advertiser is initialized")
         self.is_initialized = True
