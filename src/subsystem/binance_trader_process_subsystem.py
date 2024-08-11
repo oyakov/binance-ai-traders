@@ -6,11 +6,13 @@ from injector import inject
 
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
+from db.repository.macd_trend_repository import MACDTrendRepository
 from db.repository.order_book_repository import OrderBookRepository
 from db.repository.order_repository import OrderRepository
 from db.repository.ticker_repository import TickerRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
+from service.crypto.indicator_service import IndicatorService
 from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
@@ -22,16 +24,20 @@ class BinanceTraderProcessSubsystem(Subsystem):
     def __init__(self,
                  bot: Bot,
                  binance_service: BinanceService,
+                 indicator_service: IndicatorService,
                  order_repository: OrderRepository,
                  klines_repository: KlinesRepository,
                  macd_repository: MACDRepository,
+                 macd_trend_repository: MACDTrendRepository,
                  order_book_repository: OrderBookRepository,
                  ticker_repository: TickerRepository):
         self.bot = bot
         self.binance_service = binance_service
+        self.indicator_service = indicator_service
         self.order_repository = order_repository
         self.klines_repository = klines_repository
         self.macd_repository = macd_repository
+        self.macd_trend_repository = macd_trend_repository
         self.order_book_repository = order_book_repository
         self.ticker_repository = ticker_repository
 
@@ -39,8 +45,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
         logger.info(f"Initializing Binance Trader Process subsystem {self.bot}")
         scheduler = AsyncIOScheduler()
         await self.trade_cycle("BTCUSDT")
-        scheduler.add_job(self.trade_cycle, 'interval',
-                          args=["BTCUSDT"], minutes=1)
+        scheduler.add_job(self.trade_cycle, 'interval', args=["BTCUSDT"], minutes=1)
         scheduler.start()
         logger.info("Advertiser is initialized")
         self.is_initialized = True
@@ -81,10 +86,31 @@ class BinanceTraderProcessSubsystem(Subsystem):
             logger.info(f"Test order cancelled {cancel_result}")
 
             # Read the current state of the market from the database, collected by the data offload subsystem
+            # Read the latest MACD data from the database
+            # Short term trend analysis
+            last_macd_1m = await self.macd_repository.get_latest_macd(symbol, '1m')
+            macd_trend_1m = self.indicator_service.determine_macd_trend_regression(last_macd_1m['histogram'], window=5)
+            last_macd_trend_1m = await self.macd_trend_repository.get_latest_macd_trend(symbol, '1m')
+            if macd_trend_1m != last_macd_trend_1m:
+                logger.info(f"MACD trend changed from {last_macd_trend_1m} to {macd_trend_1m} "
+                            f"on 1m interval at {datetime.now()}")
+                await self.macd_trend_repository.write_macd_trend(symbol, '1m', macd_trend_1m,
+                                                                  last_macd_1m['histogram'].iloc[-1])
+            # Long term trend analysis
+            last_macd_15m = await self.macd_repository.get_latest_macd(symbol, '15m')
+            macd_trend_15m = self.indicator_service.determine_macd_trend_regression(last_macd_15m['histogram'],
+                                                                                    window=5)
+            last_macd_trend_15m = await self.macd_trend_repository.get_latest_macd_trend(symbol, '15m')
+            if macd_trend_15m != last_macd_trend_15m:
+                logger.info(f"MACD trend changed from {last_macd_trend_15m} to {macd_trend_15m} "
+                            f"on 15m interval at {datetime.now()}")
+                await self.macd_trend_repository.write_macd_trend(symbol, '15m', macd_trend_15m,
+                                                                  last_macd_15m['histogram'].iloc[-1])
+
+
             last_ticker = await self.ticker_repository.get_last_ticker(symbol)
 
-            last_macd_1m = await self.macd_repository.get_latest_macd(symbol, '1m')
-            last_macd_15m = await self.macd_repository.get_latest_macd(symbol, '15m')
+            last_order_book = await self.order_book_repository.get_order_book(symbol)
 
             klines_1m = await self.klines_repository.get_klines(symbol, '1m',
                                                                 int((datetime.now().timestamp() - 3600) * 1000),

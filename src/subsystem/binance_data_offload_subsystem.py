@@ -83,7 +83,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 await self.ticker_repository.write_ticker(symbol, ticker)
                 logger.info(f"Ticker is loaded for symbol {symbol}")
                 order_book = await self.binance_service.get_order_book(symbol)
-                await self.order_book_repository.write_order_book(symbol, order_book)
+                await self.order_book_repository.write_order_books(symbol, order_book)
                 logger.info(f"Order book is loaded for symbols {symbol}")
         except Exception as e:
             logger.error(f"Error in MACD offload cycle: {e.__class__}"

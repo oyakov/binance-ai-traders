@@ -3,6 +3,7 @@ from injector import Module, singleton, provider
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
+from db.repository.macd_trend_repository import MACDTrendRepository
 from db.repository.order_book_repository import OrderBookRepository
 from db.repository.order_repository import OrderRepository
 from db.repository.telegram_group_repository import TelegramGroupRepository
@@ -44,3 +45,8 @@ class RepositoryModule(Module):
     @provider
     def provide_order_repository(self) -> OrderRepository:
         return OrderRepository()
+
+    @singleton
+    @provider
+    def provide_macd_trend_repository(self) -> MACDTrendRepository:
+        return MACDTrendRepository()

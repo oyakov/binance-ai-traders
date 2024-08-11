@@ -19,6 +19,7 @@ python-binance = "^1.0.19"
 pandas = "^2.2.2"
 elasticsearch = "^8.14.0"
 injector = "^0.22.0"
+scipy = "^1.14.0"
 
 
 [build-system]

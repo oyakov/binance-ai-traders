@@ -7,7 +7,8 @@ class OrderBook(Base):
     __tablename__ = 'order_books'
     id = Column(Integer, primary_key=True, autoincrement=True)
     symbol = Column(String, nullable=False)
-    lastUpdateId = Column('last_update_id', BigInteger, nullable=False)
+    last_update_id = Column(BigInteger, nullable=False)
     tx_time = Column(DateTime, nullable=False)
-    bids = Column(JSON, nullable=False)
-    asks = Column(JSON, nullable=False)
+    type = Column(String, nullable=False)
+    price = Column(BigInteger, nullable=False)
+    quantity = Column(BigInteger, nullable=False)

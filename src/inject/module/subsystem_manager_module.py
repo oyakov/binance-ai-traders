@@ -3,6 +3,7 @@ from injector import Module, provider, singleton, multiprovider
 
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
+from db.repository.macd_trend_repository import MACDTrendRepository
 from db.repository.order_book_repository import OrderBookRepository
 from db.repository.order_repository import OrderRepository
 from db.repository.ticker_repository import TickerRepository
@@ -87,13 +88,17 @@ class SubsystemManagerModule(Module):
     @singleton
     @provider
     def provide_binance_trade_process_subsystem(self, bot: Bot, binance_service: BinanceService,
+                                                indicator_service: IndicatorService,
                                                 order_repository: OrderRepository,
                                                 klines_repository: KlinesRepository,
                                                 macd_repository: MACDRepository,
+                                                macd_trend_repository: MACDTrendRepository,
                                                 order_book_repository: OrderBookRepository,
                                                 ticker_repository: TickerRepository) -> BinanceTraderProcessSubsystem:
-        return BinanceTraderProcessSubsystem(bot, binance_service, order_repository, klines_repository, macd_repository,
-                                             order_book_repository, ticker_repository)
+        return BinanceTraderProcessSubsystem(bot, binance_service, indicator_service, order_repository,
+                                             klines_repository, macd_repository, macd_trend_repository,
+                                             order_book_repository,
+                                             ticker_repository)
 
     @singleton
     @provider

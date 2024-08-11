@@ -88,7 +88,7 @@ class BinanceService:
                                          endTime=end_time, timeZone=timezone, limit=limit)
 
         # Convert to DataFrame for easier manipulation
-        df = pd.DataFrame(candles, columns=[
+        df = DataFrame(candles, columns=[
             'timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
             'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
         ])
@@ -109,10 +109,31 @@ class BinanceService:
         tickers = self.client.get_all_tickers()
         return tickers
 
-    async def get_order_book(self, symbol, limit=100):
+    async def get_order_book(self, symbol, limit=100) -> pd.DataFrame:
         # Get the order book for a specific symbol
         order_book = self.client.get_order_book(symbol=symbol, limit=limit)
-        return order_book
+
+        # Extract bids and asks as separate DataFrames
+        bids_df = pd.DataFrame(order_book.get('bids', []), columns=['price', 'quantity'])
+        asks_df = pd.DataFrame(order_book.get('asks', []), columns=['price', 'quantity'])
+
+        # Convert specified columns to float
+        float_columns = ['price', 'quantity']
+        bids_df[float_columns] = bids_df[float_columns].astype(float)
+        asks_df[float_columns] = asks_df[float_columns].astype(float)
+
+        # Optionally, add an identifier to distinguish between bids and asks
+        bids_df['type'] = 'bid'
+        asks_df['type'] = 'ask'
+
+        # Concatenate the two DataFrames, if needed
+        df_order_book = pd.concat([bids_df, asks_df], ignore_index=True)
+
+        # Add current time and last_update_id
+        df_order_book['tx_time'] = pd.Timestamp.now()
+        df_order_book['last_update_id'] = order_book.get('lastUpdateId')
+
+        return df_order_book
 
     async def get_my_trades(self, symbol, limit=500):
         # Get trades for the current account
