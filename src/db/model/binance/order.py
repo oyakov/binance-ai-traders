@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, BigInteger, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, BigInteger, ForeignKey, DateTime, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -26,27 +26,27 @@ class Order(Base):
     display_working_time = Column(DateTime, nullable=False)
     self_trade_prevention_mode = Column(String(20), nullable=False, default="NONE")
     # Relationship to the Fill model
-    fills = relationship("Fill", back_populates="order", cascade="all, delete-orphan")
+    fills = Column(JSON, nullable=False)
 
     def __repr__(self):
         return f"<Order(order_id={self.order_id}, symbol={self.symbol}, status={self.status})>"
 
 
-class Fill(Base):
-    __tablename__ = 'fills'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    price = Column(Float, nullable=False)
-    qty = Column(Float, nullable=False)
-    commission = Column(Float, nullable=False)
-    commission_asset = Column(String(10), nullable=False)
-    trade_id = Column(Integer, nullable=False)
-
-    # Foreign key to the orders table
-    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'), nullable=False)
-
-    # Relationship back to the Order model
-    order = relationship("Order", back_populates="fills")
-
-    def __repr__(self):
-        return f"<Fill(trade_id={self.trade_id}, price={self.price}, qty={self.qty})>"
+# class Fill(Base):
+#     __tablename__ = 'fills'
+#
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     price = Column(Float, nullable=False)
+#     qty = Column(Float, nullable=False)
+#     commission = Column(Float, nullable=False)
+#     commission_asset = Column(String(10), nullable=False)
+#     trade_id = Column(Integer, nullable=False)
+#
+#     # Foreign key to the orders table
+#     order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'), nullable=False)
+#
+#     # Relationship back to the Order model
+#     order = relationship("Order", back_populates="fills")
+#
+#     def __repr__(self):
+#         return f"<Fill(trade_id={self.trade_id}, price={self.price}, qty={self.qty})>"

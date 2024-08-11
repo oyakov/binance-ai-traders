@@ -103,7 +103,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                                                                   last_macd_long['histogram'].iloc[-1])
 
                 # New trend is detected, place a trade
-                if macd_trend_long == UPWARD:
+                if last_macd_long is not None and macd_trend_long == UPWARD:
                     # Create a BUY order
                     order_details = None
                     try:
@@ -119,7 +119,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     except Exception as e:
                         logger.error(f"Error writing order to database", exc_info=e)
                     logger.info(f"Order details: {order_details}")
-                if macd_trend_short == DOWNWARD:
+                if last_macd_long is not None and macd_trend_long == DOWNWARD:
                     # Create a SELL order
                     order_details = None
                     try:
