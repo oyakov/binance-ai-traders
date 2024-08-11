@@ -1,5 +1,6 @@
 from injector import Module, singleton, provider
 
+from db.repository.account_repository import AccountRepository
 from db.repository.calendar_repository import CalendarRepository
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
@@ -50,3 +51,8 @@ class RepositoryModule(Module):
     @provider
     def provide_macd_trend_repository(self) -> MACDTrendRepository:
         return MACDTrendRepository()
+
+    @singleton
+    @provider
+    def provide_account_repository(self) -> AccountRepository:
+        return AccountRepository()

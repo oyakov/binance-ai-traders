@@ -5,6 +5,7 @@ from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from injector import inject
 
+from db.repository.account_repository import AccountRepository
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
 from db.repository.order_book_repository import OrderBookRepository
@@ -27,7 +28,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
                  ticker_repository: TickerRepository,
                  order_book_repository: OrderBookRepository,
                  klines_repository: KlinesRepository,
-                 macd_repository: MACDRepository):
+                 macd_repository: MACDRepository,
+                 account_repository: AccountRepository):
         self.bot = bot
         self.binance_service = binance_service
         self.indicator_service = indicator_service
@@ -35,6 +37,7 @@ class BinanceDataOffloadSubsystem(Subsystem):
         self.order_book_repository = order_book_repository
         self.klines_repository = klines_repository
         self.macd_repository = macd_repository
+        self.account_repository = account_repository
 
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Data Offload subsystem {self.bot}")
@@ -42,25 +45,21 @@ class BinanceDataOffloadSubsystem(Subsystem):
             logger.info("Initialize data offload cycle jobs")
             scheduler = AsyncIOScheduler()
             await self.ticker_offload_cycle(["BTCUSDT", "ETHUSDT"])
-            scheduler.add_job(self.ticker_offload_cycle,
-                              'interval',
-                              args=[["BTCUSDT", "ETHUSDT"]], minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m', 360)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[["BTCUSDT", "ETHUSDT"], '1m', 500], minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m', 360)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[["BTCUSDT", "ETHUSDT"], '15m', 500], minutes=1)
+            scheduler.add_job(self.ticker_offload_cycle, 'interval', args=[["BTCUSDT", "ETHUSDT"]], minutes=1)
+            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m', 500)
+            scheduler.add_job(self.klines_offload_cycle, 'interval', args=[["BTCUSDT", "ETHUSDT"], '1m', 500],
+                              minutes=1)
+            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m', 500)
+            scheduler.add_job(self.klines_offload_cycle, 'interval', args=[["BTCUSDT", "ETHUSDT"], '15m', 500],
+                              minutes=1)
             await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '1m')
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[["BTCUSDT", "ETHUSDT"], '1m'], minutes=1)
+            scheduler.add_job(self.macd_offload_cycle, 'interval', args=[["BTCUSDT", "ETHUSDT"], '1m'],
+                              minutes=1)
             await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], '15m')
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[["BTCUSDT", "ETHUSDT"], '15m'], minutes=1)
+            scheduler.add_job(self.macd_offload_cycle, 'interval', args=[["BTCUSDT", "ETHUSDT"], '15m'],
+                              minutes=1)
+            await self.account_offload_cycle()
+            scheduler.add_job(self.account_offload_cycle, 'interval', minutes=1)
             scheduler.start()
             logger.info("Data offload cycle jobs are initialized")
         except Exception as e:
@@ -74,6 +73,18 @@ class BinanceDataOffloadSubsystem(Subsystem):
 
     def get_priority(self):
         return InitPriority.DATA_OFFLOAD
+
+    async def account_offload_cycle(self):
+        logger.info(f"Account offload cycle has begun")
+        try:
+            account = await self.binance_service.get_account_info()
+            await self.account_repository.write_account(account)
+            logger.info(f"Account is loaded")
+        except Exception as e:
+            logger.error(f"Error in Account offload cycle: {e.__class__}"
+                         f"\n\t{e}"
+                         f"\n\t{traceback.format_exc()}")
+        logger.info(f"Account offload cycle has completed")
 
     async def ticker_offload_cycle(self, symbols: list[str] = "BTCUSDT"):
         logger.info(f"Ticker offload cycle for symbols {symbols} has begun")

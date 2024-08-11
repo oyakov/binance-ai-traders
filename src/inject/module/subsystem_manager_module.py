@@ -1,6 +1,7 @@
 from aiogram import Bot
 from injector import Module, provider, singleton, multiprovider
 
+from db.repository.account_repository import AccountRepository
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
 from db.repository.macd_trend_repository import MACDTrendRepository
@@ -76,14 +77,16 @@ class SubsystemManagerModule(Module):
                                                ticker_repository: TickerRepository,
                                                order_book_repository: OrderBookRepository,
                                                klines_repository: KlinesRepository,
-                                               macd_repository: MACDRepository) -> BinanceDataOffloadSubsystem:
+                                               macd_repository: MACDRepository,
+                                               account_repository: AccountRepository) -> BinanceDataOffloadSubsystem:
         return BinanceDataOffloadSubsystem(bot,
                                            binance_service,
                                            indicator_service,
                                            ticker_repository,
                                            order_book_repository,
                                            klines_repository,
-                                           macd_repository)
+                                           macd_repository,
+                                           account_repository)
 
     @singleton
     @provider

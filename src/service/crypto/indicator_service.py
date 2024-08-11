@@ -4,6 +4,10 @@ from scipy.stats import linregress
 
 from oam import log_config
 
+UPWARD = "Upward"
+DOWNWARD = "Downward"
+NO_CLEAR_TREND = "No Clear Trend"
+
 # Initialize logger
 logger = log_config.get_logger(__name__)
 
@@ -42,17 +46,17 @@ class IndicatorService:
     #             ema[i] = alpha * prices[i] + (1 - alpha) * ema[i - 1]
     #     return ema
 
-    def determine_macd_trend_regression(self, macd_hist: pd.Series, window: int = 5) -> str:
+    def trend_regression(self, series: pd.Series, window: int = 5) -> str:
         # Consider only the last `window` values
-        recent_hist = macd_hist.tail(window)
+        recent_hist = series.tail(window)
 
         # Fit a linear regression line
         slope, _, _, _, _ = linregress(range(len(recent_hist)), recent_hist)
 
         # Determine the trend based on the slope
         if slope > 0:
-            return "Upward"
+            return UPWARD
         elif slope < 0:
-            return "Downward"
+            return DOWNWARD
         else:
-            return "No Clear Trend"
+            return NO_CLEAR_TREND

@@ -47,7 +47,8 @@ class BinanceService:
     async def get_account_info(self):
         # Get account information
         account_info = self.client.get_account()
-        return account_info
+
+        return convert_dict_keys_to_snake_case(account_info)
 
     async def get_asset_balance(self, asset):
         # Get the balance of a specific asset
