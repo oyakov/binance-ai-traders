@@ -86,9 +86,13 @@ class BinanceTraderProcessSubsystem(Subsystem):
             last_macd_1m = await self.macd_repository.get_latest_macd(symbol, '1m')
             last_macd_15m = await self.macd_repository.get_latest_macd(symbol, '15m')
 
-            klines = await self.klines_repository.get_klines(symbol, '1m',
-                                                             int((datetime.now().timestamp() - 3600) * 1000),
-                                                             int(datetime.now().timestamp() * 1000))
+            klines_1m = await self.klines_repository.get_klines(symbol, '1m',
+                                                                int((datetime.now().timestamp() - 3600) * 1000),
+                                                                int(datetime.now().timestamp() * 1000))
+
+            klines_15m = await self.klines_repository.get_klines(symbol, '15m',
+                                                                 int((datetime.now().timestamp() - 72000) * 1000),
+                                                                 int(datetime.now().timestamp() * 1000))
 
             # Find resistance and support levels based on the data collected from the database
 
