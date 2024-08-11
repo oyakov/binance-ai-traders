@@ -31,6 +31,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                  macd_trend_repository: MACDTrendRepository,
                  order_book_repository: OrderBookRepository,
                  ticker_repository: TickerRepository):
+        self.router = None
         self.bot = bot
         self.binance_service = binance_service
         self.indicator_service = indicator_service
