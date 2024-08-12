@@ -108,7 +108,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     order_details = None
                     try:
                         order_details = await self.binance_service.create_order(symbol,
-                                                                                Client.SIDE_BUY,
+                                                                                Client.SIDE_SELL,
                                                                                 Client.ORDER_TYPE_MARKET,
                                                                                 "{:.8f}".format(0.00034))
                     except Exception as e:
@@ -124,7 +124,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     order_details = None
                     try:
                         order_details = await self.binance_service.create_order(symbol,
-                                                                                Client.SIDE_SELL,
+                                                                                Client.SIDE_BUY,
                                                                                 Client.ORDER_TYPE_MARKET,
                                                                                 "{:.8f}".format(0.00034))
                     except Exception as e:
