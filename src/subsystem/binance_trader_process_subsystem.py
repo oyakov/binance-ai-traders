@@ -44,7 +44,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.ticker_repository = ticker_repository
         self.long_interval = Client.KLINE_INTERVAL_15MINUTE
         self.short_interval = Client.KLINE_INTERVAL_1MINUTE
-        self.long_window = 5
+        self.long_window = 3
         self.short_window = 5
         self.notional = 0.00034
         self.is_initialized = False
