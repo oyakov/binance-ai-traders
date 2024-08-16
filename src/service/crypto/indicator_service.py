@@ -35,17 +35,6 @@ class IndicatorService:
         logger.info(f"MACD is calculated for DataFrame: {klines.head()}")
         return macd
 
-    # def calculate_ema(self, prices, window, previous_ema=None):
-    #     if previous_ema is None:
-    #         ema = prices.ewm(span=window, adjust=False).mean()
-    #     else:
-    #         alpha = 2 / (window + 1)
-    #         ema = prices.copy()
-    #         ema.iloc[0] = previous_ema
-    #         for i in range(1, len(prices)):
-    #             ema[i] = alpha * prices[i] + (1 - alpha) * ema[i - 1]
-    #     return ema
-
     def trend_regression(self, series: pd.Series, window: int = 5) -> str:
         # Consider only the last `window` values
         recent_hist = series.tail(window)
