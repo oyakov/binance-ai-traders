@@ -14,12 +14,6 @@ class AccountRepository:
     async def write_account(self, account: dict) -> None:
         logger.debug(f"Writing account {account}")
         async with self.session_maker() as session:
-            # Step 1: Delete existing Klines entries for the specified symbol and interval
-            await session.execute(
-                delete(Account)
-            )
-
-            # Step 2: Insert new Klines entries
             session.add(Account(**account))
             await session.commit()
         logger.debug(f"Account {account} is written")
