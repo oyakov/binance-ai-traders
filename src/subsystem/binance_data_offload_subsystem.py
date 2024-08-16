@@ -91,42 +91,39 @@ class BinanceDataOffloadSubsystem(Subsystem):
                                   Client.KLINE_INTERVAL_1HOUR,
                                   1000],
                               minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1MINUTE)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1MINUTE, 900)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1MINUTE],
+                                  Client.KLINE_INTERVAL_1MINUTE,
+                                  900],
                               minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1MINUTE)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_5MINUTE, 900)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1MINUTE],
+                                  Client.KLINE_INTERVAL_5MINUTE,
+                                  900],
                               minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_5MINUTE)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_15MINUTE, 900)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_5MINUTE],
+                                  Client.KLINE_INTERVAL_15MINUTE,
+                                  900],
                               minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_15MINUTE)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_30MINUTE, 900)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
                                   ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_15MINUTE],
+                                  Client.KLINE_INTERVAL_30MINUTE,
+                                  900],
                               minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_30MINUTE)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_30MINUTE],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1HOUR)
+            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1HOUR, 900)
             scheduler.add_job(self.macd_offload_cycle,
                               'interval',
                               args=[
@@ -194,11 +191,11 @@ class BinanceDataOffloadSubsystem(Subsystem):
                          f"\n\t{e}"
                          f"\n\t{traceback.format_exc()}")
 
-    async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m'):
+    async def macd_offload_cycle(self, symbols: list[str] = "BTCUSDT", interval: str = '1m', timedelta_minutes: int = 181):
         logger.info(f"MACD offload cycle for symbols {symbols} has begun")
         try:
             for symbol in symbols:
-                start_time = (datetime.now() - timedelta(minutes=181)).timestamp()
+                start_time = (datetime.now() - timedelta(minutes=timedelta_minutes)).timestamp()
                 end_time = datetime.now().timestamp()
 
                 klines = await self.klines_repository.get_klines(
