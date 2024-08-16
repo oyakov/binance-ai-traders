@@ -60,3 +60,12 @@ class IndicatorService:
             return DOWNWARD
         else:
             return NO_CLEAR_TREND
+
+    def generate_signals(self, df: DataFrame):
+        df['Signal_Buy'] = ((df['MACD'] > df['Signal']) & (df['MACD'].shift(1) <= df['Signal'].shift(1)))
+        df['Signal_Sell'] = ((df['MACD'] < df['Signal']) & (df['MACD'].shift(1) >= df['Signal'].shift(1)))
+        df['Volume_Signal'] = df['Volume'] > df['Volume'].rolling(window=20).mean() * 1.5  # Example volume condition
+
+        df['Buy'] = df['Signal_Buy'] & df['Volume_Signal']
+        df['Sell'] = df['Signal_Sell'] & df['Volume_Signal']
+        return df
