@@ -47,8 +47,9 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.long_window = 2
         self.short_window = 2
         self.slope_threshold_buy = 1.0
-        self.slope_threshold_sell = 0.5
+        self.slope_threshold_sell = 0.2
         self.notional = 0.00034
+        self.mode = Client.SIDE_BUY
         self.is_initialized = False
 
     async def initialize(self, subsystem_manager):
@@ -102,6 +103,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     await self.order_repository.write_order(symbol, order)
                 except Exception as e:
                     logger.error(f"Error saving order to the database", exc_info=e)
+                self.mode = Client.SIDE_SELL
             elif self.sell_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
                 logger.info("Sell condition is statisfied, placing order")
                 # Place a sell order
@@ -117,17 +119,21 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     await self.order_repository.write_order(symbol, order)
                 except Exception as e:
                     logger.error(f"Error saving order to the database", exc_info=e)
+                self.mode = Client.SIDE_BUY
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
 
     def buy_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-        return (macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0
+        return (self.mode == Client.SIDE_BUY and
+                macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0
                 and macd_lin_regression_2 > self.slope_threshold_buy
                 and macd_lin_regression_3 > self.slope_threshold_buy)
 
     def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-        return (macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0 and
-                macd_lin_regression_2 < self.slope_threshold_sell < macd_lin_regression_3)
+        # Fake sell when no buy was committed, need to add a mode table to check if a buy was committed
+        return (self.mode == Client.SIDE_SELL and
+                macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0 and
+                macd_lin_regression_2 < self.slope_threshold_sell)
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
