@@ -93,7 +93,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                 # Place a buy order
                 order = None
                 try:
-                    order = await self.binance_service.create_order(symbol, "BUY", self.notional)
+                    order = await self.binance_service.create_order(symbol, Client.SIDE_BUY, Client.ORDER_TYPE_MARKET, self.notional)
                     logger.info(f"Order placed: {order}")
                 except Exception as e:
                     logger.error(f"Error placing order", exc_info=e)
