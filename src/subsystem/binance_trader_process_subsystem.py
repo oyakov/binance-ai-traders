@@ -130,7 +130,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
     def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
         # Fake sell when no buy was committed, need to add a mode table to check if a buy was committed
         return (self.mode == Client.SIDE_SELL and
-                macd_histogram.iloc[-1]['histogram'] > 0 > macd_histogram.iloc[-2]['histogram'])
+                macd_histogram.iloc[-1]['histogram'] < 0 < macd_histogram.iloc[-2]['histogram'])
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
