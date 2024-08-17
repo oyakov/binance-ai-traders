@@ -1,9 +1,9 @@
+import json
 import traceback
 from datetime import datetime, timedelta
 
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from binance import Client
 from injector import inject
 
 from db.repository.account_repository import AccountRepository
@@ -45,93 +45,45 @@ class BinanceDataOffloadSubsystem(Subsystem):
         try:
             logger.info("Initialize data offload cycle jobs")
             scheduler = AsyncIOScheduler()
-            await self.ticker_offload_cycle(["BTCUSDT", "ETHUSDT"])
+
+            # Load configuration from JSON file
+            with open('jobs.config', 'r') as config_file:
+                config = json.load(config_file)
+
+            symbols = config['symbols']
+            job_interval_minutes = config['job_interval_minutes']
+
+            # Schedule ticker offload cycle
+            await self.ticker_offload_cycle(symbols)
             scheduler.add_job(self.ticker_offload_cycle,
                               'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"]
-                              ], minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1MINUTE, 1000)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1MINUTE,
-                                  1000],
-                              minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_5MINUTE, 1000)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_5MINUTE,
-                                  1000],
-                              minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_15MINUTE, 1000)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_15MINUTE,
-                                  1000],
-                              minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_30MINUTE, 1000)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_30MINUTE,
-                                  1000],
-                              minutes=1)
-            await self.klines_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1HOUR, 1000)
-            scheduler.add_job(self.klines_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1HOUR,
-                                  1000],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1MINUTE, 900)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1MINUTE,
-                                  900],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_5MINUTE, 900)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_5MINUTE,
-                                  900],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_15MINUTE, 900)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_15MINUTE,
-                                  900],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_30MINUTE, 900)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_30MINUTE,
-                                  900],
-                              minutes=1)
-            await self.macd_offload_cycle(["BTCUSDT", "ETHUSDT"], Client.KLINE_INTERVAL_1HOUR, 900)
-            scheduler.add_job(self.macd_offload_cycle,
-                              'interval',
-                              args=[
-                                  ["BTCUSDT", "ETHUSDT"],
-                                  Client.KLINE_INTERVAL_1HOUR],
-                              minutes=1)
+                              args=[symbols],
+                              minutes=job_interval_minutes)
+
+            # Schedule klines offload cycles
+            for interval_config in config['klines_intervals']:
+                interval = interval_config['interval']
+                limit = interval_config['limit']
+                await self.klines_offload_cycle(symbols, interval, limit)
+                scheduler.add_job(self.klines_offload_cycle,
+                                  'interval',
+                                  args=[symbols, interval, limit],
+                                  minutes=job_interval_minutes)
+
+            # Schedule MACD offload cycles
+            for interval_config in config['macd_intervals']:
+                interval = interval_config['interval']
+                timedelta_minutes = interval_config['timedelta_minutes']
+                await self.macd_offload_cycle(symbols, interval, timedelta_minutes)
+                scheduler.add_job(self.macd_offload_cycle,
+                                  'interval',
+                                  args=[symbols, interval, timedelta_minutes],
+                                  minutes=job_interval_minutes)
+
+            # Schedule account offload cycle
             await self.account_offload_cycle()
-            scheduler.add_job(self.account_offload_cycle, 'interval', minutes=1)
+            scheduler.add_job(self.account_offload_cycle, 'interval', minutes=job_interval_minutes)
+
             scheduler.start()
             logger.info("Data offload cycle jobs are initialized")
         except Exception as e:
@@ -207,6 +159,8 @@ class BinanceDataOffloadSubsystem(Subsystem):
                 # Calculate MACD values
                 macd = await self.indicator_service.calculate_macd(klines)
                 logger.info(f"MACD is calculated for symbol {symbol}")
+                macd_signal = self.indicator_service.generate_signals(macd)
+                # Write the MACD values to the database
                 await self.macd_repository.write_macd(symbol, interval, macd)
                 logger.info(f"MACD values updated for the last 60 minutes for symbol {symbol}")
         except Exception as e:

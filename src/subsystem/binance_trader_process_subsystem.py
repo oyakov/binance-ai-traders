@@ -43,9 +43,10 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.order_book_repository = order_book_repository
         self.ticker_repository = ticker_repository
         self.long_interval = Client.KLINE_INTERVAL_15MINUTE
-        self.short_interval = Client.KLINE_INTERVAL_1MINUTE
+        self.short_interval = Client.KLINE_INTERVAL_5MINUTE
         self.long_window = 2
-        self.short_window = 5
+        self.short_window = 2
+        self.slope_threshold_buy = 1
         self.notional = 0.00034
         self.is_initialized = False
 
@@ -65,7 +66,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
             # Get our current orders
             open_orders = await self.binance_service.get_open_orders(symbol)
 
-            # Cancel all open orders
+            # Cancel all open (primarily MARKET if any) orders for safety for now
             for order in open_orders:
                 logger.info(f"Order exists: {order}")
                 try:
@@ -80,72 +81,38 @@ class BinanceTraderProcessSubsystem(Subsystem):
             # Read the latest MACD data from the database
             # Short term trend analysis
             # ==========================================================================================================
-            last_macd_short = await self.macd_repository.get_latest_macd(symbol, self.short_interval)
-            macd_trend_short = self.indicator_service.trend_regression(last_macd_short['histogram'],
-                                                                       window=self.short_window)
-            last_macd_trend_short = await self.macd_trend_repository.get_latest_macd_trend(symbol, self.short_interval)
-            if macd_trend_short != last_macd_trend_short:
-                logger.info(f"MACD trend changed from {last_macd_trend_short} to {macd_trend_short} "
-                            f"on 1m interval at {datetime.now()}")
-                await self.macd_trend_repository.write_macd_trend(symbol, self.short_interval, macd_trend_short,
-                                                                  last_macd_short['histogram'].iloc[-1])
-            # Long term trend analysis
-            last_macd_long = await self.macd_repository.get_latest_macd(symbol, self.long_interval)
-            macd_trend_long = self.indicator_service.trend_regression(last_macd_long['histogram'],
-                                                                      window=self.long_window)
-            last_macd_trend_15m = await self.macd_trend_repository.get_latest_macd_trend(symbol, self.long_interval)
+            macd_histogram = await self.macd_repository.get_latest_macd(symbol, self.short_interval)
+            macd_signals = self.indicator_service.generate_signals(macd_histogram)
+            macd_lin_regression_2, trend_2 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
+            macd_lin_regression_3, trend_3 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
+            # Check if the last two values are greater than zero
+            if self.buy_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+                logger.info("Buy condition is statisfied, placing order")
+                # Place a buy order
+                order = None
+                try:
+                    order = await self.binance_service.create_order(symbol, "BUY", self.notional)
+                    logger.info(f"Order placed: {order}")
+                except Exception as e:
+                    logger.error(f"Error placing order", exc_info=e)
 
-            # Track the trend change
-            if macd_trend_long != last_macd_trend_15m:
-                logger.info(f"MACD trend changed from {last_macd_trend_15m} to {macd_trend_long} "
-                            f"on 15m interval at {datetime.now()}")
-                await self.macd_trend_repository.write_macd_trend(symbol, self.long_interval, macd_trend_long,
-                                                                  last_macd_long['histogram'].iloc[-1])
-
-                # New trend is detected, place a trade
-                if last_macd_long is not None and macd_trend_long == UPWARD:
-                    # Create a BUY order
-                    order_details = None
-                    try:
-                        order_details = await self.binance_service.create_order(symbol,
-                                                                                Client.SIDE_SELL,
-                                                                                Client.ORDER_TYPE_MARKET,
-                                                                                "{:.8f}".format(0.00034))
-                    except Exception as e:
-                        logger.error(f"Error creating order", exc_info=e)
-
-                    try:
-                        await self.order_repository.write_order(symbol, order_details)
-                    except Exception as e:
-                        logger.error(f"Error writing order to database", exc_info=e)
-                    logger.info(f"Order details: {order_details}")
-                if last_macd_long is not None and macd_trend_long == DOWNWARD:
-                    # Create a SELL order
-                    order_details = None
-                    try:
-                        order_details = await self.binance_service.create_order(symbol,
-                                                                                Client.SIDE_BUY,
-                                                                                Client.ORDER_TYPE_MARKET,
-                                                                                "{:.8f}".format(0.00034))
-                    except Exception as e:
-                        logger.error(f"Error creating order", exc_info=e)
-
-                    try:
-                        await self.order_repository.write_order(symbol, order_details)
-                    except Exception as e:
-                        logger.error(f"Error writing order to database", exc_info=e)
-                    logger.info(f"Order details: {order_details}")
-
-            # Find resistance and support levels based on the data collected from the database
-            # Assess potential entry and exit points based on the resistance and support levels
-            # Assess potential profitablity of the trade, based on the entry and exit points,
-            # trading fees and other costs
-            # Determine if current orders need to be cancelled or new orders need to be placed
-            # Place orders based on the new assessment
-            # Update the order with the new trades in the database
-            # In case of an error, log the error, send a notification to the admin and stop the trade cycle
+                # Save the order to the database
+                try:
+                    await self.order_repository.write_order(symbol, order)
+                except Exception as e:
+                    logger.error(f"Error saving order to the database", exc_info=e)
+            else:
+                logger.info("One or both of the last two MACD histogram values are not greater than 0.")
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
+
+    def buy_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+        return (macd_histogram.iloc[-1] > 0 and macd_histogram.iloc[-2] > 0
+                and macd_lin_regression_2 > self.slope_threshold_buy
+                and macd_lin_regression_3 > self.slope_threshold_buy)
+
+    def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+        return macd_lin_regression_2 < 0 and macd_lin_regression_3 < 0
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")

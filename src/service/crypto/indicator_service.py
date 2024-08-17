@@ -35,7 +35,7 @@ class IndicatorService:
         logger.info(f"MACD is calculated for DataFrame: {klines.head()}")
         return macd
 
-    def trend_regression(self, series: pd.Series, window: int = 5) -> str:
+    def trend_regression(self, series: pd.Series, window: int = 5) -> (int, str):
         # Consider only the last `window` values
         recent_hist = series.tail(window)
 
@@ -44,17 +44,17 @@ class IndicatorService:
 
         # Determine the trend based on the slope
         if slope > 0:
-            return UPWARD
+            return slope, UPWARD
         elif slope < 0:
-            return DOWNWARD
+            return slope, DOWNWARD
         else:
-            return NO_CLEAR_TREND
+            return slope, NO_CLEAR_TREND
 
-    def generate_signals(self, df: DataFrame):
-        df['Signal_Buy'] = ((df['MACD'] > df['Signal']) & (df['MACD'].shift(1) <= df['Signal'].shift(1)))
-        df['Signal_Sell'] = ((df['MACD'] < df['Signal']) & (df['MACD'].shift(1) >= df['Signal'].shift(1)))
-        df['Volume_Signal'] = df['Volume'] > df['Volume'].rolling(window=20).mean() * 1.5  # Example volume condition
+    def generate_signals(self, df: DataFrame) -> DataFrame:
+        df['signal_buy'] = ((df['macd'] > df['signal']) & (df['macd'].shift(1) <= df['signal'].shift(1)))
+        df['signal_sell'] = ((df['macd'] < df['signal']) & (df['macd'].shift(1) >= df['signal'].shift(1)))
+        df['volume_signal'] = True #df['volume'] > df['volume'].rolling(window=20).mean() * 1.5  # Example volume condition
 
-        df['Buy'] = df['Signal_Buy'] & df['Volume_Signal']
-        df['Sell'] = df['Signal_Sell'] & df['Volume_Signal']
+        df['buy'] = df['signal_buy'] & df['volume_signal']
+        df['sell'] = df['signal_sell'] & df['volume_signal']
         return df

@@ -8,7 +8,7 @@ class Account(Base):
     __tablename__ = 'accounts'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    uid = Column(BigInteger, unique=True, nullable=False)
+    uid = Column(BigInteger, nullable=False)
     maker_commission = Column(Integer, nullable=False)
     taker_commission = Column(Integer, nullable=False)
     buyer_commission = Column(Integer, nullable=False)
