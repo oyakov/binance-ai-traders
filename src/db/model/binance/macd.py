@@ -16,3 +16,8 @@ class MACD(Base):
     macd = Column(Float)
     signal = Column(Float)
     histogram = Column(Float)
+    signal_buy = Column(Float)
+    signal_sell = Column(Float)
+    volume_signal = Column(Float)
+    buy = Column(Float)
+    sell = Column(Float)
