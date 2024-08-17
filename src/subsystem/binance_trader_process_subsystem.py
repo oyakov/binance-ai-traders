@@ -46,7 +46,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.short_interval = Client.KLINE_INTERVAL_5MINUTE
         self.long_window = 2
         self.short_window = 2
-        self.slope_threshold_buy = 1
+        self.slope_threshold_buy = 1.0
+        self.slope_threshold_sell = 0.5
         self.notional = 0.00034
         self.is_initialized = False
 
@@ -84,10 +85,10 @@ class BinanceTraderProcessSubsystem(Subsystem):
             macd_histogram = await self.macd_repository.get_latest_macd(symbol, self.short_interval)
             macd_signals = self.indicator_service.generate_signals(macd_histogram)
             macd_lin_regression_2, trend_2 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
-            macd_lin_regression_3, trend_3 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
+            macd_lin_regression_3, trend_3 = self.indicator_service.trend_regression(macd_histogram['histogram'], 3)
             # Check if the last two values are greater than zero
             if self.buy_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-                logger.info("Buy condition is statisfied, placing order")
+                logger.info("Buy condition is satisfied, placing order")
                 # Place a buy order
                 order = None
                 try:
@@ -106,7 +107,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                 # Place a sell order
                 order = None
                 try:
-                    order = await self.binance_service.create_order(symbol, "SELL", self.notional)
+                    order = await self.binance_service.create_order(symbol, Client.SIDE_SELL, Client.ORDER_TYPE_MARKET, self.notional)
                     logger.info(f"Order placed: {order}")
                 except Exception as e:
                     logger.error(f"Error placing order", exc_info=e)
@@ -120,12 +121,12 @@ class BinanceTraderProcessSubsystem(Subsystem):
             logger.error(f"Error in trade cycle", exc_info=e)
 
     def buy_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-        return (macd_histogram.iloc[-1] > 0 and macd_histogram.iloc[-2] > 0
+        return (macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0
                 and macd_lin_regression_2 > self.slope_threshold_buy
                 and macd_lin_regression_3 > self.slope_threshold_buy)
 
     def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-        return macd_lin_regression_2 < 0 and macd_lin_regression_3 < 0
+        return macd_lin_regression_2 < self.slope_threshold_sell < macd_lin_regression_3
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
