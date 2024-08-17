@@ -101,8 +101,21 @@ class BinanceTraderProcessSubsystem(Subsystem):
                     await self.order_repository.write_order(symbol, order)
                 except Exception as e:
                     logger.error(f"Error saving order to the database", exc_info=e)
-            else:
-                logger.info("One or both of the last two MACD histogram values are not greater than 0.")
+            elif self.sell_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+                logger.info("Sell condition is statisfied, placing order")
+                # Place a sell order
+                order = None
+                try:
+                    order = await self.binance_service.create_order(symbol, "SELL", self.notional)
+                    logger.info(f"Order placed: {order}")
+                except Exception as e:
+                    logger.error(f"Error placing order", exc_info=e)
+
+                # Save the order to the database
+                try:
+                    await self.order_repository.write_order(symbol, order)
+                except Exception as e:
+                    logger.error(f"Error saving order to the database", exc_info=e)
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
 
