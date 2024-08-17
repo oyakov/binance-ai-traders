@@ -126,7 +126,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
                 and macd_lin_regression_3 > self.slope_threshold_buy)
 
     def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
-        return macd_lin_regression_2 < self.slope_threshold_sell < macd_lin_regression_3
+        return (macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0 and
+                macd_lin_regression_2 < self.slope_threshold_sell < macd_lin_regression_3)
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
