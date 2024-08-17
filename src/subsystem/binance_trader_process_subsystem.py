@@ -42,8 +42,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.macd_trend_repository = macd_trend_repository
         self.order_book_repository = order_book_repository
         self.ticker_repository = ticker_repository
-        self.long_interval = Client.KLINE_INTERVAL_15MINUTE
-        self.short_interval = Client.KLINE_INTERVAL_5MINUTE
+        self.long_interval = Client.KLINE_INTERVAL_1HOUR
+        self.short_interval = Client.KLINE_INTERVAL_30MINUTE
         self.long_window = 2
         self.short_window = 2
         self.slope_threshold_buy = 1.0
@@ -125,15 +125,12 @@ class BinanceTraderProcessSubsystem(Subsystem):
 
     def buy_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
         return (self.mode == Client.SIDE_BUY and
-                macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0
-                and macd_lin_regression_2 > self.slope_threshold_buy
-                and macd_lin_regression_3 > self.slope_threshold_buy)
+                macd_histogram.iloc[-1]['histogram'] > 0 > macd_histogram.iloc[-2]['histogram'])
 
     def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
         # Fake sell when no buy was committed, need to add a mode table to check if a buy was committed
         return (self.mode == Client.SIDE_SELL and
-                macd_histogram.iloc[-1]['histogram'] > 0 and macd_histogram.iloc[-2]['histogram'] > 0 and
-                macd_lin_regression_2 < self.slope_threshold_sell)
+                macd_histogram.iloc[-1]['histogram'] > 0 > macd_histogram.iloc[-2]['histogram'])
 
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
