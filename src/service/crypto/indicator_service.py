@@ -58,3 +58,24 @@ class IndicatorService:
         df['buy'] = df['signal_buy'] & df['volume_signal']
         df['sell'] = df['signal_sell'] & df['volume_signal']
         return df
+
+    def calculate_rsi(self, prices: pd.Series, period: int = 14) -> pd.Series:
+        """Calculate the Relative Strength Index (RSI) for a given price series."""
+        delta = prices.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+
+    def calculate_bollinger_bands(self, prices: pd.Series, period: int = 20, std_dev_multiplier: int = 2):
+        """Calculate Bollinger Bands for a given price series."""
+        sma = prices.rolling(window=period).mean()
+        std_dev = prices.rolling(window=period).std()
+
+        upper_band = sma + (std_dev_multiplier * std_dev)
+        lower_band = sma - (std_dev_multiplier * std_dev)
+
+        return upper_band, lower_band

@@ -4,15 +4,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-#      elasticsearch:
-#        condition: service_healthy
     env_file:
       - .env.prod
     ports:
       - "8000:8000"
     networks:
       - bot_network
-
+    volumes:
+      - ./logs:/app/logs  # Ensure the logs directory is mounted
+      - ./logging.ini:/app/logging.ini  # Mount logging.ini to the correct path
+    environment:
+      - LOGGING_CONFIG=/app/logging.ini  # Point to the logging configuration
   db:
     image: postgres:13
     environment:
