@@ -79,3 +79,12 @@ class IndicatorService:
         lower_band = sma - (std_dev_multiplier * std_dev)
 
         return upper_band, lower_band
+
+    def calculate_atr(self, high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> pd.Series:
+        """Calculate the Average True Range (ATR) for a given period."""
+        high_low = high - low
+        high_close = (high - close.shift()).abs()
+        low_close = (low - close.shift()).abs()
+        true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+        atr = true_range.rolling(window=period).mean()
+        return atr
