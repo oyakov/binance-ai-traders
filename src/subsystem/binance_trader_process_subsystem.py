@@ -83,6 +83,39 @@ class BinanceTraderProcessSubsystem(Subsystem):
             # Read the latest MACD data from the database
             # Short term trend analysis
             # ==========================================================================================================
+
+            # Get the latest klines
+            klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
+
+            # Calculate MACD
+            macd_calculated = await self.indicator_service.calculate_macd(klines_15m, 12, 26, 9)
+
+            logger.info(f"MACD calculated: {macd_calculated}")
+
+            # Calculate RSI
+            rsi = await self.indicator_service.calculate_rsi(klines_15m['close'], 14)
+
+            if rsi.iloc[-1] > 70:
+                logger.info("RSI is overbought")
+            elif rsi.iloc[-1] < 30:
+                logger.info("RSI is oversold")
+
+            # Calculate Bollinger bands
+            bollinger_bands = await self.indicator_service.calculate_bollinger_bands(klines_15m['close'], 20)
+
+            if klines_15m['close'].iloc[-1] > bollinger_bands['upper'].iloc[-1]:
+                logger.info("Price is above the upper Bollinger band")
+            elif klines_15m['close'].iloc[-1] < bollinger_bands['lower'].iloc[-1]:
+                logger.info("Price is below the lower Bollinger band")
+
+            # Calculate ATR
+            atr = await self.indicator_service.calculate_atr(klines_15m['high'], klines_15m['low'], klines_15m['close'], 14)
+
+            if atr.iloc[-1] > 0.01:
+                logger.info("ATR is above 0.01")
+            elif atr.iloc[-1] < 0.01:
+                logger.info("ATR is below 0.01")
+
             macd_histogram = await self.macd_repository.get_latest_macd(symbol, self.short_interval)
             macd_signals = self.indicator_service.generate_signals(macd_histogram)
             macd_lin_regression_2, trend_2 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)

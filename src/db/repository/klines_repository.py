@@ -36,6 +36,7 @@ class KlinesRepository:
 
     async def get_klines(self, symbol: str, interval: str, start_time: int, end_time: int) -> DataFrame:
         logger.debug(f"Getting klines for {symbol}")
+
         async with self.session_maker() as session:
             stmt = select(Kline).filter(Kline.symbol == symbol, Kline.interval == interval,
                                         Kline.timestamp >= start_time, Kline.timestamp <= end_time)
@@ -43,6 +44,16 @@ class KlinesRepository:
             klines = result.scalars().all()
         klines = DataFrame([kline.__dict__ for kline in klines])
         logger.debug(f"Klines for {symbol} are retrieved")
+        return klines
+
+    async def get_all_klines(self, symbol: str, interval: str) -> DataFrame:
+        logger.debug(f"Getting all klines for {symbol}")
+        async with self.session_maker() as session:
+            stmt = select(Kline).filter(Kline.symbol == symbol, Kline.interval == interval)
+            result = await session.execute(stmt)
+            klines = result.scalars().all()
+        klines = DataFrame([kline.__dict__ for kline in klines])
+        logger.debug(f"All klines for {symbol} are retrieved")
         return klines
 
     async def get_latest_kline(self, symbol: str, interval: str) -> DataFrame:
