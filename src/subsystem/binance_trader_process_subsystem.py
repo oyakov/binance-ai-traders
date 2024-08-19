@@ -165,6 +165,20 @@ class BinanceTraderProcessSubsystem(Subsystem):
         return (self.mode == Client.SIDE_SELL and
                 macd_histogram.iloc[-1]['histogram'] < 0 < macd_histogram.iloc[-2]['histogram'])
 
+    async def calculate_dynamic_trade_size(self, entry_price: float) -> float:
+        """Calculate trade size dynamically based on account equity and/or market conditions."""
+        account_info = await self.binance_service.get_account_info()
+        account_equity = float(account_info['totalNetAssetOfBtc'])  # Assuming BTC as base currency
+
+        # Example: Risk 1% of account equity per trade
+        risk_per_trade = account_equity * 0.01  # 1% risk
+
+        # Calculate quantity based on risk and entry price
+        quantity = risk_per_trade / entry_price
+
+        # Additional sizing logic could consider market volatility (ATR)
+        return quantity
+
     async def shutdown(self):
         logger.info(f"Shutting down Binance Trader Process subsystem")
 
