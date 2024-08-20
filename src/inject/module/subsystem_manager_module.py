@@ -16,6 +16,7 @@ from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
+from service.crypto.signals.signals_service import SignalsService
 from service.os.filesystem_service import FilesystemService
 from service.telegram_service import TelegramService
 from subsystem.actuator_subsystem import ActuatorSubsystem
@@ -94,6 +95,7 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_binance_trade_process_subsystem(self, bot: Bot, binance_service: BinanceService,
                                                 indicator_service: IndicatorService,
+                                                signals_service: SignalsService,
                                                 telegram_service: TelegramService,
                                                 filesystem_service: FilesystemService,
                                                 order_repository: OrderRepository,
@@ -103,7 +105,7 @@ class SubsystemManagerModule(Module):
                                                 order_book_repository: OrderBookRepository,
                                                 ticker_repository: TickerRepository) -> BinanceTraderProcessSubsystem:
         return BinanceTraderProcessSubsystem(bot,
-                                             binance_service, indicator_service,
+                                             binance_service, indicator_service, signals_service,
                                              telegram_service, filesystem_service,
                                              order_repository, klines_repository,
                                              macd_repository, macd_trend_repository,
