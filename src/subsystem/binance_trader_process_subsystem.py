@@ -47,7 +47,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.order_book_repository = order_book_repository
         self.ticker_repository = ticker_repository
         self.long_interval = Client.KLINE_INTERVAL_1HOUR
-        self.short_interval = Client.KLINE_INTERVAL_15MINUTE
+        self.short_interval = Client.KLINE_INTERVAL_30MINUTE
         self.long_window = 2
         self.short_window = 2
         self.slope_threshold_buy = 1.0
