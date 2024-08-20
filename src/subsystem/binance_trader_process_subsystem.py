@@ -94,12 +94,11 @@ class BinanceTraderProcessSubsystem(Subsystem):
             klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
             last_kline = klines_15m.iloc[-1]
 
-
             # Calculate MACD
             macd_calculated = await self.indicator_service.calculate_macd(klines_15m, 12, 26, 9)
             if macd_calculated is not None:
-                logger.info(f"MACD calculated - last 4 - {macd_calculated.iloc[-4]}, {macd_calculated.iloc[-3]}, "
-                            f"{macd_calculated.iloc[-2]}, {macd_calculated.iloc[-1]}")
+                logger.info(f"MACD calculated - last 4 - {macd_calculated.iloc[-4]['histogram']}, {macd_calculated.iloc[-3]['histogram']}, "
+                            f"{macd_calculated.iloc[-2]['histogram']}, {macd_calculated.iloc[-1]['histogram']}")
                 self.prev_macd = self.current_macd
                 self.current_macd = macd_calculated
             else:
@@ -133,7 +132,9 @@ class BinanceTraderProcessSubsystem(Subsystem):
 
             # Calculate Bollinger bands
             bollinger_bands = self.indicator_service.calculate_bollinger_bands(klines_15m['close'], 20)
-            logger.info(f"Bollinger bands calculated: last kline - {klines_15m['close'].iloc[-1]} upper bb - {bollinger_bands[0].iloc[-1]} - lower bb - {bollinger_bands[1].iloc[-1]}")
+            logger.info(f"Bollinger bands calculated: last kline - {klines_15m['close'].iloc[-1]} - upper bb - {bollinger_bands[0].iloc[-1]} "
+                        f"- lower bb - {bollinger_bands[1].iloc[-1]}")
+
             if klines_15m['close'].iloc[-1] > bollinger_bands[0].iloc[-1]:
                 logger.info("Price is above the upper Bollinger band")
             elif klines_15m['close'].iloc[-1] < bollinger_bands[1].iloc[-1]:
@@ -152,8 +153,12 @@ class BinanceTraderProcessSubsystem(Subsystem):
             macd_signals = self.indicator_service.generate_signals(macd_histogram)
             macd_lin_regression_2, trend_2 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
             macd_lin_regression_3, trend_3 = self.indicator_service.trend_regression(macd_histogram['histogram'], 3)
+            logger.info(f"MACD trend: {trend_2} - {macd_lin_regression_2}, {trend_3} - {macd_lin_regression_3}")
+            logger.info(f"MACD signals: {macd_signals.iloc[-4]} - {macd_signals.iloc[-3]} "
+                        f"- {macd_signals.iloc[-2]} - {macd_signals.iloc[-1]}")
+
             # Check if the last two values are greater than zero
-            if self.buy_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+            if macd_signal_buy and rsi_signal_buy:
                 logger.info("Buy condition is satisfied, placing order")
                 # Place a buy order
                 order = None
@@ -169,7 +174,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                 except Exception as e:
                     logger.error(f"Error saving order to the database", exc_info=e)
                 self.mode = Client.SIDE_SELL
-            elif self.sell_condition(macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+            elif macd_signal_sell and rsi_signal_sell:
                 logger.info("Sell condition is statisfied, placing order")
                 # Place a sell order
                 order = None
@@ -188,11 +193,11 @@ class BinanceTraderProcessSubsystem(Subsystem):
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
 
-    def buy_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+    def buy_condition_histogram(self, macd_histogram):
         return (self.mode == Client.SIDE_BUY and
                 macd_histogram.iloc[-1]['histogram'] > 0 > macd_histogram.iloc[-2]['histogram'])
 
-    def sell_condition(self, macd_histogram, macd_lin_regression_2, macd_lin_regression_3):
+    def sell_condition_histogram(self, macd_histogram):
         # Fake sell when no buy was committed, need to add a mode table to check if a buy was committed
         return (self.mode == Client.SIDE_SELL and
                 macd_histogram.iloc[-1]['histogram'] < 0 < macd_histogram.iloc[-2]['histogram'])
