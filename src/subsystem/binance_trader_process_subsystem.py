@@ -14,6 +14,7 @@ from db.repository.ticker_repository import TickerRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService, UPWARD, DOWNWARD
+from service.crypto.signals.signals_service import SignalsService
 from service.os.filesystem_service import FilesystemService
 from service.telegram_service import TelegramService
 from subsystem.subsystem import Subsystem, InitPriority
@@ -28,6 +29,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
                  bot: Bot,
                  binance_service: BinanceService,
                  indicator_service: IndicatorService,
+                 signals_service: SignalsService,
                  telegram_service : TelegramService,
                  filesystem_service: FilesystemService,
                  order_repository: OrderRepository,
@@ -40,6 +42,7 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.bot = bot
         self.binance_service = binance_service
         self.indicator_service = indicator_service
+        self.signals_service = signals_service
         self.order_repository = order_repository
         self.klines_repository = klines_repository
         self.macd_repository = macd_repository
@@ -94,36 +97,13 @@ class BinanceTraderProcessSubsystem(Subsystem):
             klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
             last_kline = klines_15m.iloc[-1]
 
-            # Calculate MACD
+            # Calculate MACD and Signals
             macd_calculated = await self.indicator_service.calculate_macd(klines_15m, 12, 26, 9)
-            if macd_calculated is not None:
-                logger.info(f"MACD calculated - last 4 - {macd_calculated.iloc[-4]['histogram']}, {macd_calculated.iloc[-3]['histogram']}, "
-                            f"{macd_calculated.iloc[-2]['histogram']}, {macd_calculated.iloc[-1]['histogram']}")
-                self.prev_macd = self.current_macd
-                self.current_macd = macd_calculated
-            else:
-                logger.error(f"MACD calculation failed")
+            macd_signal_buy, macd_signal_sell = await self.signals_service.calculate_macd_signals(macd_calculated)
 
-            macd_signal_sell, macd_signal_buy = False, False
-            if self.current_macd is not None:
-                macd_signal_sell, macd_signal_buy = False, False
-                if self.current_macd.iloc[-1]['histogram'] > 0 > self.current_macd.iloc[-2]['histogram']:
-                    macd_signal_buy = True
-                    logger.info("MACD is positive")
-                elif self.current_macd.iloc[-1]['histogram'] < 0 < self.current_macd.iloc[-2]['histogram']:
-                    macd_signal_sell = True
-                    logger.info("MACD is negative")
-
-            # Calculate RSI
+            # Calculate RSI and Signals
             rsi = self.indicator_service.calculate_rsi(klines_15m['close'], 14)
-            logger.info(f"RSI calculated: {rsi.iloc[-1]}")
-            rsi_signal_sell, rsi_signal_buy = False
-            if rsi.iloc[-1] > 70:
-                rsi_signal_sell = True
-                logger.info("RSI is overbought")
-            elif rsi.iloc[-1] < 30:
-                rsi_signal_buy = True
-                logger.info("RSI is oversold")
+            rsi_signal_buy, rsi_signal_sell = await self.signals_service.calculate_rsi_signals(rsi)
 
             logger.info(f"MACD signals: buy - {macd_signal_buy}, sell - {macd_signal_sell}")
             logger.info(f"RSI signals: buy - {rsi_signal_buy}, sell - {rsi_signal_sell}")
@@ -158,40 +138,35 @@ class BinanceTraderProcessSubsystem(Subsystem):
                         f"- {macd_signals.iloc[-2]} - {macd_signals.iloc[-1]}")
 
             # Check if the last two values are greater than zero
-            if macd_signal_buy and rsi_signal_buy:
-                logger.info("Buy condition is satisfied, placing order")
-                # Place a buy order
-                order = None
-                try:
-                    order = await self.binance_service.create_order(symbol, Client.SIDE_BUY, Client.ORDER_TYPE_MARKET, self.notional)
-                    logger.info(f"Order placed: {order}")
-                except Exception as e:
-                    logger.error(f"Error placing order", exc_info=e)
-
-                # Save the order to the database
-                try:
-                    await self.order_repository.write_order(symbol, order)
-                except Exception as e:
-                    logger.error(f"Error saving order to the database", exc_info=e)
-                self.mode = Client.SIDE_SELL
-            elif macd_signal_sell and rsi_signal_sell:
-                logger.info("Sell condition is statisfied, placing order")
-                # Place a sell order
-                order = None
-                try:
-                    order = await self.binance_service.create_order(symbol, Client.SIDE_SELL, Client.ORDER_TYPE_MARKET, self.notional)
-                    logger.info(f"Order placed: {order}")
-                except Exception as e:
-                    logger.error(f"Error placing order", exc_info=e)
-
-                # Save the order to the database
-                try:
-                    await self.order_repository.write_order(symbol, order)
-                except Exception as e:
-                    logger.error(f"Error saving order to the database", exc_info=e)
-                self.mode = Client.SIDE_BUY
+            await self.execute_buy_or_sell(macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell,
+                                           symbol)
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
+
+    async def execute_buy_or_sell(self, macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell, symbol):
+        if macd_signal_buy and rsi_signal_buy:
+            logger.info("Buy condition is satisfied, placing order")
+            await self.execute_trade_operation(symbol, Client.SIDE_BUY)
+        elif macd_signal_sell and rsi_signal_sell:
+            logger.info("Sell condition is satisfied, placing order")
+            await self.execute_trade_operation(symbol, Client.SIDE_SELL)
+
+    async def execute_trade_operation(self, symbol, operation):
+        logger.info("Buy condition is satisfied, placing order")
+        # Place a buy order
+        order = None
+        try:
+            order = await self.binance_service.create_order(symbol, operation, Client.ORDER_TYPE_MARKET,
+                                                            self.notional)
+            logger.info(f"Order placed: {order}")
+        except Exception as e:
+            logger.error(f"Error placing order", exc_info=e)
+        # Save the order to the database
+        try:
+            await self.order_repository.write_order(symbol, order)
+        except Exception as e:
+            logger.error(f"Error saving order to the database", exc_info=e)
+        self.mode = Client.SIDE_SELL if operation == Client.SIDE_BUY else Client.SIDE_BUY
 
     def buy_condition_histogram(self, macd_histogram):
         return (self.mode == Client.SIDE_BUY and
