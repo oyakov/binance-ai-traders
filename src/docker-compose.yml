@@ -11,8 +11,8 @@ services:
     networks:
       - bot_network
     volumes:
-      - ./logs:/app/logs  # Ensure the logs directory is mounted
-      - ./logging.ini:/app/logging.ini  # Mount logging.ini to the correct path
+      - ./install/logs:/app/logs  # Ensure the logs directory is mounted
+      - ./logs/config/logging.ini:/app/logging.ini  # Mount logging.ini to the correct path
     environment:
       - LOGGING_CONFIG=/app/logging.ini  # Point to the logging configuration
   db:
@@ -33,6 +33,7 @@ services:
     networks:
       - bot_network
 
+## ElasticSearch is removed for now
 #  elasticsearch:
 #    image: elasticsearch:8.14.0
 #    container_name: es01
@@ -83,7 +84,7 @@ services:
 
 volumes:
   pgdata:
-  esdata:
+#  esdata:
   grafana-data:
 
 networks:
