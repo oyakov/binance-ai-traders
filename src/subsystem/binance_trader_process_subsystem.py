@@ -14,6 +14,8 @@ from db.repository.ticker_repository import TickerRepository
 from oam import log_config
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService, UPWARD, DOWNWARD
+from service.os.filesystem_service import FilesystemService
+from service.telegram_service import TelegramService
 from subsystem.subsystem import Subsystem, InitPriority
 
 logger = log_config.get_logger(__name__)
@@ -26,6 +28,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
                  bot: Bot,
                  binance_service: BinanceService,
                  indicator_service: IndicatorService,
+                 telegram_service : TelegramService,
+                 filesystem_service: FilesystemService,
                  order_repository: OrderRepository,
                  klines_repository: KlinesRepository,
                  macd_repository: MACDRepository,
@@ -51,6 +55,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.notional = 0.00034
         self.mode = Client.SIDE_BUY
         self.is_initialized = False
+        self.current_macd = None
+        self.prev_macd = None
 
     async def initialize(self, subsystem_manager):
         logger.info(f"Initializing Binance Trader Process subsystem {self.bot}")
@@ -86,30 +92,56 @@ class BinanceTraderProcessSubsystem(Subsystem):
 
             # Get the latest klines
             klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
+            last_kline = klines_15m.iloc[-1]
+
 
             # Calculate MACD
             macd_calculated = await self.indicator_service.calculate_macd(klines_15m, 12, 26, 9)
+            if macd_calculated is not None:
+                logger.info(f"MACD calculated - last 4 - {macd_calculated.iloc[-4]}, {macd_calculated.iloc[-3]}, "
+                            f"{macd_calculated.iloc[-2]}, {macd_calculated.iloc[-1]}")
+                self.prev_macd = self.current_macd
+                self.current_macd = macd_calculated
+            else:
+                logger.error(f"MACD calculation failed")
 
-            logger.info(f"MACD calculated: {macd_calculated}")
+            macd_signal_sell, macd_signal_buy = False, False
+            if self.current_macd is not None:
+                macd_signal_sell, macd_signal_buy = False, False
+                if self.current_macd.iloc[-1]['histogram'] > 0 > self.current_macd.iloc[-2]['histogram']:
+                    macd_signal_buy = True
+                    logger.info("MACD is positive")
+                elif self.current_macd.iloc[-1]['histogram'] < 0 < self.current_macd.iloc[-2]['histogram']:
+                    macd_signal_sell = True
+                    logger.info("MACD is negative")
 
             # Calculate RSI
-            rsi = await self.indicator_service.calculate_rsi(klines_15m['close'], 14)
-
+            rsi = self.indicator_service.calculate_rsi(klines_15m['close'], 14)
+            logger.info(f"RSI calculated: {rsi.iloc[-1]}")
+            rsi_signal_sell, rsi_signal_buy = False
             if rsi.iloc[-1] > 70:
+                rsi_signal_sell = True
                 logger.info("RSI is overbought")
             elif rsi.iloc[-1] < 30:
+                rsi_signal_buy = True
                 logger.info("RSI is oversold")
 
-            # Calculate Bollinger bands
-            bollinger_bands = await self.indicator_service.calculate_bollinger_bands(klines_15m['close'], 20)
+            logger.info(f"MACD signals: buy - {macd_signal_buy}, sell - {macd_signal_sell}")
+            logger.info(f"RSI signals: buy - {rsi_signal_buy}, sell - {rsi_signal_sell}")
+            logger.info(f"Combined signals - buy - {macd_signal_buy and rsi_signal_buy}, "
+                        f"sell - {macd_signal_sell and rsi_signal_sell}")
 
-            if klines_15m['close'].iloc[-1] > bollinger_bands['upper'].iloc[-1]:
+            # Calculate Bollinger bands
+            bollinger_bands = self.indicator_service.calculate_bollinger_bands(klines_15m['close'], 20)
+            logger.info(f"Bollinger bands calculated: last kline - {klines_15m['close'].iloc[-1]} upper bb - {bollinger_bands[0].iloc[-1]} - lower bb - {bollinger_bands[1].iloc[-1]}")
+            if klines_15m['close'].iloc[-1] > bollinger_bands[0].iloc[-1]:
                 logger.info("Price is above the upper Bollinger band")
-            elif klines_15m['close'].iloc[-1] < bollinger_bands['lower'].iloc[-1]:
+            elif klines_15m['close'].iloc[-1] < bollinger_bands[1].iloc[-1]:
                 logger.info("Price is below the lower Bollinger band")
 
             # Calculate ATR
-            atr = await self.indicator_service.calculate_atr(klines_15m['high'], klines_15m['low'], klines_15m['close'], 14)
+            atr = self.indicator_service.calculate_atr(klines_15m['high'], klines_15m['low'], klines_15m['close'], 14)
+            logger.info(f"ATR calculated: {atr.iloc[-1]}")
 
             if atr.iloc[-1] > 0.01:
                 logger.info("ATR is above 0.01")

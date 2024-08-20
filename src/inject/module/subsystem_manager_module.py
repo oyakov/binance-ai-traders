@@ -16,6 +16,8 @@ from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
+from service.os.filesystem_service import FilesystemService
+from service.telegram_service import TelegramService
 from subsystem.actuator_subsystem import ActuatorSubsystem
 from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
 from subsystem.binance_subsystem import BinanceSubsystem
@@ -92,16 +94,20 @@ class SubsystemManagerModule(Module):
     @provider
     def provide_binance_trade_process_subsystem(self, bot: Bot, binance_service: BinanceService,
                                                 indicator_service: IndicatorService,
+                                                telegram_service: TelegramService,
+                                                filesystem_service: FilesystemService,
                                                 order_repository: OrderRepository,
                                                 klines_repository: KlinesRepository,
                                                 macd_repository: MACDRepository,
                                                 macd_trend_repository: MACDTrendRepository,
                                                 order_book_repository: OrderBookRepository,
                                                 ticker_repository: TickerRepository) -> BinanceTraderProcessSubsystem:
-        return BinanceTraderProcessSubsystem(bot, binance_service, indicator_service, order_repository,
-                                             klines_repository, macd_repository, macd_trend_repository,
-                                             order_book_repository,
-                                             ticker_repository)
+        return BinanceTraderProcessSubsystem(bot,
+                                             binance_service, indicator_service,
+                                             telegram_service, filesystem_service,
+                                             order_repository, klines_repository,
+                                             macd_repository, macd_trend_repository,
+                                             order_book_repository, ticker_repository)
 
     @singleton
     @provider
