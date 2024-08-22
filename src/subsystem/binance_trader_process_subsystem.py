@@ -4,6 +4,7 @@ from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from binance import Client
 from injector import inject
+from pandas import DataFrame
 
 from db.repository.klines_repository import KlinesRepository
 from db.repository.macd_repository import MACDRepository
@@ -22,7 +23,7 @@ from subsystem.subsystem import Subsystem, InitPriority
 logger = log_config.get_logger(__name__)
 
 
-class BinanceTraderProcessSubsystem(Subsystem):
+class BinanceMACDRSITraderProcessSubsystem(Subsystem):
 
     @inject
     def __init__(self,
@@ -43,6 +44,8 @@ class BinanceTraderProcessSubsystem(Subsystem):
         self.binance_service = binance_service
         self.indicator_service = indicator_service
         self.signals_service = signals_service
+        self.telegram_service = telegram_service
+        self.filesystem_service = filesystem_service
         self.order_repository = order_repository
         self.klines_repository = klines_repository
         self.macd_repository = macd_repository
@@ -138,20 +141,40 @@ class BinanceTraderProcessSubsystem(Subsystem):
                         f"- {macd_signals.iloc[-2]} - {macd_signals.iloc[-1]}")
 
             # Check if the last two values are greater than zero
-            await self.execute_buy_or_sell(macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell,
+            result_order = await self.execute_buy_or_sell(macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell,
                                            symbol)
+            if result_order is not None:
+                logger.info(f"Trade has been executed: {result_order}")
+                await self.offload_debug_context(atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi)
+
+
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
 
-    async def execute_buy_or_sell(self, macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell, symbol):
+    async def offload_debug_context(self, atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi):
+        self.filesystem_service.write_file(f"trade_log_{datetime.now().timestamp().__str__()}.txt",
+                                           f"{datetime.now()} - Trade executed: {result_order}")
+        self.filesystem_service.write_dataframe_to_csv(macd_histogram,
+                                                       f"macd_histogram_{datetime.now().timestamp().__str__()}.csv")
+        self.filesystem_service.write_dataframe_to_csv(klines_15m,
+                                                       f"klines_15m_{datetime.now().timestamp().__str__()}.csv")
+        self.filesystem_service.write_dataframe_to_csv(rsi, f"rsi_{datetime.now().timestamp().__str__()}.csv")
+        self.filesystem_service.write_dataframe_to_csv(bollinger_bands[0],
+                                                       f"bollinger_bands_upper_{datetime.now().timestamp().__str__()}.csv")
+        self.filesystem_service.write_dataframe_to_csv(bollinger_bands[1],
+                                                       f"bollinger_bands_lower_{datetime.now().timestamp().__str__()}.csv")
+        self.filesystem_service.write_dataframe_to_csv(atr, f"atr_{datetime.now().timestamp().__str__()}.csv")
+
+    async def execute_buy_or_sell(self, macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell, symbol)\
+            -> DataFrame:
         if macd_signal_buy and rsi_signal_buy:
             logger.info("Buy condition is satisfied, placing order")
-            await self.execute_trade_operation(symbol, Client.SIDE_BUY)
+            return await self.execute_trade_operation(symbol, Client.SIDE_BUY)
         elif macd_signal_sell and rsi_signal_sell:
             logger.info("Sell condition is satisfied, placing order")
-            await self.execute_trade_operation(symbol, Client.SIDE_SELL)
+            return await self.execute_trade_operation(symbol, Client.SIDE_SELL)
 
-    async def execute_trade_operation(self, symbol, operation):
+    async def execute_trade_operation(self, symbol, operation) -> DataFrame:
         logger.info("Buy condition is satisfied, placing order")
         # Place a buy order
         order = None
@@ -166,7 +189,9 @@ class BinanceTraderProcessSubsystem(Subsystem):
             await self.order_repository.write_order(symbol, order)
         except Exception as e:
             logger.error(f"Error saving order to the database", exc_info=e)
+
         self.mode = Client.SIDE_SELL if operation == Client.SIDE_BUY else Client.SIDE_BUY
+        return order
 
     def buy_condition_histogram(self, macd_histogram):
         return (self.mode == Client.SIDE_BUY and

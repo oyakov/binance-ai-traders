@@ -11,6 +11,7 @@ services:
     networks:
       - bot_network
     volumes:
+      - ./data:/app/data  # Ensure the data directory is mounted
       - ./install/logs:/app/logs  # Ensure the logs directory is mounted
       - ./logs/config/logging.ini:/app/logging.ini  # Mount logging.ini to the correct path
     environment:

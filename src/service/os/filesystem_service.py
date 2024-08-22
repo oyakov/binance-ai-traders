@@ -25,7 +25,7 @@ class FilesystemService:
         return pd.read_csv(file_path, index_col=0)
 
     def write_dataframe_to_csv(self, df, file_path: str):
-        df.to_csv(file_path)
+        df.to_csv('data/' + file_path)
         logger.info(f"DataFrame is written to {file_path}")
 
     def read_csv_to_dataframe(self, file_path: str):
