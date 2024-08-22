@@ -10,33 +10,20 @@ execute() {
 # Clean up all Docker images and volumes
 cleanup_docker() {
     echo "Cleaning up Docker images and volumes..."
-
-    # Remove all stopped containers
-    execute docker container prune -f
-
-    # Remove all unused images
-    execute docker image prune -af
-
-    # Remove all unused volumes
-    execute docker volume prune -f
+    execute docker-compose down -v
 }
 
 # Start Docker Compose
 start_docker_compose() {
     echo "Starting Docker Compose..."
-
-    # Pull the latest images
-    execute docker-compose pull
-
-    # Start Docker Compose with the up command
-    execute docker-compose up --build -d
+    execute docker-compose build --no-cache
+    execute docker-compose up -d
 }
 
 # Main function to initialize the app
 initialize_app() {
     cleanup_docker
     start_docker_compose
-
     echo "Application initialized successfully."
 }
 
