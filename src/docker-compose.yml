@@ -27,7 +27,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./logs/db:/var/log/postgresql  # Mount the host log directory to the PostgreSQL log directory
-      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf # Mount the custom PostgreSQL configuration
+      - ./install/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf # Mount the custom PostgreSQL configuration
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
