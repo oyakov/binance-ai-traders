@@ -22,7 +22,7 @@ from service.telegram_service import TelegramService
 from subsystem.actuator_subsystem import ActuatorSubsystem
 from subsystem.binance_data_offload_subsystem import BinanceDataOffloadSubsystem
 from subsystem.binance_subsystem import BinanceSubsystem
-from subsystem.binance_trader_process_subsystem import BinanceTraderProcessSubsystem
+from subsystem.binance_trader_process_subsystem import BinanceMACDRSITraderProcessSubsystem
 from subsystem.configuration_subsystem import ConfigurationSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
 from subsystem.logger_subsystem import LoggerSubsystem
@@ -103,13 +103,13 @@ class SubsystemManagerModule(Module):
                                                 macd_repository: MACDRepository,
                                                 macd_trend_repository: MACDTrendRepository,
                                                 order_book_repository: OrderBookRepository,
-                                                ticker_repository: TickerRepository) -> BinanceTraderProcessSubsystem:
-        return BinanceTraderProcessSubsystem(bot,
-                                             binance_service, indicator_service, signals_service,
-                                             telegram_service, filesystem_service,
-                                             order_repository, klines_repository,
-                                             macd_repository, macd_trend_repository,
-                                             order_book_repository, ticker_repository)
+                                                ticker_repository: TickerRepository) -> BinanceMACDRSITraderProcessSubsystem:
+        return BinanceMACDRSITraderProcessSubsystem(bot,
+                                                    binance_service, indicator_service, signals_service,
+                                                    telegram_service, filesystem_service,
+                                                    order_repository, klines_repository,
+                                                    macd_repository, macd_trend_repository,
+                                                    order_book_repository, ticker_repository)
 
     @singleton
     @provider
@@ -124,7 +124,7 @@ class SubsystemManagerModule(Module):
                                scheduler_subsystem: SchedulerSubsystem, openai_subsystem: OpenAiSubsystem,
                                binance_subsystem: BinanceSubsystem,
                                binance_data_offload_subsystem: BinanceDataOffloadSubsystem,
-                               binance_trade_process_subsystem: BinanceTraderProcessSubsystem
+                               binance_trade_process_subsystem: BinanceMACDRSITraderProcessSubsystem
                                ) -> list[Subsystem]:
         return [
             actuator_subsystem,
