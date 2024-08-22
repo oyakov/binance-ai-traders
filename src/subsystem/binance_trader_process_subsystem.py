@@ -98,7 +98,6 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
 
             # Get the latest klines
             klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
-            last_kline = klines_15m.iloc[-1]
 
             # Calculate MACD and Signals
             macd_calculated = await self.indicator_service.calculate_macd(klines_15m, 12, 26, 9)
@@ -108,6 +107,7 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
             rsi = self.indicator_service.calculate_rsi(klines_15m['close'], 14)
             rsi_signal_buy, rsi_signal_sell = await self.signals_service.calculate_rsi_signals(rsi)
 
+            logger.info(f"Last klines: {klines_15m.iloc[-3]} {klines_15m.iloc[-2]} {klines_15m.iloc[-1]} ")
             logger.info(f"MACD signals: buy - {macd_signal_buy}, sell - {macd_signal_sell}")
             logger.info(f"RSI signals: buy - {rsi_signal_buy}, sell - {rsi_signal_sell}")
             logger.info(f"Combined signals - buy - {macd_signal_buy and rsi_signal_buy}, "
