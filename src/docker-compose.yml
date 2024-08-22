@@ -11,11 +11,11 @@ services:
     networks:
       - bot_network
     volumes:
-      - ./data:/app/data  # Ensure the data directory is mounted
-      - ./install/logs:/app/logs  # Ensure the logs directory is mounted
-      - ./logs/config/logging.ini:/app/logging.ini  # Mount logging.ini to the correct path
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./logs/config/logging.ini:/app/logging.ini
     environment:
-      - LOGGING_CONFIG=/app/logging.ini  # Point to the logging configuration
+      - LOGGING_CONFIG=/app/logging.ini
   db:
     image: postgres:13
     environment:
