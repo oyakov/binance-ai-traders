@@ -23,10 +23,14 @@ class SignalsService:
         macd_signal_sell, macd_signal_buy = False, False
         if self.current_macd is not None:
             macd_signal_sell, macd_signal_buy = False, False
-            if self.current_macd.iloc[-1]['histogram'] > 0 > self.current_macd.iloc[-2]['histogram']:
+            if (self.current_macd.iloc[-1]['histogram'] > 0 and
+                    (self.current_macd.iloc[-2]['histogram'] < 0 or
+                     self.current_macd.iloc[-3]['histogram'] < 0)): # Add this condition for more flexibility
                 macd_signal_buy = True
                 logger.info("MACD is positive")
-            elif self.current_macd.iloc[-1]['histogram'] < 0 < self.current_macd.iloc[-2]['histogram']:
+            elif (self.current_macd.iloc[-1]['histogram'] < 0 and
+                  (self.current_macd.iloc[-2]['histogram'] > 0 or
+                   self.current_macd.iloc[-3]['histogram'] > 0)): # Add this condition for more flexibility
                 macd_signal_sell = True
                 logger.info("MACD is negative")
         return macd_signal_buy, macd_signal_sell

@@ -16,7 +16,7 @@ class AccountRepository:
         async with self.session_maker() as session:
             session.add(Account(**account))
             await session.commit()
-        logger.debug(f"Account {account} is written")
+        logger.debug(f"Account {account['uid']} is written")
 
     async def update_account(self, uid: int, account: dict) -> None:
         logger.debug(f"Updating account {uid}")
