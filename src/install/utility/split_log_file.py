@@ -2,6 +2,7 @@ import os
 import sys
 import datetime
 import logging
+import tarfile
 
 # Configure logging to console only
 logging.basicConfig(
@@ -78,6 +79,17 @@ def split_log_file_by_size(file_path, size_per_file_mb, output_folder):
         sys.exit(1)
 
 
+def create_tar_archive(output_folder, base_folder):
+    try:
+        tar_file = os.path.join(base_folder, f"{os.path.basename(output_folder)}.tar.gz")
+        with tarfile.open(tar_file, "w:gz") as tar:
+            tar.add(output_folder, arcname=os.path.basename(output_folder))
+        logging.info(f"Created tar.gz archive: {tar_file}")
+    except Exception as e:
+        logging.error(f"Failed to create tar.gz archive: {e}")
+        sys.exit(1)
+
+
 def split_log_file(file_path, mode, value, output_base_folder='.'):
     try:
         if not os.path.exists(file_path):
@@ -93,6 +105,13 @@ def split_log_file(file_path, mode, value, output_base_folder='.'):
         else:
             logging.error(f"Invalid mode: {mode}. Use 'lines' to split by lines or 'mb' to split by size in megabytes.")
             sys.exit(1)
+
+        # Print the resulting output folder
+        logging.info(f"Output folder with split files: {output_folder}")
+
+        # Create tar.gz archive of the output folder
+        create_tar_archive(output_folder, output_base_folder)
+
     except Exception as e:
         logging.error(f"Failed to split the log file: {e}")
         sys.exit(1)
