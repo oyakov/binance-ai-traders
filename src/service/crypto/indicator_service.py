@@ -32,7 +32,9 @@ class IndicatorService:
         macd['histogram'] = macd['macd'] - macd['signal']
         macd['timestamp'] = klines['timestamp']
         macd['display_time'] = pd.to_datetime(klines['timestamp'], unit='ms')
-        logger.info(f"MACD is calculated for DataFrame: {macd}")
+        logger.info(f"MACD is calculated for DataFrame: last kline close: {klines.iloc[-1]['close']}, "
+                    f"last timestamp: {klines.iloc[-1]['timestamp']} - MACDs - {macd.iloc[-1]['histogram']}"
+                    f" - {macd.iloc[-2]['histogram']} - {macd.iloc[-3]['histogram']} - {macd.iloc[-4]['histogram']}")
         return macd
 
     def trend_regression(self, series: pd.Series, window: int = 5) -> (int, str):
