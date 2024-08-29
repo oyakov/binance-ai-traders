@@ -7,7 +7,7 @@ services:
     env_file:
       - .env.prod
     ports:
-      - "8000:8000"
+      - "8000:8000" # Expose the port 8000
     networks:
       - bot_network
     volumes:
@@ -22,12 +22,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
       POSTGRES_DB: postgres
+      UMASK:  0027  # Sets the default permission for new files to 750
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./logs/db:/var/log/postgresql  # Mount the host log directory to the PostgreSQL log directory
-      - ./install/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf # Mount the custom PostgreSQL configuration
+      - ./logs/db:/var/log/postgresql # Mount the host log directory to the PostgreSQL log directory
+      - ./install/postgres/postgresql.conf:/etc/postgresql/postgresql.conf # Mount the custom PostgreSQL configuration
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'  # Use the custom config file
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
