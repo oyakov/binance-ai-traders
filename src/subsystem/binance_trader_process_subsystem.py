@@ -13,6 +13,7 @@ from db.repository.order_book_repository import OrderBookRepository
 from db.repository.order_repository import OrderRepository
 from db.repository.ticker_repository import TickerRepository
 from oam import log_config
+from oam.environment import CHAT_ID
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService, UPWARD, DOWNWARD
 from service.crypto.signals.signals_service import SignalsService
@@ -145,13 +146,20 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
                                            symbol)
             if result_order is not None:
                 logger.info(f"Trade has been executed: {result_order}")
-                await self.offload_debug_context(atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi)
+                await self.offload_debug_context("BTCUSDT", atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi, macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell)
 
 
         except Exception as e:
             logger.error(f"Error in trade cycle", exc_info=e)
 
-    async def offload_debug_context(self, atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi):
+    async def offload_debug_context(self, symbol, atr, bollinger_bands, klines_15m, macd_histogram, result_order, rsi,
+                                    macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell,):
+        # Send telegram message
+        await self.telegram_service.send_advertisement(self.bot, CHAT_ID,
+                                                       f"Trade executed {symbol}\n "
+                                                       f"MACD signals: buy - {macd_signal_buy}, sell - {macd_signal_sell}\n"
+                                                       f"RSI signals: buy - {rsi_signal_buy}, sell - {rsi_signal_sell}\n")
+        # Save the debug context to the filesystem
         self.filesystem_service.write_file(f"trade_log_{datetime.now().timestamp().__str__()}.txt",
                                            f"{datetime.now()} - Trade executed: {result_order}")
         self.filesystem_service.write_dataframe_to_csv(macd_histogram,
@@ -167,6 +175,8 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
 
     async def execute_buy_or_sell(self, macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell, symbol)\
             -> DataFrame:
+        if macd_signal_buy:
+            logger.info("Only MACD buy signal is present")
         if macd_signal_buy and rsi_signal_buy:
             logger.info("Buy condition is satisfied, placing order")
             return await self.execute_trade_operation(symbol, Client.SIDE_BUY)
