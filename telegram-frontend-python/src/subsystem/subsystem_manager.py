@@ -20,8 +20,10 @@ class SubsystemManager(ABC):
     async def initialize_subsystems(self, subsystems: list[Subsystem]):
         priority_dict = self.split_subsystems_by_priority(subsystems)
         for priority in InitPriority:
+            logger.info(f"====================================================")
             logger.info(f"Initializing subsystems with priority {priority}")
             await asyncio.gather(*(subsys.initialize(self) for subsys in priority_dict[priority]))
+            logger.info(f"====================================================")
         if self.subsystems is None:
             self.subsystems = subsystems
         else:

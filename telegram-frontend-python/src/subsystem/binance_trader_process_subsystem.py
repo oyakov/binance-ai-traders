@@ -108,7 +108,8 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
             rsi = self.indicator_service.calculate_rsi(klines_15m['close'], 14)
             rsi_signal_buy, rsi_signal_sell = await self.signals_service.calculate_rsi_signals(rsi)
 
-            logger.info(f"Last klines: {klines_15m.iloc[-3]} {klines_15m.iloc[-2]} {klines_15m.iloc[-1]} ")
+            logger.info(f"Last 5 klines:\n {klines_15m.iloc[-5:][['open', 'high', 'low', 'close']]}")
+            logger.info(f"Last 3 MACD histograms:\n\t {macd_calculated.iloc[-3]['histogram']} {macd_calculated.iloc[-2]['histogram']} {macd_calculated.iloc[-1]['histogram']} ")
             logger.info(f"MACD signals: buy - {macd_signal_buy}, sell - {macd_signal_sell}")
             logger.info(f"RSI signals: buy - {rsi_signal_buy}, sell - {rsi_signal_sell}")
             logger.info(f"Combined signals - buy - {macd_signal_buy and rsi_signal_buy}, "
@@ -138,8 +139,8 @@ class BinanceMACDRSITraderProcessSubsystem(Subsystem):
             macd_lin_regression_2, trend_2 = self.indicator_service.trend_regression(macd_histogram['histogram'], 2)
             macd_lin_regression_3, trend_3 = self.indicator_service.trend_regression(macd_histogram['histogram'], 3)
             logger.info(f"MACD trend: {trend_2} - {macd_lin_regression_2}, {trend_3} - {macd_lin_regression_3}")
-            logger.info(f"MACD signals: {macd_signals.iloc[-4]} - {macd_signals.iloc[-3]} "
-                        f"- {macd_signals.iloc[-2]} - {macd_signals.iloc[-1]}")
+            logger.info(f"MACD buy signals: {macd_signals.iloc[-4]['signal_buy']} {macd_signals.iloc[-3]['signal_buy']} {macd_signals.iloc[-2]['signal_buy']} {macd_signals.iloc[-1]['signal_buy']}")
+            logger.info(f"MACD sell signals: {macd_signals.iloc[-4]['signal_sell']} {macd_signals.iloc[-3]['signal_sell']} {macd_signals.iloc[-2]['signal_sell']} {macd_signals.iloc[-1]['signal_sell']}")
 
             # Check if the last two values are greater than zero
             result_order = await self.execute_buy_or_sell(macd_signal_buy, macd_signal_sell, rsi_signal_buy, rsi_signal_sell,

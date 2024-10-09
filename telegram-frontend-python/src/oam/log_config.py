@@ -13,7 +13,6 @@ class CustomLogger(logging.getLoggerClass()):
 
 logging.setLoggerClass(CustomLogger)
 
-
 # Get the logger specified in the file
 def get_logger(name: str):
     return logging.getLogger(name)
