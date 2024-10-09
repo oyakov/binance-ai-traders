@@ -161,3 +161,34 @@ services:
 volumes:
   esdata1:
     driver: local
+```
+
+### How to Build & Run
+**Build the microservices**: Use Maven to build all the Java microservices.
+
+```
+mvn clean install
+```
+
+**Start the services**: Navigate to the root of the repository where the docker-compose.yml file is located and run:
+
+```
+docker-compose up --build
+```
+
+**Check the logs**: Once all services are running, you can check their logs using Docker commands:
+
+```
+docker-compose logs -f <service_name>
+```
+
+**Access the services**:
+
+Elasticsearch: http://localhost:9200
+Kafka: Use Kafka APIs to produce/consume data.
+
+### Contributing
+Feel free to create issues or submit pull requests. If you wish to contribute, please make sure to follow the DDD principles, ensuring that services are decoupled and well-structured.
+
+### License
+This project is licensed under the MIT License - see the LICENSE file for details.
