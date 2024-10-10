@@ -5,7 +5,8 @@ FROM bellsoft/liberica-openjdk-alpine:latest
 WORKDIR /app
 
 # Copy the Maven build files
-COPY . .
+COPY pom.xml .
+COPY src ./src
 
 # Build the application with Maven
 RUN ./mvnw package
@@ -14,4 +15,4 @@ RUN ./mvnw package
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/binance-data-collection.jar"]
+CMD ["java", "-jar", "target/your-application.jar"]

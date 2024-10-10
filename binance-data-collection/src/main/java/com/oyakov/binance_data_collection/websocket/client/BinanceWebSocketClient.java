@@ -7,6 +7,7 @@ import com.oyakov.binance_data_collection.model.BinanceWebsocketEventData;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -14,7 +15,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,7 +28,7 @@ public class BinanceWebSocketClient extends TextWebSocketHandler {
     private long lastCloseTime = -1;
 
     @Value("${binance.api.websocket.kline.topic}")
-    private final String klineTopic = "binance/kline";
+    private final String klineTopic = "binance-kline";
 
     public BinanceWebSocketClient(KafkaProducerService kafkaProducerService) {
         this.kafkaProducerService = kafkaProducerService;
@@ -50,7 +50,7 @@ public class BinanceWebSocketClient extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(@Nonnull WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         log.debug("Received message: {}", message.getPayload());
         String payload = message.getPayload();
         BinanceWebsocketEventData binanceWebsocketEventData = new ObjectMapper().readValue(payload, BinanceWebsocketEventData.class);

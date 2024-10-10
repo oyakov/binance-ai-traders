@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class KafkaConsumerService {
 
-    @KafkaListener(topics = "binance-kline", groupId = "test-group")
+    @KafkaListener(topics = "your-kafka-topic", groupId = "test-group")
     public void listen(String message) {
         log.info("Received message: {}", message);
     }
