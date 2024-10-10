@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_collection.commands;
+package com.oyakov.binance_data_storage.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

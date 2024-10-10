@@ -26,7 +26,7 @@ public class KafkaProducerService {
     public void sendCommand(String topic, Object command) {
         try {
             String message = objectMapper.writeValueAsString(command);
-            CompletableFuture<SendResult<String, String>> future =
+                CompletableFuture<SendResult<String, String>> future =
                     kafkaTemplate.send(topic, message);
             future.thenAccept(result -> {
                 log.debug("Sent message: {}\n" +

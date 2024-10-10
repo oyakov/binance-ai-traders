@@ -1,6 +1,6 @@
-package com.oyakov.binance_data_collection.klines;
+package com.oyakov.binance_data_storage.klines;
 
-import com.oyakov.binance_data_collection.model.BinanceWebsocketEventData;
+import com.oyakov.binance_data_storage.model.BinanceWebsocketEventData;
 
 /**
  * Service for writing collected kline data to elasticsearch

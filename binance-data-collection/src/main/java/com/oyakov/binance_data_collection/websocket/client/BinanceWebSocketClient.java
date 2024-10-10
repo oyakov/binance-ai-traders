@@ -64,6 +64,7 @@ public class BinanceWebSocketClient extends TextWebSocketHandler {
             lastCloseTime = newCloseTime;
             KlineCollectedCommand command = KlineCollectedCommand.builder()
                     .eventTime(binanceWebsocketEventData.getEventTime())
+                    .eventType(binanceWebsocketEventData.getEventType())
                     .symbol(binanceWebsocketEventData.getSymbol())
                     .openTime(binanceWebsocketEventData.getKline().getOpenTime())
                     .closeTime(binanceWebsocketEventData.getKline().getCloseTime())

@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_collection.config;
+package com.oyakov.binance_data_storage.config;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
