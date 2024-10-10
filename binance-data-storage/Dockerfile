@@ -15,4 +15,4 @@ RUN ./mvnw package
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/your-application.jar"]
+CMD ["java", "-jar", "target/binance-data-storage.jar"]

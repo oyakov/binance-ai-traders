@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 @Log4j2
 public class KafkaProducerService {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+            private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     public KafkaProducerService(
