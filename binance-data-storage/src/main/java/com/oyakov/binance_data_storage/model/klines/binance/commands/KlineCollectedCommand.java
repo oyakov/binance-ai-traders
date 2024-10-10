@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_storage.commands;
+package com.oyakov.binance_data_storage.model.klines.binance.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,7 @@ public class KlineCollectedCommand {
     private String eventType;
     private long eventTime;
     private String symbol;
+    private String interval;
     private long openTime;
     private long closeTime;
     private double open;

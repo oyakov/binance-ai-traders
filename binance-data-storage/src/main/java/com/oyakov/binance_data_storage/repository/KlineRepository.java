@@ -1,0 +1,10 @@
+package com.oyakov.binance_data_storage.repository;
+
+import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface KlineRepository extends ElasticsearchRepository<KlineItem, String> {
+
+}

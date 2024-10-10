@@ -1,7 +1,7 @@
 package com.oyakov.binance_data_storage.kafka.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oyakov.binance_data_storage.commands.KlineCollectedCommand;
+import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Map;

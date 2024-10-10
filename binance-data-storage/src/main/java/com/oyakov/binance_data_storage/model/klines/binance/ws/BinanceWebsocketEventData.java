@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_storage.model;
+package com.oyakov.binance_data_storage.model.klines.binance.ws;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,9 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(indexName = "kline_data")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
