@@ -1,5 +1,9 @@
 package com.oyakov.binance_data_storage.model.klines.binance.storage;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,15 +11,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+@Entity
 @Document(indexName = "kline")
+@Table(name = "kline")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 public class KlineItem {
 
     @Id
-    private String id;
+    @jakarta.persistence.Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private String symbol;
     private String interval;
     private long openTime;

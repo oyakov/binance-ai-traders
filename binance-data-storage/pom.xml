@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.oyakov.</groupId>
 	<artifactId>binance-data-storage</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>binance-data-storage</name>
 	<description>Binance Data Storage</description>
 	<url/>
@@ -36,9 +36,29 @@
 		<lombok.version>1.18.34</lombok.version>
 	</properties>
 	<dependencies>
+		<!-- Spring Data -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<!-- DB migration -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<!-- PostgreSQL Driver -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -61,24 +81,10 @@
 			<artifactId>reactor-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

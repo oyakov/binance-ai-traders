@@ -24,7 +24,7 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       bootstrap-servers: kafka:9092
-      group-id: test-group
+      group-id: binance-data-collection
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest

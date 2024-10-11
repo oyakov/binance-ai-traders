@@ -13,6 +13,7 @@ public class KlineCollectedCommand {
     private String eventType;
     private long eventTime;
     private String symbol;
+    private String interval;
     private long openTime;
     private long closeTime;
     private double open;

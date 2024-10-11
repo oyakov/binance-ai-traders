@@ -7,10 +7,10 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.0-SNAPSHOT</version>
 		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+	</parent>	
 	<groupId>com.oyakov.</groupId>
 	<artifactId>binance-data-collection</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>binance-data-collection</name>
 	<description>Binance Data Collection</description>
 	<url/>

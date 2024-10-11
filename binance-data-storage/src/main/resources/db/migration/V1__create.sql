@@ -135,13 +135,13 @@ CREATE TABLE public.calendar_tod (
 CREATE INDEX ix_calendar_tod_id ON public.calendar_tod USING btree (id);
 
 
--- public.klines definition
+-- public.kline definition
 
 -- Drop table
 
--- DROP TABLE public.klines;
+-- DROP TABLE public.kline;
 
-CREATE TABLE public.klines (
+CREATE TABLE public.kline (
 	id serial4 NOT NULL,
 	symbol varchar NULL,
 	"interval" varchar NULL,
@@ -152,6 +152,7 @@ CREATE TABLE public.klines (
 	low float8 NULL,
 	"close" float8 NULL,
 	volume float8 NULL,
+	open_time int8 NULL,
 	close_time int8 NULL,
 	display_close_time timestamp NULL,
 	quote_asset_volume float8 NULL,
@@ -159,7 +160,7 @@ CREATE TABLE public.klines (
 	taker_buy_base_asset_volume float8 NULL,
 	taker_buy_quote_asset_volume float8 NULL,
 	"ignore" varchar NULL,
-	CONSTRAINT klines_pkey PRIMARY KEY (id)
+	CONSTRAINT kline_pkey PRIMARY KEY (id)
 );
 
 

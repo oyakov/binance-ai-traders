@@ -2,7 +2,8 @@ package com.oyakov.binance_data_storage.service.impl;
 
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.KlineWrittenNotification;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
-import com.oyakov.binance_data_storage.repository.KlineRepository;
+import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository;
+import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -16,20 +17,23 @@ import java.util.concurrent.CompletableFuture;
 @Log4j2
 public class KlineDataService implements KlineDataServiceApi {
 
-    private final KlineRepository klineRepository;
+    private final KlineElasticRepository klineElasticRepository;
 
-    public KlineDataService(KlineRepository klineRepository) {
-        this.klineRepository = klineRepository;
+    private final KlinePostgresRepository klinePostgresRepository;
+
+    public KlineDataService(KlineElasticRepository klineElasticRepository, KlinePostgresRepository klinePostgresRepository) {
+        this.klineElasticRepository = klineElasticRepository;
+        this.klinePostgresRepository = klinePostgresRepository;
     }
 
     @Override
     public CompletableFuture<KlineWrittenNotification> saveKlineData(KlineItem kline) {
         try {
             // save kline data to elasticsearch
-            klineRepository.save(kline);
+                klineElasticRepository.save(kline);
 
             // save kline data to database
-
+            klinePostgresRepository.save(kline);
 
             log.info("Kline data saved: {}", kline);
         } catch (Exception e) {

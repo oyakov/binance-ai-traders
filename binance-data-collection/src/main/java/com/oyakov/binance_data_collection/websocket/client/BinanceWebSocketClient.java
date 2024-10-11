@@ -66,6 +66,7 @@ public class BinanceWebSocketClient extends TextWebSocketHandler {
                     .eventTime(binanceWebsocketEventData.getEventTime())
                     .eventType(binanceWebsocketEventData.getEventType())
                     .symbol(binanceWebsocketEventData.getSymbol())
+                    .interval("1m")
                     .openTime(binanceWebsocketEventData.getKline().getOpenTime())
                     .closeTime(binanceWebsocketEventData.getKline().getCloseTime())
                     .open(binanceWebsocketEventData.getKline().getOpen())
