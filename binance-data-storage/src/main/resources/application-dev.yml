@@ -25,7 +25,7 @@ spring:
       bootstrap-servers: localhost:9092
       group-id: test-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: com.oyakov.binance_data_storage.kafka.deserializer.KlineCollectedCommandDeserializer
+      value-deserializer: com.oyakov.binance_data_storage.broker.kafka.deserializer.KlineCollectedCommandDeserializer
       auto-offset-reset: earliest
 
 binance:

@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Document(indexName = "kline")
 @Table(name = "kline")
@@ -26,6 +28,8 @@ public class KlineItem {
     private long id;
     private String symbol;
     private String interval;
+    private long timestamp;
+    private LocalDateTime displayTime;
     private long openTime;
     private double open;
     private double high;
