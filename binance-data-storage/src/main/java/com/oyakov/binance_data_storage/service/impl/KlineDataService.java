@@ -6,6 +6,7 @@ import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
 import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository;
 import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.repository.CrudRepository;
@@ -27,10 +28,40 @@ public class KlineDataService implements KlineDataServiceApi {
 
     private final List<CrudRepository<KlineItem, Long>> repositories = new ArrayList<>();
 
-    public KlineDataService(KlineElasticRepository klineElasticRepository, KlinePostgresRepository klinePostgresRepository, ApplicationEventPublisher eventPublisher) {
+    public KlineDataService(
+            KlineElasticRepository klineElasticRepository,
+            KlinePostgresRepository klinePostgresRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
         repositories.add(klinePostgresRepository);
         repositories.add(klineElasticRepository);
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("KlineDataService initialized with repositories: {}", repositories);
+        KlineItem testItem = KlineItem.builder()
+                .symbol("BTCUSDT")
+                .timestamp(1620000000000L)
+                .displayTime(LocalDateTime.ofEpochSecond(1620000000, 0, ZoneOffset.UTC))
+                .interval("1m")
+                .openTime(1620000000000L)
+                .open(1000)
+                .high(1100)
+                .low(900)
+                .close(1050)
+                .volume(1000)
+                .closeTime(1620000999000L)
+                .build();
+
+        repositories.forEach(repository -> {
+            try {
+                repository.save(testItem);
+                repository.delete(testItem);
+            } catch (Exception e) {
+                log.error("Failed to initialize repository: {}", repository, e);
+            }
+        });
     }
 
     @Override

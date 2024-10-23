@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface KlinePostgresRepository extends JpaRepository<KlineItem, Long> {
+
+    public KlineItem findBySymbolAndIntervalAndTimestamp(String symbol, String interval, long timestamp);
 }
