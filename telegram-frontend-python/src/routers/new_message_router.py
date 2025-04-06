@@ -63,7 +63,7 @@ class NewMessageRouter(BaseRouter):
 
         await state.set_state(NewMessageStates.new_msg_input_text)
 
-        # Inititalize default calenndar objects for the new message
+        # Initialize default calendar objects for the new message
         await state.set_data({'selected_tod': times_of_the_day(),
                               'selected_dow': days_of_the_week(),
                               'selected_moy': months_of_the_year(),

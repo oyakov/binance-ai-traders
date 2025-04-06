@@ -6,12 +6,12 @@ authors = ["Cantor Dallocort"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.13"
 aiogram = { version = "^3.6.0", extras = ["fsm_storage"] }
 asyncio = "^3.4.3"
 logging = "^0.4.9.6"
 sqlalchemy = "^2.0.30"
-asyncpg = "^0.29.0"
+asyncpg = "^0.30.0"
 python-dotenv = "^1.0.1"
 apscheduler = "^3.10.4"
 openai = "^1.35.10"
@@ -20,6 +20,7 @@ pandas = "^2.2.2"
 elasticsearch = "^8.14.0"
 injector = "^0.22.0"
 scipy = "^1.14.0"
+greenlet = "^3.1.1"
 
 
 [build-system]
