@@ -1,0 +1,2188 @@
+23-12 20:01:15 - subsystem.logger_subsystem - INFO - Logger subsystem is initialized
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_SOURCE
+23-12 20:01:15 - subsystem.database_subsystem - INFO - Initializing the DB
+23-12 20:01:15 - subsystem.database_subsystem - INFO - create tables
+23-12 20:01:15 - subsystem.database_subsystem - ERROR - Error creating tables: the greenlet library is required to use this function. No module named 'greenlet'
+23-12 20:01:15 - subsystem.openai_subsystem - INFO - Initializing OpenAI subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:15 - subsystem.openai_subsystem - INFO - OpenAI subsystem is initialized
+23-12 20:01:15 - subsystem.binance_subsystem - INFO - Initializing Binance subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:15 - service.crypto.binance.binance_service - INFO - Binance Client is initialized with Testnet configuration...
+23-12 20:01:15 - service.crypto.binance.binance_service - INFO - Binance Client is initialized
+23-12 20:01:15 - subsystem.binance_subsystem - INFO - Binance subsystem is initialized
+23-12 20:01:15 - asyncio - WARNING - Executing <Task finished name='Task-5' coro=<BinanceSubsystem.initialize() done, defined at /app/subsystem/binance_subsystem.py:14> result=None created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.285 seconds
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:15 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_OFFLOAD
+23-12 20:01:15 - subsystem.binance_data_offload_subsystem - INFO - Initializing Binance Data Offload subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:15 - subsystem.binance_data_offload_subsystem - INFO - Initialize data offload cycle jobs
+23-12 20:01:15 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:16 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.286 seconds
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/ticker_repository.py", line 21, in write_ticker
+    await session.commit()
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1009, in commit
+    await greenlet_spawn(self.sync_session.commit)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 118, in ticker_offload_cycle
+    await self.ticker_repository.write_ticker(symbol, ticker)
+  File "/app/db/repository/ticker_repository.py", line 18, in write_ticker
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has completed
+23-12 20:01:16 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:01:16 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.721 seconds
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:16 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:16 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:01:17 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.276 seconds
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:17 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:01:17 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.711 seconds
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:17 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:01:19 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 1.145 seconds
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:01:19 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.291 seconds
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has begun
+23-12 20:01:19 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:84> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.253 seconds
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in Account offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/account_repository.py", line 18, in write_account
+    await session.commit()
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1009, in commit
+    await greenlet_spawn(self.sync_session.commit)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 105, in account_offload_cycle
+    await self.account_repository.write_account(account)
+  File "/app/db/repository/account_repository.py", line 16, in write_account
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has completed
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.ticker_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.account_offload_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:01:19 - subsystem.binance_data_offload_subsystem - INFO - Data offload cycle jobs are initialized
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_PROCESSING
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_CONSUMPTION
+23-12 20:01:19 - subsystem.actuator_subsystem - INFO - Initializing Actuator subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:19 - subsystem.configuration_subsystem - INFO - Initializing Configuration subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:19 - subsystem.scheduler_subsystem - INFO - Initializing Scheduler subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>, 1
+23-12 20:01:19 - schedule.periodic_message_scheduler - INFO - Initialize the advertiser job
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "check_calendar" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:01:19 - schedule.periodic_message_scheduler - INFO - Advertiser is initialized
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - INFO - Initializing Binance Trader Process subsystem <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - INFO - Trade cycle engaged
+23-12 20:01:19 - service.crypto.binance.binance_service - INFO - Open orders for BTCUSDT: []
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - INFO - Open orders: []
+23-12 20:01:19 - asyncio - WARNING - Executing <Task pending name='Task-22' coro=<BinanceMACDRSITraderProcessSubsystem.initialize() running at /app/subsystem/binance_trader_process_subsystem.py:71> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.243 seconds
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - ERROR - Error in trade cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 53, in get_all_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_trader_process_subsystem.py", line 101, in trade_cycle
+    klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 51, in get_all_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:01:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:01:19 - apscheduler.scheduler - INFO - Added job "BinanceMACDRSITraderProcessSubsystem.trade_cycle" to job store "default"
+23-12 20:01:19 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - INFO - Advertiser is initialized
+23-12 20:01:19 - subsystem.binance_trader_process_subsystem - INFO - Binance Trader Process subsystem is initialized
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:01:19 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.TELEGRAM_ROUTER
+23-12 20:01:19 - subsystem.slave_bot_subsystem - INFO - Initializing bot <aiogram.client.bot.Bot object at 0x7fad5e437620>
+23-12 20:01:19 - routers.dispatcher - INFO - Creating dispatcher
+23-12 20:01:19 - routers.dispatcher - INFO - Add router GatewayRouter '0x7fad8cfc2270'
+23-12 20:01:19 - routers.dispatcher - INFO - Dispatcher is created Dispatcher '0x7fad5e381e80'
+23-12 20:01:19 - aiogram.dispatcher - INFO - Start polling
+23-12 20:01:20 - aiogram.dispatcher - INFO - Run polling for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:02:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.ticker_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:16 UTC)" was missed by 0:00:03.725226
+23-12 20:02:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:16 UTC)" was missed by 0:00:03.006748
+23-12 20:02:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:17 UTC)" was missed by 0:00:02.731468
+23-12 20:02:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:17 UTC)" was missed by 0:00:02.020251
+23-12 20:02:19 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" (scheduled at 2024-12-23 20:02:19.065686+00:00)
+23-12 20:02:19 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:02:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:02:21 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:02:21 - asyncio - WARNING - Executing <Task pending name='Task-39' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.150 seconds
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.735544
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.732895
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.730471
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.728119
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.725749
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.723467
+23-12 20:02:21 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.account_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:01.470062
+23-12 20:02:21 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:02:21 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" executed successfully
+23-12 20:02:23 - apscheduler.executors.default - WARNING - Run time of job "check_calendar (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:03.714962
+23-12 20:02:23 - apscheduler.executors.default - WARNING - Run time of job "BinanceMACDRSITraderProcessSubsystem.trade_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:03:19 UTC)" was missed by 0:00:03.714028
+23-12 20:02:38 - aiogram.dispatcher - WARNING - Received SIGTERM signal
+23-12 20:02:38 - aiogram.dispatcher - INFO - Polling stopped for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:02:38 - aiogram.dispatcher - INFO - Polling stopped
+23-12 20:02:39 - subsystem.slave_bot_subsystem - INFO - Bot is initialized
+23-12 20:02:39 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:15 - subsystem.logger_subsystem - INFO - Logger subsystem is initialized
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_SOURCE
+23-12 20:03:15 - subsystem.database_subsystem - INFO - Initializing the DB
+23-12 20:03:15 - subsystem.database_subsystem - INFO - create tables
+23-12 20:03:15 - subsystem.database_subsystem - ERROR - Error creating tables: the greenlet library is required to use this function. No module named 'greenlet'
+23-12 20:03:15 - subsystem.openai_subsystem - INFO - Initializing OpenAI subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:15 - subsystem.openai_subsystem - INFO - OpenAI subsystem is initialized
+23-12 20:03:15 - subsystem.binance_subsystem - INFO - Initializing Binance subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:15 - service.crypto.binance.binance_service - INFO - Binance Client is initialized with Testnet configuration...
+23-12 20:03:15 - service.crypto.binance.binance_service - INFO - Binance Client is initialized
+23-12 20:03:15 - subsystem.binance_subsystem - INFO - Binance subsystem is initialized
+23-12 20:03:15 - asyncio - WARNING - Executing <Task finished name='Task-5' coro=<BinanceSubsystem.initialize() done, defined at /app/subsystem/binance_subsystem.py:14> result=None created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.277 seconds
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:15 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_OFFLOAD
+23-12 20:03:15 - subsystem.binance_data_offload_subsystem - INFO - Initializing Binance Data Offload subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:15 - subsystem.binance_data_offload_subsystem - INFO - Initialize data offload cycle jobs
+23-12 20:03:15 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:16 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.707 seconds
+23-12 20:03:16 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/ticker_repository.py", line 21, in write_ticker
+    await session.commit()
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1009, in commit
+    await greenlet_spawn(self.sync_session.commit)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 118, in ticker_offload_cycle
+    await self.ticker_repository.write_ticker(symbol, ticker)
+  File "/app/db/repository/ticker_repository.py", line 18, in write_ticker
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:16 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has completed
+23-12 20:03:16 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:16 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:16 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:03:17 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.711 seconds
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:17 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:03:17 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.279 seconds
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:17 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:03:17 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.289 seconds
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:17 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:03:18 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:03:18 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.716 seconds
+23-12 20:03:18 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:18 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:18 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:18 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:03:19 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.717 seconds
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in Klines offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 22, in write_klines
+    async with session.begin():
+               ~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1865, in start
+    await greenlet_spawn(
+          ~~~~~~~~~~~~~~^
+        self.session.sync_session.begin_nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        if self.nested
+        ^^^^^^^^^^^^^^
+        else self.session.sync_session.begin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 139, in klines_offload_cycle
+    await self.klines_repository.write_klines(symbol, interval, klines)
+  File "/app/db/repository/klines_repository.py", line 21, in write_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in MACD offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 43, in get_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 153, in macd_offload_cycle
+    klines = await self.klines_repository.get_klines(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        int(end_time * 1000))
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 40, in get_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has begun
+23-12 20:03:19 - asyncio - WARNING - Executing <Task pending name='Task-6' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:84> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.251 seconds
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - ERROR - Error in Account offload cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/account_repository.py", line 18, in write_account
+    await session.commit()
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1009, in commit
+    await greenlet_spawn(self.sync_session.commit)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_data_offload_subsystem.py", line 105, in account_offload_cycle
+    await self.account_repository.write_account(account)
+  File "/app/db/repository/account_repository.py", line 16, in write_account
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has completed
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.ticker_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.account_offload_cycle" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:03:19 - subsystem.binance_data_offload_subsystem - INFO - Data offload cycle jobs are initialized
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_PROCESSING
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:19 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_CONSUMPTION
+23-12 20:03:19 - subsystem.actuator_subsystem - INFO - Initializing Actuator subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:19 - subsystem.configuration_subsystem - INFO - Initializing Configuration subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:19 - subsystem.scheduler_subsystem - INFO - Initializing Scheduler subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>, 1
+23-12 20:03:19 - schedule.periodic_message_scheduler - INFO - Initialize the advertiser job
+23-12 20:03:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:19 - apscheduler.scheduler - INFO - Added job "check_calendar" to job store "default"
+23-12 20:03:19 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:03:19 - schedule.periodic_message_scheduler - INFO - Advertiser is initialized
+23-12 20:03:19 - subsystem.binance_trader_process_subsystem - INFO - Initializing Binance Trader Process subsystem <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:19 - subsystem.binance_trader_process_subsystem - INFO - Trade cycle engaged
+23-12 20:03:20 - service.crypto.binance.binance_service - INFO - Open orders for BTCUSDT: []
+23-12 20:03:20 - subsystem.binance_trader_process_subsystem - INFO - Open orders: []
+23-12 20:03:20 - asyncio - WARNING - Executing <Task pending name='Task-22' coro=<BinanceMACDRSITraderProcessSubsystem.initialize() running at /app/subsystem/binance_trader_process_subsystem.py:71> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:975, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.683 seconds
+23-12 20:03:20 - subsystem.binance_trader_process_subsystem - ERROR - Error in trade cycle: <class 'ValueError'>
+	the greenlet library is required to use this function. No module named 'greenlet'
+	Traceback (most recent call last):
+  File "/app/db/config.py", line 28, in get_db
+    yield session
+  File "/app/db/repository/klines_repository.py", line 53, in get_all_klines
+    result = await session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+                   ~~~~~~~~~~~~~~^
+        self.sync_session.execute,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        **kw,
+        ^^^^^
+    )
+    ^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/subsystem/binance_trader_process_subsystem.py", line 101, in trade_cycle
+    klines_15m = await self.klines_repository.get_all_klines(symbol, self.short_interval)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/db/repository/klines_repository.py", line 51, in get_all_klines
+    async with self.session_maker() as session:
+               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/contextlib.py", line 235, in __aexit__
+    await self.gen.athrow(value)
+  File "/app/db/config.py", line 27, in get_db
+    async with SessionLocal() as session:
+               ~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 99, in greenlet_spawn
+    _not_implemented()
+    ~~~~~~~~~~~~~~~~^^
+  File "/root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/sqlalchemy/util/concurrency.py", line 79, in _not_implemented
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: the greenlet library is required to use this function. No module named 'greenlet'
+
+23-12 20:03:20 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:03:20 - apscheduler.scheduler - INFO - Added job "BinanceMACDRSITraderProcessSubsystem.trade_cycle" to job store "default"
+23-12 20:03:20 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:03:20 - subsystem.binance_trader_process_subsystem - INFO - Advertiser is initialized
+23-12 20:03:20 - subsystem.binance_trader_process_subsystem - INFO - Binance Trader Process subsystem is initialized
+23-12 20:03:20 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:20 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:03:20 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.TELEGRAM_ROUTER
+23-12 20:03:20 - subsystem.slave_bot_subsystem - INFO - Initializing bot <aiogram.client.bot.Bot object at 0x7f1d8ce33620>
+23-12 20:03:20 - routers.dispatcher - INFO - Creating dispatcher
+23-12 20:03:20 - routers.dispatcher - INFO - Add router GatewayRouter '0x7f1d8cd7d2b0'
+23-12 20:03:20 - routers.dispatcher - INFO - Dispatcher is created Dispatcher '0x7f1d8cd7de80'
+23-12 20:03:20 - aiogram.dispatcher - INFO - Start polling
+23-12 20:03:20 - aiogram.dispatcher - INFO - Run polling for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:03:23 - aiogram.dispatcher - WARNING - Received SIGTERM signal
+23-12 20:03:23 - aiogram.dispatcher - INFO - Polling stopped for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:03:23 - aiogram.dispatcher - INFO - Polling stopped
+23-12 20:03:24 - subsystem.slave_bot_subsystem - INFO - Bot is initialized
+23-12 20:03:24 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:12 - subsystem.logger_subsystem - INFO - Logger subsystem is initialized
+23-12 20:04:12 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:12 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:12 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_SOURCE
+23-12 20:04:12 - subsystem.database_subsystem - INFO - Initializing the DB
+23-12 20:04:12 - subsystem.database_subsystem - INFO - create tables
+23-12 20:04:12 - subsystem.openai_subsystem - INFO - Initializing OpenAI subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:12 - subsystem.openai_subsystem - INFO - OpenAI subsystem is initialized
+23-12 20:04:12 - subsystem.binance_subsystem - INFO - Initializing Binance subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:12 - service.crypto.binance.binance_service - INFO - Binance Client is initialized with Testnet configuration...
+23-12 20:04:13 - service.crypto.binance.binance_service - INFO - Binance Client is initialized
+23-12 20:04:13 - subsystem.binance_subsystem - INFO - Binance subsystem is initialized
+23-12 20:04:13 - asyncio - WARNING - Executing <Task finished name='Task-5' coro=<BinanceSubsystem.initialize() done, defined at /app/subsystem/binance_subsystem.py:14> result=None created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.722 seconds
+23-12 20:04:13 - subsystem.database_subsystem - INFO - Database is initialized
+23-12 20:04:13 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:13 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:13 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_OFFLOAD
+23-12 20:04:13 - subsystem.binance_data_offload_subsystem - INFO - Initializing Binance Data Offload subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:13 - subsystem.binance_data_offload_subsystem - INFO - Initialize data offload cycle jobs
+23-12 20:04:13 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:14 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.258 seconds
+23-12 20:04:14 - subsystem.binance_data_offload_subsystem - INFO - Ticker is loaded for symbol BTCUSDT
+23-12 20:04:14 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.245 seconds
+23-12 20:04:14 - subsystem.binance_data_offload_subsystem - INFO - Order book is loaded for symbols BTCUSDT
+23-12 20:04:14 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.244 seconds
+23-12 20:04:14 - subsystem.binance_data_offload_subsystem - INFO - Ticker is loaded for symbol ETHUSDT
+23-12 20:04:15 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:57> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.688 seconds
+23-12 20:04:15 - subsystem.binance_data_offload_subsystem - INFO - Order book is loaded for symbols ETHUSDT
+23-12 20:04:15 - subsystem.binance_data_offload_subsystem - INFO - Ticker offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has completed
+23-12 20:04:15 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:15 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:15 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:04:16 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.713 seconds
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:04:16 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.272 seconds
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:16 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:16 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:04:17 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:04:17 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 1.151 seconds
+23-12 20:04:17 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:17 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:04:18 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:04:18 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.279 seconds
+23-12 20:04:18 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:18 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:18 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:18 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:04:18 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:04:18 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.709 seconds
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:04:19 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.274 seconds
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:19 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:04:20 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:04:20 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 1.380 seconds
+23-12 20:04:20 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:20 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:04:21 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:04:21 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.277 seconds
+23-12 20:04:21 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.171 seconds
+23-12 20:04:21 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:21 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:21 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:21 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:04:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:04:22 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 1.376 seconds
+23-12 20:04:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:04:23 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:67> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.278 seconds
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92966.24, last timestamp: 1734984240000 - MACDs - -24.151287659733967 - -26.920922047108114 - -28.078263808986158 - -27.167346196643756
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.85, last timestamp: 1734984240000 - MACDs - 0.17571827826374936 - 0.07452284470329137 - 0.049980421443494794 - -0.1279056132736202
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92966.24, last timestamp: 1734984000000 - MACDs - -6.889615959077929 - 8.85579699701647 - 26.921731413880693 - 32.77947709011303
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.51, last timestamp: 1734984000000 - MACDs - 0.8040965962928288 - 0.8756469353146137 - 1.0967891271030075 - 1.3121960531653323
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92966.24, last timestamp: 1734984000000 - MACDs - 38.26659230132452 - 45.365129509621795 - 52.781771983290696 - 41.86936368533134
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.51, last timestamp: 1734984000000 - MACDs - 0.5547193622386377 - 0.5178026042575192 - 0.5629940934862097 - 0.40434337113549157
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92976.29, last timestamp: 1734984000000 - MACDs - -113.92352479681676 - -133.50364438295162 - -152.26857238349953 - -205.97446399200686
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.51, last timestamp: 1734984000000 - MACDs - 1.04127780646609 - 0.9995103262469383 - 0.9931993948274478 - -0.1935434546470951
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92976.29, last timestamp: 1734984000000 - MACDs - -280.63291428720834 - -290.7900272801871 - -287.1979122509369 - -231.5075240515003
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:04:23 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.51, last timestamp: 1734984000000 - MACDs - 1.3969059070922931 - 1.2121015824752224 - 0.8388238029301611 - 3.3110178857930315
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has begun
+23-12 20:04:23 - asyncio - WARNING - Executing <Task pending name='Task-8' coro=<BinanceDataOffloadSubsystem.initialize() running at /app/subsystem/binance_data_offload_subsystem.py:84> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.252 seconds
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Account is loaded
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has completed
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.ticker_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.klines_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.macd_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "BinanceDataOffloadSubsystem.account_offload_cycle" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:04:23 - subsystem.binance_data_offload_subsystem - INFO - Data offload cycle jobs are initialized
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_PROCESSING
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:23 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.DATA_CONSUMPTION
+23-12 20:04:23 - subsystem.actuator_subsystem - INFO - Initializing Actuator subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:23 - subsystem.configuration_subsystem - INFO - Initializing Configuration subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:23 - subsystem.scheduler_subsystem - INFO - Initializing Scheduler subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>, 1
+23-12 20:04:23 - schedule.periodic_message_scheduler - INFO - Initialize the advertiser job
+23-12 20:04:23 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:23 - apscheduler.scheduler - INFO - Added job "check_calendar" to job store "default"
+23-12 20:04:23 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:04:23 - schedule.periodic_message_scheduler - INFO - Advertiser is initialized
+23-12 20:04:23 - subsystem.binance_trader_process_subsystem - INFO - Initializing Binance Trader Process subsystem <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:23 - subsystem.binance_trader_process_subsystem - INFO - Trade cycle engaged
+23-12 20:04:24 - service.crypto.binance.binance_service - INFO - Open orders for BTCUSDT: []
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - Open orders: []
+23-12 20:04:24 - asyncio - WARNING - Executing <Task pending name='Task-49' coro=<BinanceMACDRSITraderProcessSubsystem.initialize() running at /app/subsystem/binance_trader_process_subsystem.py:71> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.13/asyncio/tasks.py:820] created at /usr/local/lib/python3.13/asyncio/tasks.py:748> took 0.247 seconds
+23-12 20:04:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92976.29, last timestamp: 1734984000000 - MACDs - -117.74528730567704 - -137.33043206311606 - -156.05024265610945 - -209.64870569919128
+23-12 20:04:24 - service.crypto.signals.signals_service - INFO - MACD calculated - last 4 - -209.64870569919128, -156.05024265610945, -137.33043206311606, -117.74528730567704
+23-12 20:04:24 - service.crypto.signals.signals_service - INFO - RSI calculated: 29.897449121275784
+23-12 20:04:24 - service.crypto.signals.signals_service - INFO - RSI is oversold
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - Last 5 klines:
+          open      high       low     close
+995  93380.67  93670.17  23787.00  93294.25
+996  93295.25  93492.35  92791.84  92791.84
+997  92808.76  93528.87  92712.00  93468.00
+998  93468.00  93634.61  93009.50  93038.85
+999  93040.01  93045.62  92957.71  92976.29
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - Last 3 MACD histograms:
+	 -156.05024265610945 -137.33043206311606 -117.74528730567704 
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - MACD signals: buy - False, sell - False
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - RSI signals: buy - True, sell - False
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - Combined signals - buy - False, sell - False
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - Bollinger bands calculated: last kline - 92976.29 - upper bb - 97001.4727138792 - lower bb - 91742.4462861208
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - ATR calculated: 31527.670000000002
+23-12 20:04:24 - subsystem.binance_trader_process_subsystem - INFO - ATR is above 0.01
+23-12 20:04:25 - subsystem.binance_trader_process_subsystem - INFO - MACD trend: Upward - 19.580119586134856, Upward - 19.172523793341384
+23-12 20:04:25 - subsystem.binance_trader_process_subsystem - INFO - MACD buy signals: False False False False
+23-12 20:04:25 - subsystem.binance_trader_process_subsystem - INFO - MACD sell signals: False False False False
+23-12 20:04:25 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+23-12 20:04:25 - apscheduler.scheduler - INFO - Added job "BinanceMACDRSITraderProcessSubsystem.trade_cycle" to job store "default"
+23-12 20:04:25 - apscheduler.scheduler - INFO - Scheduler started
+23-12 20:04:25 - subsystem.binance_trader_process_subsystem - INFO - Advertiser is initialized
+23-12 20:04:25 - subsystem.binance_trader_process_subsystem - INFO - Binance Trader Process subsystem is initialized
+23-12 20:04:25 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:25 - subsystem.subsystem_manager - INFO - ====================================================
+23-12 20:04:25 - subsystem.subsystem_manager - INFO - Initializing subsystems with priority InitPriority.TELEGRAM_ROUTER
+23-12 20:04:25 - subsystem.slave_bot_subsystem - INFO - Initializing bot <aiogram.client.bot.Bot object at 0x7f710b11a510>
+23-12 20:04:25 - routers.dispatcher - INFO - Creating dispatcher
+23-12 20:04:25 - routers.dispatcher - INFO - Add router GatewayRouter '0x7f710b002900'
+23-12 20:04:25 - routers.dispatcher - INFO - Dispatcher is created Dispatcher '0x7f710b0034d0'
+23-12 20:04:25 - aiogram.dispatcher - INFO - Start polling
+23-12 20:04:26 - aiogram.dispatcher - INFO - Run polling for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:05:08 - middleware.propagation_middleware - INFO - PropagationMiddleware called
+23-12 20:05:08 - middleware.propagation_middleware - INFO - PropagationMiddleware called for message
+23-12 20:05:08 - aiogram.event - INFO - Update id=815943892 is not handled. Duration 14 ms by bot id=798078868
+23-12 20:05:13 - middleware.propagation_middleware - INFO - PropagationMiddleware called
+23-12 20:05:13 - middleware.propagation_middleware - INFO - PropagationMiddleware called for message
+23-12 20:05:13 - aiogram.event - INFO - Update id=815943893 is not handled. Duration 13 ms by bot id=798078868
+23-12 20:05:17 - middleware.propagation_middleware - INFO - PropagationMiddleware called
+23-12 20:05:17 - middleware.propagation_middleware - INFO - PropagationMiddleware called for message
+23-12 20:05:17 - aiogram.event - INFO - Update id=815943894 is not handled. Duration 11 ms by bot id=798078868
+23-12 20:05:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.ticker_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:15 UTC)" was missed by 0:00:03.658142
+23-12 20:05:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:16 UTC)" was missed by 0:00:02.445807
+23-12 20:05:19 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:18 UTC)" (scheduled at 2024-12-23 20:05:18.205066+00:00)
+23-12 20:05:19 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:05:20 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:05:20 - asyncio - WARNING - Executing <Task pending name='Task-70' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.150 seconds
+23-12 20:05:20 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:19 UTC)" (scheduled at 2024-12-23 20:05:19.379387+00:00)
+23-12 20:05:20 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:20 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:05:21 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:05:21 - asyncio - WARNING - Executing <Task pending name='Task-71' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at /usr/local/lib/python3.13/asyncio/futures.py:384, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.147 seconds
+23-12 20:05:21 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:21 UTC)" (scheduled at 2024-12-23 20:05:21.315139+00:00)
+23-12 20:05:21 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:21 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:05:22 - asyncio - WARNING - Executing <Task pending name='Task-72' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at /usr/local/lib/python3.13/asyncio/futures.py:384, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.718 seconds
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:05:22 - asyncio - WARNING - Executing <Task pending name='Task-70' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.269 seconds
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:22 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:18 UTC)" executed successfully
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:05:22 - asyncio - WARNING - Executing <Task pending name='Task-71' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.277 seconds
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:05:23 - asyncio - WARNING - Executing <Task pending name='Task-72' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.273 seconds
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.148337+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:05:23 - asyncio - WARNING - Executing <Task pending name='Task-77' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.274 seconds
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.380804+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.454173+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.501729+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.541233+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" (scheduled at 2024-12-23 20:05:23.577977+00:00)
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:23 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:19 UTC)" executed successfully
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:23 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:21 UTC)" executed successfully
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:23 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:05:24 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:05:24 - asyncio - WARNING - Executing <Task pending name='Task-77' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.152 seconds
+23-12 20:05:24 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.account_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" was missed by 0:00:01.102283
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93007.54, last timestamp: 1734984300000 - MACDs - -11.01273060160949 - -3.2934945290533335 - 8.85579275682133 - 26.921726834465886
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93007.54, last timestamp: 1734984000000 - MACDs - -111.92922280252048 - -133.50364438295162 - -152.26857238349953 - -205.97446399200686
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93007.54, last timestamp: 1734984000000 - MACDs - -278.63861229290046 - -290.7900272801871 - -287.1979122509369 - -231.5075240515003
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93007.54, last timestamp: 1734984000000 - MACDs - 40.90226181700223 - 45.365129509621795 - 52.781771983290696 - 41.86936368533134
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92966.24, last timestamp: 1734984240000 - MACDs - -24.151287659733967 - -26.920922047108114 - -28.078263808986158 - -27.167346196643756
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3342.51, last timestamp: 1734984000000 - MACDs - 0.682354689873927 - 0.5178026042575192 - 0.5629940934862097 - 0.40434337113549157
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3342.51, last timestamp: 1734984300000 - MACDs - 0.9384738882670358 - 0.9834247015789521 - 0.875647442870332 - 1.0967896752629835
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3342.51, last timestamp: 1734984000000 - MACDs - 1.5245412347272183 - 1.2121015824752224 - 0.8388238029301611 - 3.3110178857930315
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3342.51, last timestamp: 1734984000000 - MACDs - 1.1689131341010155 - 0.9995103262469383 - 0.9931993948274478 - -0.1935434546470951
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:05:25 - asyncio - WARNING - Executing <Task pending name='Task-78' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.158 seconds
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:05:25 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.85, last timestamp: 1734984240000 - MACDs - 0.17571827826374936 - 0.07452284470329137 - 0.049980421443494794 - -0.1279056132736202
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:05:25 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:05:25 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" executed successfully
+23-12 20:05:26 - apscheduler.executors.default - WARNING - Run time of job "check_calendar (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:23 UTC)" was missed by 0:00:02.877906
+23-12 20:05:29 - apscheduler.executors.default - WARNING - Run time of job "BinanceMACDRSITraderProcessSubsystem.trade_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:06:25 UTC)" was missed by 0:00:03.733261
+23-12 20:05:44 - middleware.propagation_middleware - INFO - PropagationMiddleware called
+23-12 20:05:44 - middleware.propagation_middleware - INFO - PropagationMiddleware called for message
+23-12 20:05:44 - aiogram.event - INFO - Update id=815943895 is not handled. Duration 11 ms by bot id=798078868
+23-12 20:06:03 - middleware.propagation_middleware - INFO - PropagationMiddleware called
+23-12 20:06:03 - middleware.propagation_middleware - INFO - PropagationMiddleware called for message
+23-12 20:06:03 - aiogram.event - INFO - Update id=815943896 is not handled. Duration 11 ms by bot id=798078868
+23-12 20:06:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.ticker_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:15 UTC)" was missed by 0:00:03.733568
+23-12 20:06:19 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:16 UTC)" was missed by 0:00:02.521282
+23-12 20:06:19 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:18 UTC)" (scheduled at 2024-12-23 20:06:18.205066+00:00)
+23-12 20:06:19 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:19 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:06:20 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:06:20 - asyncio - WARNING - Executing <Task pending name='Task-120' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.138 seconds
+23-12 20:06:20 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:19 UTC)" (scheduled at 2024-12-23 20:06:19.379387+00:00)
+23-12 20:06:20 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:20 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:06:21 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:06:21 - asyncio - WARNING - Executing <Task pending name='Task-121' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.130 seconds
+23-12 20:06:21 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:21 UTC)" (scheduled at 2024-12-23 20:06:21.315139+00:00)
+23-12 20:06:21 - subsystem.binance_data_offload_subsystem - INFO - Klines offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:21 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol BTCUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol BTCUSDT
+23-12 20:06:22 - asyncio - WARNING - Executing <Task pending name='Task-122' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.706 seconds
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:06:22 - asyncio - WARNING - Executing <Task pending name='Task-121' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.275 seconds
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:06:22 - asyncio - WARNING - Executing <Task pending name='Task-122' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.266 seconds
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:22 - subsystem.binance_data_offload_subsystem - INFO - No klines found for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - 1000 klines were loaded for symbol ETHUSDT
+23-12 20:06:24 - asyncio - WARNING - Executing <Task pending name='Task-120' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[BaseProtocol._on_waiter_completed(), Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 1.146 seconds
+23-12 20:06:24 - apscheduler.executors.default - WARNING - Run time of job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" was missed by 0:00:01.012009
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.380804+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.454173+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.501729+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.541233+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.577977+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD offload cycle for symbols ['BTCUSDT', 'ETHUSDT'] has begun
+23-12 20:06:24 - apscheduler.executors.default - INFO - Running job "BinanceDataOffloadSubsystem.account_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" (scheduled at 2024-12-23 20:06:23.836064+00:00)
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has begun
+23-12 20:06:24 - asyncio - WARNING - Executing <Task pending name='Task-133' coro=<run_coroutine_job() running at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/base.py:181> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at /usr/local/lib/python3.13/asyncio/futures.py:384, Task.task_wakeup()] created at /usr/local/lib/python3.13/asyncio/base_events.py:459> cb=[AsyncIOExecutor._do_submit_job.<locals>.callback() at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:32] created at /root/.cache/pypoetry/virtualenvs/spambot-python-9TtSrW0h-py3.13/lib/python3.13/site-packages/apscheduler/executors/asyncio.py:45> took 0.251 seconds
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:19 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:21 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.klines_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:18 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93050.66, last timestamp: 1734984000000 - MACDs - 43.65407948081946 - 45.365129509621795 - 52.781771983290696 - 41.86936368533134
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Account is loaded
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Account offload cycle has completed
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.account_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93050.66, last timestamp: 1734984300000 - MACDs - -8.260912937780645 - -3.2934945290533335 - 8.85579275682133 - 26.921726834465886
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93007.54, last timestamp: 1734984000000 - MACDs - -278.63861229290046 - -290.7900272801871 - -287.1979122509369 - -231.5075240515003
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 93050.66, last timestamp: 1734984000000 - MACDs - -109.1774051386916 - -133.50364438295162 - -152.26857238349953 - -205.97446399200686
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol BTCUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 92966.24, last timestamp: 1734984240000 - MACDs - -24.151287659733967 - -26.920922047108114 - -28.078263808986158 - -27.167346196643756
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3344.34, last timestamp: 1734984000000 - MACDs - 0.7991410146604441 - 0.5178026042575192 - 0.5629940934862097 - 0.40434337113549157
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3344.34, last timestamp: 1734984300000 - MACDs - 1.0552602130535529 - 0.9834247015789521 - 0.875647442870332 - 1.0967896752629835
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3342.51, last timestamp: 1734984000000 - MACDs - 1.5245412347272183 - 1.2121015824752224 - 0.8388238029301611 - 3.3110178857930315
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3344.34, last timestamp: 1734984000000 - MACDs - 1.2856994588875326 - 0.9995103262469383 - 0.9931993948274478 - -0.1935434546470951
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol BTCUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - Klines are loaded for symbol ETHUSDT
+23-12 20:06:24 - service.crypto.indicator_service - INFO - MACD is calculated for DataFrame: last kline close: 3340.85, last timestamp: 1734984240000 - MACDs - 0.17571827826374936 - 0.07452284470329137 - 0.049980421443494794 - -0.1279056132736202
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD is calculated for symbol ETHUSDT
+23-12 20:06:24 - subsystem.binance_data_offload_subsystem - INFO - MACD values updated for the last 60 minutes for symbol ETHUSDT
+23-12 20:06:24 - apscheduler.executors.default - INFO - Job "BinanceDataOffloadSubsystem.macd_offload_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" executed successfully
+23-12 20:06:27 - apscheduler.executors.default - WARNING - Run time of job "check_calendar (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:23 UTC)" was missed by 0:00:03.733426
+23-12 20:06:27 - apscheduler.executors.default - WARNING - Run time of job "BinanceMACDRSITraderProcessSubsystem.trade_cycle (trigger: interval[0:01:00], next run at: 2024-12-23 20:07:25 UTC)" was missed by 0:00:01.862033
+23-12 20:06:40 - aiogram.dispatcher - WARNING - Received SIGTERM signal
+23-12 20:06:40 - aiogram.dispatcher - INFO - Polling stopped for bot @NoteEfreetBot id=798078868 - 'Efreet'
+23-12 20:06:40 - aiogram.dispatcher - INFO - Polling stopped
+23-12 20:06:40 - subsystem.slave_bot_subsystem - INFO - Bot is initialized
+23-12 20:06:40 - subsystem.subsystem_manager - INFO - ====================================================

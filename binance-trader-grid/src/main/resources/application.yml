@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: binance-data-collection
+  elasticsearch:
+    uris: http://elasticsearch:9200
+    username: elastic
+    password: admin
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
+    driver-class-name: org.postgresql.Driver

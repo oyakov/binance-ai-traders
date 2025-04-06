@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: binance-data-collection
+  elasticsearch:
+    uris: http://elasticsearch:9200
+    username: elastic
+    password: admin
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    mixed: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    history-table: schema_version
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: com.oyakov.binance_data_storage.broker.kafka.deserializer.KlineCollectedCommandDeserializer
+      auto-offset-reset: earliest
+
+binance:
+  rest:
+    base-url: https://api.binance.com
+  websocket:
+    base-url: wss://stream.binance.com:9443/ws
+  data:
+    kline:
+      entity-name: kline
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-storage
+      intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
+      symbols: btcusdt,ethusdt,bnbusdt,adausdt,dogeusdt,xrpusdt,dotusdt,ltcusdt,linkusdt,uniusdt
+
