@@ -1,6 +1,6 @@
-package com.oyakov.binance_data_storage.broker.app;
+package com.oyakov.binance_data_storage.kafka.service;
 
-import com.oyakov.binance_data_storage.broker.kafka.producer.KafkaProducerService;
+import com.oyakov.binance_data_storage.kafka.producer.KafkaProducerService;
 import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.DataItemWrittenNotification;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;

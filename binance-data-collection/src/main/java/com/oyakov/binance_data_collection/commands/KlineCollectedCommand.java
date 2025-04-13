@@ -1,5 +1,6 @@
 package com.oyakov.binance_data_collection.commands;
 
+import com.oyakov.binance_data_collection.kafka.CommandMarker;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class KlineCollectedCommand {
+public class KlineCollectedCommand implements CommandMarker {
+    private String type;
     private String eventType;
     private long eventTime;
     private String symbol;

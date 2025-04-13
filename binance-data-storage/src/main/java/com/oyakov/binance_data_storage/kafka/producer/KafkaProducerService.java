@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_storage.broker.kafka.producer;
+package com.oyakov.binance_data_storage.kafka.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

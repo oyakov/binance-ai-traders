@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_storage.broker.kafka.consumer;
+package com.oyakov.binance_data_storage.kafka.kafka.consumer;
 
 import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
 import org.apache.kafka.clients.producer.ProducerConfig;

@@ -15,4 +15,5 @@ public class DataItemWrittenNotification<T> {
     private long eventTime;
     private T dataItem;
     private String errorMessage;
+    Throwable error;
 }

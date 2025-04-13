@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_storage.broker.kafka.deserializer;
+package com.oyakov.binance_data_storage.kafka.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;

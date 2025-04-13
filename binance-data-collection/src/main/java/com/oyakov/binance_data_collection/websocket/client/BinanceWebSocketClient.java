@@ -1,81 +1,103 @@
 package com.oyakov.binance_data_collection.websocket.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oyakov.binance_data_collection.commands.KlineCollectedCommand;
-import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
-import com.oyakov.binance_data_collection.model.BinanceWebsocketEventData;
+import com.oyakov.binance_data_collection.cache.StreamSourcesManager;
+import com.oyakov.binance_data_collection.commands.ConfigureStreamSources;
+import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
+import com.oyakov.binance_data_collection.kafka.service.ConfigurationEventBroker;
+import com.oyakov.binance_data_collection.model.StreamSource;
+import com.oyakov.binance_data_collection.websocket.handler.BinanceTextMessageHandler;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.net.URI;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 @Log4j2
-public class BinanceWebSocketClient extends TextWebSocketHandler {
+@RequiredArgsConstructor
+public class BinanceWebSocketClient implements ConfigurationEventBroker {
 
-    private static final String BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m";
-    private final KafkaProducerService kafkaProducerService;
-    private long lastOpenTime = -1;
-    private long lastCloseTime = -1;
+    private final BinanceDataCollectionConfig config;
+    private final StreamSourcesManager streamSourcesManager;
+    private final BinanceTextMessageHandler textMessageHandler;
+    private final StandardWebSocketClient client = new StandardWebSocketClient();
 
-    @Value("${binance.api.websocket.kline.topic}")
-    private final String klineTopic = "binance-kline";
-
-    public BinanceWebSocketClient(KafkaProducerService kafkaProducerService) {
-        this.kafkaProducerService = kafkaProducerService;
-    }
 
     @PostConstruct
-    public void connect() {
-        StandardWebSocketClient client = new StandardWebSocketClient();
+    public void init() {
+        if (config.getWebsocket().getAutoConnect()) {
+            connect(fetchDefaultStreamSources());
+        }
+    }
+
+    private List<StreamSource> fetchDefaultStreamSources() {
+        List<String> intervals = config.getData().getKline().getIntervals();
+        List<String> symbols = config.getData().getKline().getSymbols();
+        List<StreamSource> streamSources = new ArrayList<>();
+
+        for (String symbol : symbols) {
+            for (String interval : intervals) {
+                streamSources.add(new StreamSource(new StreamSource.StreamSourceFingerprint(symbol, interval), -1, -1, null));
+            }
+        }
+
+        return streamSources;
+    }
+
+
+    public void connect(List<StreamSource> streamSources) {
+        log.info("Binance data collection streaming reconfiguration...");
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        CompletableFuture<WebSocketSession> future =
-                client.execute(this, headers, URI.create(BINANCE_WS_URL));
-        future.thenAccept(session -> {
-            System.out.println("Connected: " + session.getId() + " to " + BINANCE_WS_URL + " at " + System.currentTimeMillis()
-            + " with headers: " + headers);
-        }).exceptionally(throwable -> {
-            log.error("Failed to connect to Binance WebSocket", throwable);
-            return null;
-        });
+
+        Set<StreamSource.StreamSourceFingerprint> updatedFingerprints =
+                streamSources.stream().map(StreamSource::fingerprint).collect(Collectors.toSet());
+
+        Set<StreamSource.StreamSourceFingerprint> activeFingerprints = streamSourcesManager.getActiveSSFingerprints();
+
+        log.info("Existing connections: {}", activeFingerprints);
+        log.info("Updated configuration: {}", updatedFingerprints);
+
+        log.info("Closing obsolete sessions...");
+        Set<StreamSource.StreamSourceFingerprint> toClose =
+                activeFingerprints.stream()
+                        .filter(fingerprint -> !updatedFingerprints.contains(fingerprint))
+                        .collect(Collectors.toSet());
+        Set<String> closedSessions = streamSourcesManager.closeStreamSources(toClose);
+        log.info("Closed sessions: {}", closedSessions);
+
+        log.info("Opening new sessions...");
+        List<CompletableFuture<Void>> futures = streamSources.stream()
+                .filter(streamSource -> !activeFingerprints.contains(streamSource.fingerprint()))
+                .map(streamSource -> {
+                    log.info("New stream source to be added {}", streamSource);
+                    URI uri = StreamSource.formatURLTemplate(streamSource, config);
+                    log.info("Connecting to URI {}", uri);
+                    return client.execute(textMessageHandler, headers, uri)
+                            .thenAccept(session -> {
+                        log.info("Connected: session {} is opened for {} at {} with headers: {}",
+                                session.getId(), streamSource, System.currentTimeMillis() / 1000, headers);
+                        streamSourcesManager.putStreamSource(streamSource.withSession(session));
+                    }).exceptionally(throwable -> {
+                        log.error("Failed to connect to Binance WebSocket {}", streamSource, throwable);
+                        return null;
+                    });
+                })
+                .toList();
+
+        // Wait for all to complete
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).orTimeout(15, TimeUnit.SECONDS).join();
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        log.debug("Received message: {}", message.getPayload());
-        String payload = message.getPayload();
-        BinanceWebsocketEventData binanceWebsocketEventData = new ObjectMapper().readValue(payload, BinanceWebsocketEventData.class);
-        log.debug("Parsed message: {}", binanceWebsocketEventData);
-
-        long newOpenTime = binanceWebsocketEventData.getKline().getOpenTime();
-        long newCloseTime = binanceWebsocketEventData.getKline().getCloseTime();
-
-        if (newOpenTime != lastOpenTime || newCloseTime != lastCloseTime) {
-            lastOpenTime = newOpenTime;
-            lastCloseTime = newCloseTime;
-            KlineCollectedCommand command = KlineCollectedCommand.builder()
-                    .eventTime(binanceWebsocketEventData.getEventTime())
-                    .eventType(binanceWebsocketEventData.getEventType())
-                    .symbol(binanceWebsocketEventData.getSymbol())
-                    .interval("1m")
-                    .openTime(binanceWebsocketEventData.getKline().getOpenTime())
-                    .closeTime(binanceWebsocketEventData.getKline().getCloseTime())
-                    .open(binanceWebsocketEventData.getKline().getOpen())
-                    .high(binanceWebsocketEventData.getKline().getHigh())
-                    .low(binanceWebsocketEventData.getKline().getLow())
-                    .close(binanceWebsocketEventData.getKline().getClose())
-                    .volume(binanceWebsocketEventData.getKline().getVolume())
-                    .build();
-            kafkaProducerService.sendCommand(klineTopic, command);
-        }
+    public void configureStreamSourcesEvent(ConfigureStreamSources event) {
+        log.info("Reconfigure client with new stream sources: {}", event.getUpdatedStreamSources());
+        connect(event.getUpdatedStreamSources());
     }
 }
