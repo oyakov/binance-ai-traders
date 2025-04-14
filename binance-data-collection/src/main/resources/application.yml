@@ -1,20 +1,6 @@
 spring:
   application:
     name: binance-data-collection
-  elasticsearch:
-    uris: http://elasticsearch:9200
-    username: elastic
-    password: admin
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    history-table: schema_version
   kafka:
     bootstrap-servers: kafka:9092
     producer:
@@ -24,7 +10,7 @@ spring:
       bootstrap-servers: kafka:9092
       group-id: test-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: com.oyakov.binance_data_collection.kafka.deserializer.CommandMarkerDeserializer
+      value-deserializer: com.oyakov.binance_shared_model.kafka.deserializer.CommandMarkerDeserializer
       auto-offset-reset: earliest
 
 binance:

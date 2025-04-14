@@ -1,6 +1,7 @@
 package com.oyakov.binance_data_collection.kafka.consumer;
 
-import com.oyakov.binance_data_collection.commands.ConfigureStreamSources;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.ConfigureStreamSources;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.KlineCollectedCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,7 +16,7 @@ public class KafkaConsumerService {
     private final ApplicationEventPublisher eventPublisher;
 
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", groupId = "${binance.data.kline.kafka-consumer-group}")
-    public void listen(String message) {
+    public void listen(KlineCollectedCommand message) {
         log.info("Received message: {}", message);
     }
 

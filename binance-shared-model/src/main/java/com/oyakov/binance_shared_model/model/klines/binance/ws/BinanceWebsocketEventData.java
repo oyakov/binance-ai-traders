@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,6 @@ import org.springframework.data.annotation.Id;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BinanceWebsocketEventData {
 
-    @Id
     private String id;
     @JsonAlias("e")
     private String eventType;

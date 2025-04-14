@@ -1,4 +1,4 @@
-package com.oyakov.binance_data_collection.model;
+package com.oyakov.binance_data_collection.model.binance;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

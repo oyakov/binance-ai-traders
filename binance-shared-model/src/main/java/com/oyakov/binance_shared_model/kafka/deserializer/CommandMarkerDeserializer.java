@@ -1,10 +1,10 @@
-package com.oyakov.binance_data_collection.kafka.deserializer;
+package com.oyakov.binance_shared_model.kafka.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oyakov.binance_data_collection.commands.ConfigureStreamSources;
-import com.oyakov.binance_data_collection.commands.KlineCollectedCommand;
-import com.oyakov.binance_data_collection.kafka.CommandMarker;
+import com.oyakov.binance_shared_model.kafka.command.CommandMarker;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.ConfigureStreamSources;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.KlineCollectedCommand;
 import org.apache.kafka.common.errors.SerializationException;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 

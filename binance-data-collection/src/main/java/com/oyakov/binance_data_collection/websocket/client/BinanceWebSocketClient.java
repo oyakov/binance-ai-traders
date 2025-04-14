@@ -1,11 +1,11 @@
 package com.oyakov.binance_data_collection.websocket.client;
 
 import com.oyakov.binance_data_collection.cache.StreamSourcesManager;
-import com.oyakov.binance_data_collection.commands.ConfigureStreamSources;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
 import com.oyakov.binance_data_collection.kafka.service.ConfigurationEventBroker;
-import com.oyakov.binance_data_collection.model.StreamSource;
 import com.oyakov.binance_data_collection.websocket.handler.BinanceTextMessageHandler;
+import com.oyakov.binance_shared_model.model.klines.binance.StreamSource;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.ConfigureStreamSources;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -77,7 +77,7 @@ public class BinanceWebSocketClient implements ConfigurationEventBroker {
                 .filter(streamSource -> !activeFingerprints.contains(streamSource.fingerprint()))
                 .map(streamSource -> {
                     log.info("New stream source to be added {}", streamSource);
-                    URI uri = StreamSource.formatURLTemplate(streamSource, config);
+                    URI uri = StreamSource.formatURLTemplate(streamSource, config.getWebsocket().getBaseUrl());
                     log.info("Connecting to URI {}", uri);
                     return client.execute(textMessageHandler, headers, uri)
                             .thenAccept(session -> {

@@ -1,6 +1,7 @@
-package com.oyakov.binance_data_collection.model;
+package com.oyakov.binance_shared_model.model.klines.binance;
 
-import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
+
+
 import org.springframework.web.socket.WebSocketSession;
 
 import java.net.URI;
@@ -12,8 +13,7 @@ public record StreamSource(StreamSourceFingerprint fingerprint,
                            WebSocketSession session) {
 
     public static URI formatURLTemplate(StreamSource streamSource,
-                                        BinanceDataCollectionConfig config) {
-        String baseUrl = config.getWebsocket().getBaseUrl();
+                                        String baseUrl) {
         if (!baseUrl.contains("%s")) {
             throw new IllegalArgumentException("WebSocket base URL must contain two '%s' placeholders.");
         }

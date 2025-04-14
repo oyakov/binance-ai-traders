@@ -2,11 +2,11 @@ package com.oyakov.binance_data_collection.websocket.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyakov.binance_data_collection.cache.StreamSourcesManager;
-import com.oyakov.binance_data_collection.commands.KlineCollectedCommand;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
 import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
-import com.oyakov.binance_data_collection.model.BinanceWebsocketEventData;
-import com.oyakov.binance_data_collection.model.StreamSource;
+import com.oyakov.binance_data_collection.model.binance.BinanceWebsocketEventData;
+import com.oyakov.binance_shared_model.model.klines.binance.StreamSource;
+import com.oyakov.binance_shared_model.model.klines.binance.commands.KlineCollectedCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
