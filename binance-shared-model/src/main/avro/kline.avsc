@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "KlineEvent",
+  "namespace": "com.oyakov.binance_shared_model.avro",
+  "fields": [
+    {"name": "eventType", "type": "string"},
+    {"name": "eventTime", "type": "long"},
+    {"name": "symbol", "type": "string"},
+    {"name": "interval", "type": "string"},
+    {"name": "openTime", "type": "long"},
+    {"name": "closeTime", "type": "long"},
+    {"name": "open", "type": "double"},
+    {"name": "high", "type": "double"},
+    {"name": "low", "type": "double"},
+    {"name": "close", "type": "double"},
+    {"name": "volume", "type": "double"}
+  ]
+} 
