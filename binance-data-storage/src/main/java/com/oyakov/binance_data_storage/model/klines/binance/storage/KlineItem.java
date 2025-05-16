@@ -21,10 +21,11 @@ import java.time.LocalDateTime;
 public class KlineItem {
 
     @Id
+    @Transient // JPA will ignore this field
     @Field(type = FieldType.Keyword)
     private String id; // Elasticsearch doc ID
 
-    @Embedded
+    @EmbeddedId
     private KlineFingerprint fingerprint;
 
     private long timestamp;

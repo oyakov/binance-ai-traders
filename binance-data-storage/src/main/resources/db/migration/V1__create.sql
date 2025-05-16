@@ -141,28 +141,32 @@ CREATE INDEX ix_calendar_tod_id ON public.calendar_tod USING btree (id);
 
 -- DROP TABLE public.kline;
 
-CREATE TABLE public.kline (
-	id serial4 NOT NULL,
-	symbol varchar NULL,
-	"interval" varchar NULL,
-	"timestamp" int8 NULL,
-	display_time timestamp NULL,
-	"open" float8 NULL,
-	high float8 NULL,
-	low float8 NULL,
-	"close" float8 NULL,
-	volume float8 NULL,
-	open_time int8 NULL,
-	close_time int8 NULL,
-	display_close_time timestamp NULL,
-	quote_asset_volume float8 NULL,
-	number_of_trades int4 NULL,
-	taker_buy_base_asset_volume float8 NULL,
-	taker_buy_quote_asset_volume float8 NULL,
-	"ignore" varchar NULL,
-	CONSTRAINT kline_pkey PRIMARY KEY (id)
+create table public.kline
+(
+    symbol                       varchar,
+    interval                     varchar,
+    timestamp                    bigint,
+    display_time                 timestamp,
+    open                         double precision,
+    high                         double precision,
+    low                          double precision,
+    close                        double precision,
+    volume                       double precision,
+    open_time                    bigint,
+    close_time                   bigint,
+    display_close_time           timestamp,
+    quote_asset_volume           double precision,
+    number_of_trades             integer,
+    taker_buy_base_asset_volume  double precision,
+    taker_buy_quote_asset_volume double precision,
+    ignore                       varchar
 );
 
+alter table public.kline
+    owner to postgres;
+
+create unique index kline_symbol_interval_opentime_idx
+    on public.kline (symbol, interval, open_time, close_time);
 
 -- public.macd definition
 

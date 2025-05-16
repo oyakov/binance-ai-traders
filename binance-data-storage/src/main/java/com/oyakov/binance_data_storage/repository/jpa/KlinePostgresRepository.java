@@ -16,11 +16,11 @@ public interface KlinePostgresRepository extends JpaRepository<KlineItem, Long> 
 
     @Modifying
     @Query(value = """
-    INSERT INTO kline (symbol, interval, open_time, close_time, display_time, open, high, low, close, volume)
-    VALUES (:symbol, :interval, :openTime, :closeTime, :displayTime, :open, :high, :low, :close, :volume)
-    ON CONFLICT (symbol, interval, open_time)
+    INSERT INTO kline (symbol, interval, open_time, close_time, timestamp, display_time, open, high, low, close, volume)
+    VALUES (:symbol, :interval, :openTime, :closeTime, :timestamp, :displayTime, :open, :high, :low, :close, :volume)
+    ON CONFLICT (symbol, interval, open_time, close_time)
     DO UPDATE SET 
-        close_time = EXCLUDED.close_time,
+        timestamp = EXCLUDED.timestamp,
         display_time = EXCLUDED.display_time,
         open = EXCLUDED.open,
         high = EXCLUDED.high,
@@ -32,6 +32,7 @@ public interface KlinePostgresRepository extends JpaRepository<KlineItem, Long> 
                      @Param("interval") String interval,
                      @Param("openTime") long openTime,
                      @Param("closeTime") long closeTime,
+                     @Param("timestamp") long timestamp,
                      @Param("displayTime") LocalDateTime displayTime,
                      @Param("open") double open,
                      @Param("high") double high,
@@ -46,6 +47,7 @@ public interface KlinePostgresRepository extends JpaRepository<KlineItem, Long> 
                 f.getInterval(),
                 f.getOpenTime(),
                 klineItem.getCloseTime(),
+                klineItem.getTimestamp(),
                 klineItem.getDisplayTime(),
                 klineItem.getOpen(),
                 klineItem.getHigh(),
