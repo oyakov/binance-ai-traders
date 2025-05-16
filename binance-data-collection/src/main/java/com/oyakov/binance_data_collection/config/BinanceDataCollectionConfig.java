@@ -23,6 +23,7 @@ public class BinanceDataCollectionConfig {
     @lombok.Data
     public static class Websocket {
         private String baseUrl;
+        private String klineUrlTemplate;
         private Boolean autoConnect = true;
     }
 

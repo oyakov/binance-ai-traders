@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class KafkaConsumerService {
 
     private final KlineDataServiceApi klineDataService;
-    private final KlineMapper klineMapper;
 
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", groupId = "${binance.data.kline.kafka-consumer-group}")
     public void listen(KlineEvent event) {

@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Kline {
+    @JsonAlias("s")
+    private String symbol;
+    @JsonAlias("i")
+    private String interval;
     @JsonAlias("t")
     private long openTime;
     @JsonAlias("o")
@@ -27,4 +31,6 @@ public class Kline {
     private double volume;
     @JsonAlias("T")
     private long closeTime;
+    @JsonAlias("x")
+    private boolean closed;
 }

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.oyakov.</groupId>
-	<artifactId>binance-data-storage</artifactId>
+	<artifactId>binance-trader-macd</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
-	<name>binance-data-storage</name>
-	<description>Binance Data Storage</description>
+	<name>binance-trader-macd</name>
+	<description>Binance MACD Trader</description>
 	<url/>
 	<licenses>
 		<license/>

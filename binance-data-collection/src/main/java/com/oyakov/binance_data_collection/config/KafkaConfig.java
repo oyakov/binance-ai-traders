@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //@Configuration
+// TODO: remove this
 public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
