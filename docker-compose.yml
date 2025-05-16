@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  binance-data-collection:
+    build: 
+      context: .
+      dockerfile: binance-data-collection/Dockerfile
+    container_name: binance-data-collection
+    depends_on:
+      - kafka
+      - schema-registry
+    networks:
+      - binance-network
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
   postgres:
     image: postgres:latest
     container_name: postgres
@@ -12,6 +25,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - binance-network
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
@@ -24,6 +39,8 @@ services:
       - "9300:9300"
     volumes:
       - es-data:/usr/share/elasticsearch/data
+    networks:
+      - binance-network
 
   kafka:
     image: apache/kafka:3.8.0
@@ -49,8 +66,29 @@ services:
       KAFKA_BROKER_ID: 1
     volumes:
       - kafka-data:/var/lib/kafka/data
+    networks:
+      - binance-network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.1
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - binance-network
 
 volumes:
   postgres-data:
   es-data:
   kafka-data:
+
+networks:
+  binance-network:
+    driver: bridge

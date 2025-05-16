@@ -1,10 +1,9 @@
 package com.oyakov.binance_data_storage.kafka.service;
 
 import com.oyakov.binance_data_storage.kafka.producer.KafkaProducerService;
-import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.DataItemWrittenNotification;
-import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
+import com.oyakov.binance_shared_model.avro.KlineEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -33,20 +32,20 @@ public class KlineEventBrokerTest {
 
     @Test
     public void testHandleKlineCollectedEvent() {
-        KlineCollectedCommand command = new KlineCollectedCommand();
+        KlineEvent command = new KlineEvent();
         klineEventBroker.handleKlineCollectedEvent(command);
         verify(dataServiceApi).saveKlineData(command);
     }
 
     @Test
     public void testHandleKlineWrittenEvent() {
-        KlineItem klineItem = new KlineItem();
-        DataItemWrittenNotification<KlineItem> notification =
-                DataItemWrittenNotification.<KlineItem>builder()
-                .dataItem(klineItem)
+        KlineEvent klineEvent = new KlineEvent();
+        DataItemWrittenNotification<KlineEvent> notification =
+                DataItemWrittenNotification.<KlineEvent>builder()
+                .dataItem(klineEvent)
                 .build();
         klineEventBroker.handleKlineWrittenEvent(notification);
-        verify(kafkaProducerService).sendCommand("binance-notification", notification);
+        verify(kafkaProducerService).sendCommand("binance-notification", notification.getDataItem());
     }
 
 }

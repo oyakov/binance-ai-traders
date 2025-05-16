@@ -1,15 +1,18 @@
 package com.oyakov.binance_data_storage.service.impl;
 
-import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
+import com.oyakov.binance_data_storage.mapper.KlineMapper;
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.DataItemWrittenNotification;
+import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineFingerprint;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
 import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository;
 import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
+import com.oyakov.binance_shared_model.avro.KlineEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -29,6 +32,9 @@ public class KlineDataServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Spy
+    private KlineMapper klineMapper;
+
     @InjectMocks
     private KlineDataService klineDataService;
 
@@ -40,17 +46,18 @@ public class KlineDataServiceTest {
     @Test
     public void testSaveKlineDataSuccess() {
 
-        KlineCollectedCommand incomingCommand = KlineCollectedCommand.builder()
-                .symbol("BTCUSDT")
-                .interval("1m")
-                .eventTime(1620000000000L)
-                .openTime(1620000000000L)
-                .open(1000)
-                .high(1100)
-                .low(900)
-                .close(1050)
-                .volume(1000)
-                .closeTime(1620000999000L)
+        KlineEvent incomingCommand = KlineEvent.newBuilder()
+                .setSymbol("BTCUSDT")
+                .setInterval("1m")
+                .setEventType("test")
+                .setEventTime(1620000000000L)
+                .setOpenTime(1620000000000L)
+                .setOpen(1000.0)
+                .setHigh(1100.0)
+                .setLow(900.0)
+                .setClose(1050.0)
+                .setVolume(1000.0)
+                .setCloseTime(1620000999000L)
                 .build();
 
         LocalDateTime eventDisplayTime = LocalDateTime.ofEpochSecond(
@@ -58,18 +65,18 @@ public class KlineDataServiceTest {
                 0,
                 java.time.ZoneOffset.UTC);
 
+
+        KlineFingerprint fingerprint = KlineFingerprint.fromKlineEvent(incomingCommand);
+
         KlineItem expectedItem = KlineItem.builder()
-                .symbol(incomingCommand.getSymbol())
-                .interval(incomingCommand.getInterval())
+                .fingerprint(fingerprint)
                 .timestamp(incomingCommand.getEventTime())
                 .displayTime(eventDisplayTime)
-                .openTime(incomingCommand.getOpenTime())
                 .open(incomingCommand.getOpen())
                 .high(incomingCommand.getHigh())
                 .low(incomingCommand.getLow())
                 .close(incomingCommand.getClose())
                 .volume(incomingCommand.getVolume())
-                .closeTime(incomingCommand.getCloseTime())
                 .build();
 
         when(klineElasticRepository.save(expectedItem)).thenReturn(expectedItem);
@@ -94,61 +101,63 @@ public class KlineDataServiceTest {
 
     @Test
     public void testCompensateKlineData() {
-
-        KlineItem klineItem = KlineItem.builder()
-                .symbol("BTCUSDT")
-                .interval("1m")
-                .openTime(1620000000000L)
-                .open(1000)
-                .high(1100)
-                .low(900)
-                .close(1050)
-                .volume(1000)
-                .closeTime(1620000999000L)
+        KlineEvent klineEvent = KlineEvent.newBuilder()
+                .setSymbol("BTCUSDT")
+                .setInterval("1m")
+                .setEventType("test")
+                .setEventTime(1620000000000L)
+                .setOpenTime(1620000000000L)
+                .setOpen(1000.0)
+                .setHigh(1100.0)
+                .setLow(900.0)
+                .setClose(1050.0)
+                .setVolume(1000.0)
+                .setCloseTime(1620000999000L)
                 .build();
 
-        DataItemWrittenNotification<KlineItem> klineNotification =
-                DataItemWrittenNotification.<KlineItem>builder()
+        DataItemWrittenNotification<KlineEvent> klineNotification =
+                DataItemWrittenNotification.<KlineEvent>builder()
                         .eventType("KlineNotWritten")
                         .eventTime(1620000000000L)
-                        .dataItem(klineItem)
+                        .dataItem(klineEvent)
                         .errorMessage(null)
                         .build();
 
         klineDataService.compensateKlineData(klineNotification);
 
-        verify(klineElasticRepository, times(1)).delete(klineItem);
-        verify(klinePostgresRepository, times(1)).delete(klineItem);
+        KlineFingerprint expectedFingerprint = KlineFingerprint.fromKlineEvent(klineEvent);
+
+        verify(klineElasticRepository, times(1)).deleteByFingerprint(expectedFingerprint);
+        verify(klinePostgresRepository, times(1)).deleteByFingerprint(expectedFingerprint);
     }
 
     @Test
     public void testSaveKlineDataElasticFailure() {
-
-            KlineCollectedCommand incomingCommand = KlineCollectedCommand.builder()
-                    .symbol("BTCUSDT")
-                    .interval("1m")
-                    .eventTime(1620000000000L)
-                    .openTime(1620000000000L)
-                    .open(1000)
-                    .high(1100)
-                    .low(900)
-                    .close(1050)
-                    .volume(1000)
-                    .closeTime(1620000999000L)
+            KlineEvent incomingCommand = KlineEvent.newBuilder()
+                    .setSymbol("BTCUSDT")
+                    .setInterval("1m")
+                    .setEventType("test")
+                    .setEventTime(1620000000000L)
+                    .setOpenTime(1620000000000L)
+                    .setOpen(1000.0)
+                    .setHigh(1100.0)
+                    .setLow(900.0)
+                    .setClose(1050.0)
+                    .setVolume(1000.0)
+                    .setCloseTime(1620000999000L)
                     .build();
 
+            KlineFingerprint fingerprint = KlineFingerprint.fromKlineEvent(incomingCommand);
+
             KlineItem expectedItem = KlineItem.builder()
-                    .symbol(incomingCommand.getSymbol())
-                    .interval(incomingCommand.getInterval())
+                    .fingerprint(fingerprint)
                     .timestamp(incomingCommand.getEventTime())
                     .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                    .openTime(incomingCommand.getOpenTime())
                     .open(incomingCommand.getOpen())
                     .high(incomingCommand.getHigh())
                     .low(incomingCommand.getLow())
                     .close(incomingCommand.getClose())
                     .volume(incomingCommand.getVolume())
-                    .closeTime(incomingCommand.getCloseTime())
                     .build();
 
             when(klineElasticRepository.save(expectedItem)).thenThrow(new RuntimeException("Elasticsearch is down"));
@@ -157,7 +166,7 @@ public class KlineDataServiceTest {
             klineDataService.saveKlineData(incomingCommand);
 
             verify(klineElasticRepository, times(1)).save(expectedItem);
-            verify(klinePostgresRepository, times(1)).save(expectedItem);
+            verify(klinePostgresRepository, times(0)).save(expectedItem);
 
             DataItemWrittenNotification<KlineItem> expectedNotification =
                     DataItemWrittenNotification.<KlineItem>builder()
@@ -173,32 +182,31 @@ public class KlineDataServiceTest {
 
     @Test
     public void testSaveKlineDataPostgresFailure() {
-
-            KlineCollectedCommand incomingCommand = KlineCollectedCommand.builder()
-                    .symbol("BTCUSDT")
-                    .interval("1m")
-                    .eventTime(1620000000000L)
-                    .openTime(1620000000000L)
-                    .open(1000)
-                    .high(1100)
-                    .low(900)
-                    .close(1050)
-                    .volume(1000)
-                    .closeTime(1620000999000L)
+            KlineEvent incomingCommand = KlineEvent.newBuilder()
+                    .setSymbol("BTCUSDT")
+                    .setInterval("1m")
+                    .setEventType("test")
+                    .setEventTime(1620000000000L)
+                    .setOpenTime(1620000000000L)
+                    .setOpen(1000.0)
+                    .setHigh(1100.0)
+                    .setLow(900.0)
+                    .setClose(1050.0)
+                    .setVolume(1000.0)
+                    .setCloseTime(1620000999000L)
                     .build();
 
+        KlineFingerprint fingerprint = KlineFingerprint.fromKlineEvent(incomingCommand);
+
             KlineItem expectedItem = KlineItem.builder()
-                    .symbol(incomingCommand.getSymbol())
-                    .interval(incomingCommand.getInterval())
+                    .fingerprint(fingerprint)
                     .timestamp(incomingCommand.getEventTime())
                     .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                    .openTime(incomingCommand.getOpenTime())
                     .open(incomingCommand.getOpen())
                     .high(incomingCommand.getHigh())
                     .low(incomingCommand.getLow())
                     .close(incomingCommand.getClose())
                     .volume(incomingCommand.getVolume())
-                    .closeTime(incomingCommand.getCloseTime())
                     .build();
 
             when(klineElasticRepository.save(expectedItem)).thenReturn(expectedItem);

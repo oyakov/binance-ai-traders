@@ -1,12 +1,12 @@
 package com.oyakov.binance_data_collection.websocket.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oyakov.binance_data_collection.cache.StreamSource;
 import com.oyakov.binance_data_collection.cache.StreamSourcesManager;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
 import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
 import com.oyakov.binance_data_collection.model.binance.BinanceWebsocketEventData;
-import com.oyakov.binance_shared_model.model.klines.binance.StreamSource;
-import com.oyakov.binance_shared_model.model.klines.binance.commands.KlineCollectedCommand;
+import com.oyakov.binance_shared_model.avro.KlineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -33,32 +33,32 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
         log.debug("Parsed message: {}", binanceWebsocketEventData);
 
         streamSourcesManager.findStreamSourceBySessionId(session.getId())
-                .ifPresent(streamSource -> sendKlineCollected(streamSource, binanceWebsocketEventData));
+                .ifPresent(streamSource -> sendKlineEvent(streamSource, binanceWebsocketEventData));
     }
 
-    private void sendKlineCollected(StreamSource streamSource, BinanceWebsocketEventData eventData) {
+    private void sendKlineEvent(StreamSource streamSource, BinanceWebsocketEventData eventData) {
         long newOpenTime = eventData.getKline().getOpenTime();
         long newCloseTime = eventData.getKline().getCloseTime();
 
         if (newOpenTime != streamSource.lastOpenTime() || newCloseTime != streamSource.lastCloseTime()) {
             StreamSource updatedStreamSource = streamSource.withTimestamps(newOpenTime, newCloseTime);
-            streamSourcesManager.putStreamSource(updatedStreamSource);  // update the cache
+            streamSourcesManager.putStreamSource(updatedStreamSource);
 
-            KlineCollectedCommand command = KlineCollectedCommand.builder()
-                    .eventTime(eventData.getEventTime())
-                    .eventType(eventData.getEventType())
-                    .symbol(eventData.getSymbol())
-                    .interval(streamSource.fingerprint().interval())
-                    .openTime(eventData.getKline().getOpenTime())
-                    .closeTime(eventData.getKline().getCloseTime())
-                    .open(eventData.getKline().getOpen())
-                    .high(eventData.getKline().getHigh())
-                    .low(eventData.getKline().getLow())
-                    .close(eventData.getKline().getClose())
-                    .volume(eventData.getKline().getVolume())
+            KlineEvent klineEvent = KlineEvent.newBuilder()
+                    .setEventType(eventData.getEventType())
+                    .setEventTime(eventData.getEventTime())
+                    .setSymbol(eventData.getSymbol())
+                    .setInterval(streamSource.fingerprint().interval())
+                    .setOpenTime(eventData.getKline().getOpenTime())
+                    .setCloseTime(eventData.getKline().getCloseTime())
+                    .setOpen(eventData.getKline().getOpen())
+                    .setHigh(eventData.getKline().getHigh())
+                    .setLow(eventData.getKline().getLow())
+                    .setClose(eventData.getKline().getClose())
+                    .setVolume(eventData.getKline().getVolume())
                     .build();
 
-            kafkaProducerService.sendCommand(config.getData().getKline().getKafkaTopic(), command);
+            kafkaProducerService.sendKlineEvent(config.getData().getKline().getKafkaTopic(), klineEvent);
         }
     }
 

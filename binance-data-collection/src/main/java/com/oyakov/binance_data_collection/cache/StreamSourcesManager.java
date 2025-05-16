@@ -1,6 +1,5 @@
 package com.oyakov.binance_data_collection.cache;
 
-import com.oyakov.binance_shared_model.model.klines.binance.StreamSource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 

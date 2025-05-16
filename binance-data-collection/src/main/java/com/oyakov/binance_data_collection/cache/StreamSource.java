@@ -1,4 +1,4 @@
-package com.oyakov.binance_shared_model.model.klines.binance;
+package com.oyakov.binance_data_collection.cache;
 
 
 

@@ -1,12 +1,38 @@
 spring:
   application:
-    name: binance-data-collection
+    name: binance-data-storage
   elasticsearch:
     uris: http://elasticsearch:9200
     username: elastic
     password: admin
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/binance
     username: postgres
-    password: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
+    password: postgres
     driver-class-name: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: kafka:9092
+    properties:
+      schema.registry.url: http://schema-registry:8081
+      schema.registry.max.retries: 5
+      schema.registry.retry.backoff.ms: 1000
+      security.protocol: PLAINTEXT
+      auto.register.schemas: true
+      use.latest.version: true
+      specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      auto-offset-reset: earliest
+
+binance:
+  data:
+    kline:
+      entity-name: kline
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-storage

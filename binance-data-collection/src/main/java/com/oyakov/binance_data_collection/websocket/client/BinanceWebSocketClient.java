@@ -1,11 +1,9 @@
 package com.oyakov.binance_data_collection.websocket.client;
 
+import com.oyakov.binance_data_collection.cache.StreamSource;
 import com.oyakov.binance_data_collection.cache.StreamSourcesManager;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
-import com.oyakov.binance_data_collection.kafka.service.ConfigurationEventBroker;
 import com.oyakov.binance_data_collection.websocket.handler.BinanceTextMessageHandler;
-import com.oyakov.binance_shared_model.model.klines.binance.StreamSource;
-import com.oyakov.binance_shared_model.model.klines.binance.commands.ConfigureStreamSources;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 @Log4j2
 @RequiredArgsConstructor
-public class BinanceWebSocketClient implements ConfigurationEventBroker {
+public class BinanceWebSocketClient {
 
     private final BinanceDataCollectionConfig config;
     private final StreamSourcesManager streamSourcesManager;
@@ -93,11 +91,5 @@ public class BinanceWebSocketClient implements ConfigurationEventBroker {
 
         // Wait for all to complete
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).orTimeout(15, TimeUnit.SECONDS).join();
-    }
-
-    @Override
-    public void configureStreamSourcesEvent(ConfigureStreamSources event) {
-        log.info("Reconfigure client with new stream sources: {}", event.getUpdatedStreamSources());
-        connect(event.getUpdatedStreamSources());
     }
 }

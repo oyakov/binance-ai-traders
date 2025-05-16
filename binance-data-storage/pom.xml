@@ -34,8 +34,17 @@
 		<maven.compiler.source>23</maven.compiler.source>
 		<maven.compiler.target>23</maven.compiler.target>
 		<lombok.version>1.18.34</lombok.version>
+		<spring-boot.version>3.3.9</spring-boot.version>
+		<kafka.version>3.8.0</kafka.version>
+		<confluent.version>7.5.1</confluent.version>
+		<spring-kafka.version>3.3.5</spring-kafka.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>com.oyakov.</groupId>
+			<artifactId>binance-shared-model</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
 		<!-- Spring Data -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -69,12 +78,18 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-avro-serializer</artifactId>
+			<version>${confluent.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+			<version>${spring-kafka.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.projectreactor</groupId>
@@ -105,6 +120,7 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
+			<version>${spring-kafka.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -150,6 +166,10 @@
 			<releases>
 				<enabled>false</enabled>
 			</releases>
+		</repository>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>

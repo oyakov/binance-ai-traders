@@ -1,15 +1,13 @@
 package com.oyakov.binance_data_storage.model.klines.binance.storage;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 
@@ -23,23 +21,53 @@ import java.time.LocalDateTime;
 public class KlineItem {
 
     @Id
-    @jakarta.persistence.Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private String symbol;
-    private String interval;
+    @Field(type = FieldType.Keyword)
+    private String id; // Elasticsearch doc ID
+
+    @Embedded
+    private KlineFingerprint fingerprint;
+
     private long timestamp;
     private LocalDateTime displayTime;
-    private long openTime;
     private double open;
     private double high;
     private double low;
     private double close;
     private double volume;
-    private long closeTime;
-    private double quoteAssetVolume;
-    private long numberOfTrades;
-    private double takerBuyBaseAssetVolume;
-    private double takerBuyQuoteAssetVolume;
-    private long ignore;
+
+    @PrePersist
+    @PreUpdate
+    public void updateFingerprint() {
+        if (fingerprint == null) {
+            fingerprint = KlineFingerprint.builder()
+                    .symbol(fingerprint.getSymbol())
+                    .interval(fingerprint.getInterval())
+                    .closeTime(fingerprint.getCloseTime())
+                    .openTime(fingerprint.getOpenTime())
+                    .build();
+        }
+
+        if (fingerprint != null) {
+            this.id = "%s-%s-%d".formatted(
+                    fingerprint.getSymbol(),
+                    fingerprint.getInterval(),
+                    fingerprint.getOpenTime()
+            );
+        }
+    }
+
+    // Convenience getters that delegate to fingerprint
+    public String getSymbol() {
+        return fingerprint != null ? fingerprint.getSymbol() : null;
+    }
+
+    public String getInterval() {
+        return fingerprint != null ? fingerprint.getInterval() : null;
+    }
+
+    public long getCloseTime() { return fingerprint != null ? fingerprint.getCloseTime() : 0; }
+
+    public long getOpenTime() {
+        return fingerprint != null ? fingerprint.getOpenTime() : 0;
+    }
 }

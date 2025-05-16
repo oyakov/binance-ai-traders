@@ -19,7 +19,6 @@ public class KlineJdbcRepository {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
-                kline.getId(),
                 kline.getSymbol(),
                 kline.getInterval(),
                 kline.getTimestamp(),
@@ -37,14 +36,13 @@ public class KlineJdbcRepository {
     public void upsertKline(KlineItem kline) {
         String sql = """ 
                     INSERT INTO kline
-                    (id, symbol, interval, timestamp, display_time, open_time, open, high, low, close, volume, close_time)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (symbol, interval, timestamp, display_time, open_time, open, high, low, close, volume, close_time)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (symbol, interval, open_time)
                     SET ()
                 """;
 
         jdbcTemplate.update(sql,
-                kline.getId(),
                 kline.getSymbol(),
                 kline.getInterval(),
                 kline.getTimestamp(),
