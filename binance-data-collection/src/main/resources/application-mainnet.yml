@@ -1,0 +1,56 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: binance-data-collection
+  kafka:
+    bootstrap-servers: kafka:9092
+    properties:
+      schema.registry.url: http://schema-registry:8081
+      schema.registry.max.retries: 5
+      schema.registry.retry.backoff.ms: 1000
+      security.protocol: PLAINTEXT
+      auto.register.schemas: true
+      use.latest.version: true
+      specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        enable.idempotence: true
+        acks: all
+        retries: 3
+        max.in.flight.requests.per.connection: 1
+        schema.registry.url: http://schema-registry:8081
+        use.latest.version: true
+        specific.avro.reader: true
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: binance-data-collection
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        specific.avro.reader: true
+        schema.registry.url: http://schema-registry:8081
+        auto.register.schemas: true
+        use.latest.version: true
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      auto-offset-reset: earliest
+
+binance:
+  rest:
+    base-url: https://api.binance.com
+    api-token: DuqDvO8WLjclQxEjlmElmDmwE1CZFJuPBFWMNm3G20WvVUMe9dqlJaQXOjobhkKo
+    secret-api-token: xtlPzeesOE2VECk0mdt77O1kwoWsGohwhir1CO499L3r7NrGh55Fi4J7OWr12eES
+  websocket:
+    base-url: wss://stream.binance.com:9443/ws
+    kline-url-template: /%s@kline_%s
+  data:
+    config-topic: config-ss
+    kline:
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-collection
+      intervals: 5m,15m,1h,1d,1w,1M
+      symbols: btcusdt,ethusdt
+

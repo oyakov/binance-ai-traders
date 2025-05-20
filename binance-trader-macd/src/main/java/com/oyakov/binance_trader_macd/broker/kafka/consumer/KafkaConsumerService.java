@@ -1,6 +1,6 @@
 package com.oyakov.binance_trader_macd.broker.kafka.consumer;
 
-import com.oyakov.binance_trader_macd.model.klines.binance.commands.KlineCollectedCommand;
+import com.oyakov.binance_shared_model.avro.KlineEvent;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,7 +17,7 @@ public class KafkaConsumerService {
     }
 
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", groupId = "${binance.data.kline.kafka-consumer-group}")
-    public void listen(KlineCollectedCommand command) {
+    public void listen(KlineEvent command) {
         log.info("Received kline command: {}", command);
         eventPublisher.publishEvent(command);
     }
