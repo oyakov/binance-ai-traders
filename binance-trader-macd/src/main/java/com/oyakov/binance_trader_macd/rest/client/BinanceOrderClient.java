@@ -29,10 +29,11 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BinanceOrderClient {
 
+    public static final String X_MBX_APIKEY = "X-MBX-APIKEY";
     private final RestTemplate restTemplate;
     private final String apiKey = "F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU";
     private final String secretKey = "N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20";
-    private final String baseUrl = "https://api.binance.com";
+    private final String mainnetBaseUrl = "https://api.binance.com";
     private final String testnetBaseUrl = "https://testnet.binance.vision";
 
     public BinanceOrderResponse placeOrder(String symbol, OrderType type, OrderSide side, BigDecimal quantity,
@@ -81,7 +82,7 @@ public class BinanceOrderClient {
             String finalUrl = testnetBaseUrl + "/api/v3/order?" + queryString + "&signature=" + signature;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("X-MBX-APIKEY", apiKey);
+            headers.set(X_MBX_APIKEY, apiKey);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             BinanceOrderResponse response = restTemplate.exchange(

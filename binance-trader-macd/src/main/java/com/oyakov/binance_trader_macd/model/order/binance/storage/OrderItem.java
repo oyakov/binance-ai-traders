@@ -1,6 +1,7 @@
 package com.oyakov.binance_trader_macd.model.order.binance.storage;
 
 import com.oyakov.binance_trader_macd.domain.OrderSide;
+import com.oyakov.binance_trader_macd.domain.OrderState;
 import com.oyakov.binance_trader_macd.domain.OrderType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -56,7 +57,8 @@ public class OrderItem {
     private BigDecimal cummulativeQuoteQty;
 
     @Column(length = 20, nullable = false)
-    private String status;
+    @Enumerated(EnumType.ORDINAL)
+    private OrderState status;
 
     @Column(name = "time_in_force", length = 10, nullable = false)
     private String timeInForce;

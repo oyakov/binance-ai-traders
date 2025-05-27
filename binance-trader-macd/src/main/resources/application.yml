@@ -8,6 +8,44 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
+    password: postgres
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    mixed: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    history-table: schema_version
+  kafka:
+    bootstrap-servers: kafka:9092
+    properties:
+      schema.registry.url: http://schema-registry:8081
+      schema.registry.max.retries: 5
+      schema.registry.retry.backoff.ms: 1000
+      security.protocol: PLAINTEXT
+      auto.register.schemas: true
+      use.latest.version: true
+      specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      auto-offset-reset: earliest
+
+binance:
+  rest:
+    base-url: https://api.binance.com
+  websocket:
+    base-url: wss://stream.binance.com:9443/ws
+  data:
+    kline:
+      entity-name: kline
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-trader
+      intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
+      symbols: btcusdt,ethusdt,bnbusdt,adausdt,dogeusdt,xrpusdt,dotusdt,ltcusdt,linkusdt,uniusdt
 
