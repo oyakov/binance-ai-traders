@@ -9,12 +9,16 @@ import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
 import com.oyakov.binance_trader_macd.service.api.KlineEventListener;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,56 +28,60 @@ import java.util.concurrent.locks.ReentrantLock;
 @RequiredArgsConstructor
 public class TraderServiceImpl implements KlineEventListener {
 
-
-    private final MACDSignalAnalyzer MACDSignalAnalyzer;
+    private final MACDSignalAnalyzer macdSignalAnalyzer;
     private final OrderServiceApi orderService;
     private final MACDTraderConfig traderConfig;
 
-    private final ConcurrentLinkedQueue<KlineEvent> slidingWindow = new ConcurrentLinkedQueue<>();
+    private final Deque<KlineEvent> slidingWindow = new ArrayDeque<>();
     private final Lock eventQLock = new ReentrantLock();
 
-    public static final BigDecimal QUANTITY = new BigDecimal("0.05");
-    private static final int SLIDING_WINDOW_SIZE = 27; // Need at least 26 periods for MACD calculation
-    private static final double STOP_LOSS_PERCENTAGE = 0.02; // 2% stop loss
-    private static final double TAKE_PROFIT_PERCENTAGE = 0.04; // 4% take profit
-    private final BigDecimal TAKE_PROFIT_THRESHOLD = BigDecimal.valueOf(1 + TAKE_PROFIT_PERCENTAGE);
-    private final BigDecimal STOP_LOSS_THRESHOLD = BigDecimal.valueOf(1 - STOP_LOSS_PERCENTAGE);
+    private static final int SLIDING_WINDOW_SIZE = 35;
 
+    private BigDecimal TAKE_PROFIT_THRESHOLD;
+    private BigDecimal STOP_LOSS_THRESHOLD;
+    public BigDecimal QUANTITY;
+
+    @PostConstruct
+    private void init() {
+        TAKE_PROFIT_THRESHOLD = traderConfig.getTakeProfitPercentage();
+        STOP_LOSS_THRESHOLD = traderConfig.getStopLossPercentage();
+        QUANTITY = traderConfig.getOrderQuantity();
+    }
 
     @Override
     public void onNewKline(KlineEvent klineEvent) {
-        log.info("Kline event received for processing: %s".formatted(klineEvent));
-        // Add new kline to the queue whatever happens
-        slidingWindow.add(klineEvent);
+        log.info("Kline event received for processing: {}", klineEvent);
+        boolean locked = eventQLock.tryLock();
         try {
-            if (eventQLock.tryLock()) {
+            if (locked) {
                 log.info("Event Q lock acquired, processing the next event");
-                // Keep only the necessary number of klines
+                slidingWindow.addLast(klineEvent);
                 while (slidingWindow.size() > SLIDING_WINDOW_SIZE) {
-                    log.info("Queue size = %s > %s. Remove oldest elements".formatted(slidingWindow.size(), SLIDING_WINDOW_SIZE));
-                    slidingWindow.poll();
+                    log.info("Queue size = {} > {}. Removing oldest element", slidingWindow.size(), SLIDING_WINDOW_SIZE);
+                    slidingWindow.removeFirst();
                 }
 
-                // Only process if we have enough data points
                 if (slidingWindow.size() == SLIDING_WINDOW_SIZE) {
-                    log.info("Queue size adjusted, process events");
+                    log.info("Queue size adjusted, processing window");
                     processSlidingWindow(slidingWindow, klineEvent);
                 } else {
-                    log.debug("Waiting for more klines. Current size: %s".formatted(slidingWindow.size()));
+                    log.debug("Waiting for more klines. Current size: {}", slidingWindow.size());
                 }
             } else {
-                log.info("failed to acquire the Q lock, pass the invocation");
+                log.info("Failed to acquire the Q lock; skipping this event");
             }
         } catch (Exception e) {
             log.error("Error processing kline event", e);
         } finally {
-            eventQLock.unlock();
+            if (locked) {
+                eventQLock.unlock();
+            }
         }
     }
 
     private void processSlidingWindow(Iterable<KlineEvent> data, KlineEvent triggerEvent) {
         // Get MACD signal
-        MACDSignalAnalyzer.tryExtractSignal(data).ifPresentOrElse(
+        macdSignalAnalyzer.tryExtractSignal(data).ifPresentOrElse(
                 signal -> executeTradeSignal(signal, triggerEvent),
                 () -> executeKlineUpdate(triggerEvent));
     }

@@ -14,13 +14,16 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -4515704415327733047L;
+  private static final long serialVersionUID = 5270549766283945283L;
 
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KlineEvent\",\"namespace\":\"com.oyakov.binance_shared_model.avro\",\"fields\":[{\"name\":\"eventType\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"eventTime\",\"type\":\"long\"},{\"name\":\"symbol\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"interval\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"openTime\",\"type\":\"long\"},{\"name\":\"closeTime\",\"type\":\"long\"},{\"name\":\"open\",\"type\":\"double\"},{\"name\":\"high\",\"type\":\"double\"},{\"name\":\"low\",\"type\":\"double\"},{\"name\":\"close\",\"type\":\"double\"},{\"name\":\"volume\",\"type\":\"double\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KlineEvent\",\"namespace\":\"com.oyakov.binance_shared_model.avro\",\"fields\":[{\"name\":\"eventType\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"eventTime\",\"type\":\"long\"},{\"name\":\"symbol\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"interval\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"openTime\",\"type\":\"long\"},{\"name\":\"closeTime\",\"type\":\"long\"},{\"name\":\"open\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":18,\"scale\":8}},{\"name\":\"high\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":18,\"scale\":8}},{\"name\":\"low\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":18,\"scale\":8}},{\"name\":\"close\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":18,\"scale\":8}},{\"name\":\"volume\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":18,\"scale\":8}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static final SpecificData MODEL$ = new SpecificData();
+  static {
+    MODEL$.addLogicalTypeConversion(new org.apache.avro.Conversions.DecimalConversion());
+  }
 
   private static final BinaryMessageEncoder<KlineEvent> ENCODER =
       new BinaryMessageEncoder<>(MODEL$, SCHEMA$);
@@ -79,11 +82,11 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
   private java.lang.String interval;
   private long openTime;
   private long closeTime;
-  private double open;
-  private double high;
-  private double low;
-  private double close;
-  private double volume;
+  private java.math.BigDecimal open;
+  private java.math.BigDecimal high;
+  private java.math.BigDecimal low;
+  private java.math.BigDecimal close;
+  private java.math.BigDecimal volume;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -106,7 +109,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * @param close The new value for close
    * @param volume The new value for volume
    */
-  public KlineEvent(java.lang.String eventType, java.lang.Long eventTime, java.lang.String symbol, java.lang.String interval, java.lang.Long openTime, java.lang.Long closeTime, java.lang.Double open, java.lang.Double high, java.lang.Double low, java.lang.Double close, java.lang.Double volume) {
+  public KlineEvent(java.lang.String eventType, java.lang.Long eventTime, java.lang.String symbol, java.lang.String interval, java.lang.Long openTime, java.lang.Long closeTime, java.math.BigDecimal open, java.math.BigDecimal high, java.math.BigDecimal low, java.math.BigDecimal close, java.math.BigDecimal volume) {
     this.eventType = eventType;
     this.eventTime = eventTime;
     this.symbol = symbol;
@@ -145,6 +148,27 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
     }
   }
 
+  private static final org.apache.avro.Conversion<?>[] conversions =
+      new org.apache.avro.Conversion<?>[] {
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      new org.apache.avro.Conversions.DecimalConversion(),
+      new org.apache.avro.Conversions.DecimalConversion(),
+      new org.apache.avro.Conversions.DecimalConversion(),
+      new org.apache.avro.Conversions.DecimalConversion(),
+      new org.apache.avro.Conversions.DecimalConversion(),
+      null
+  };
+
+  @Override
+  public org.apache.avro.Conversion<?> getConversion(int field) {
+    return conversions[field];
+  }
+
   // Used by DatumReader.  Applications should not call.
   @Override
   @SuppressWarnings(value="unchecked")
@@ -156,11 +180,11 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
     case 3: interval = value$ != null ? value$.toString() : null; break;
     case 4: openTime = (java.lang.Long)value$; break;
     case 5: closeTime = (java.lang.Long)value$; break;
-    case 6: open = (java.lang.Double)value$; break;
-    case 7: high = (java.lang.Double)value$; break;
-    case 8: low = (java.lang.Double)value$; break;
-    case 9: close = (java.lang.Double)value$; break;
-    case 10: volume = (java.lang.Double)value$; break;
+    case 6: open = (java.math.BigDecimal)value$; break;
+    case 7: high = (java.math.BigDecimal)value$; break;
+    case 8: low = (java.math.BigDecimal)value$; break;
+    case 9: close = (java.math.BigDecimal)value$; break;
+    case 10: volume = (java.math.BigDecimal)value$; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -271,7 +295,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'open' field.
    * @return The value of the 'open' field.
    */
-  public double getOpen() {
+  public java.math.BigDecimal getOpen() {
     return open;
   }
 
@@ -280,7 +304,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'open' field.
    * @param value the value to set.
    */
-  public void setOpen(double value) {
+  public void setOpen(java.math.BigDecimal value) {
     this.open = value;
   }
 
@@ -288,7 +312,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'high' field.
    * @return The value of the 'high' field.
    */
-  public double getHigh() {
+  public java.math.BigDecimal getHigh() {
     return high;
   }
 
@@ -297,7 +321,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'high' field.
    * @param value the value to set.
    */
-  public void setHigh(double value) {
+  public void setHigh(java.math.BigDecimal value) {
     this.high = value;
   }
 
@@ -305,7 +329,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'low' field.
    * @return The value of the 'low' field.
    */
-  public double getLow() {
+  public java.math.BigDecimal getLow() {
     return low;
   }
 
@@ -314,7 +338,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'low' field.
    * @param value the value to set.
    */
-  public void setLow(double value) {
+  public void setLow(java.math.BigDecimal value) {
     this.low = value;
   }
 
@@ -322,7 +346,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'close' field.
    * @return The value of the 'close' field.
    */
-  public double getClose() {
+  public java.math.BigDecimal getClose() {
     return close;
   }
 
@@ -331,7 +355,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'close' field.
    * @param value the value to set.
    */
-  public void setClose(double value) {
+  public void setClose(java.math.BigDecimal value) {
     this.close = value;
   }
 
@@ -339,7 +363,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Gets the value of the 'volume' field.
    * @return The value of the 'volume' field.
    */
-  public double getVolume() {
+  public java.math.BigDecimal getVolume() {
     return volume;
   }
 
@@ -348,7 +372,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'volume' field.
    * @param value the value to set.
    */
-  public void setVolume(double value) {
+  public void setVolume(java.math.BigDecimal value) {
     this.volume = value;
   }
 
@@ -399,11 +423,11 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
     private java.lang.String interval;
     private long openTime;
     private long closeTime;
-    private double open;
-    private double high;
-    private double low;
-    private double close;
-    private double volume;
+    private java.math.BigDecimal open;
+    private java.math.BigDecimal high;
+    private java.math.BigDecimal low;
+    private java.math.BigDecimal close;
+    private java.math.BigDecimal volume;
 
     /** Creates a new Builder */
     private Builder() {
@@ -755,7 +779,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * Gets the value of the 'open' field.
       * @return The value.
       */
-    public double getOpen() {
+    public java.math.BigDecimal getOpen() {
       return open;
     }
 
@@ -765,7 +789,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'open'.
       * @return This builder.
       */
-    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setOpen(double value) {
+    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setOpen(java.math.BigDecimal value) {
       validate(fields()[6], value);
       this.open = value;
       fieldSetFlags()[6] = true;
@@ -786,6 +810,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @return This builder.
       */
     public com.oyakov.binance_shared_model.avro.KlineEvent.Builder clearOpen() {
+      open = null;
       fieldSetFlags()[6] = false;
       return this;
     }
@@ -794,7 +819,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * Gets the value of the 'high' field.
       * @return The value.
       */
-    public double getHigh() {
+    public java.math.BigDecimal getHigh() {
       return high;
     }
 
@@ -804,7 +829,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'high'.
       * @return This builder.
       */
-    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setHigh(double value) {
+    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setHigh(java.math.BigDecimal value) {
       validate(fields()[7], value);
       this.high = value;
       fieldSetFlags()[7] = true;
@@ -825,6 +850,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @return This builder.
       */
     public com.oyakov.binance_shared_model.avro.KlineEvent.Builder clearHigh() {
+      high = null;
       fieldSetFlags()[7] = false;
       return this;
     }
@@ -833,7 +859,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * Gets the value of the 'low' field.
       * @return The value.
       */
-    public double getLow() {
+    public java.math.BigDecimal getLow() {
       return low;
     }
 
@@ -843,7 +869,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'low'.
       * @return This builder.
       */
-    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setLow(double value) {
+    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setLow(java.math.BigDecimal value) {
       validate(fields()[8], value);
       this.low = value;
       fieldSetFlags()[8] = true;
@@ -864,6 +890,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @return This builder.
       */
     public com.oyakov.binance_shared_model.avro.KlineEvent.Builder clearLow() {
+      low = null;
       fieldSetFlags()[8] = false;
       return this;
     }
@@ -872,7 +899,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * Gets the value of the 'close' field.
       * @return The value.
       */
-    public double getClose() {
+    public java.math.BigDecimal getClose() {
       return close;
     }
 
@@ -882,7 +909,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'close'.
       * @return This builder.
       */
-    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setClose(double value) {
+    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setClose(java.math.BigDecimal value) {
       validate(fields()[9], value);
       this.close = value;
       fieldSetFlags()[9] = true;
@@ -903,6 +930,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @return This builder.
       */
     public com.oyakov.binance_shared_model.avro.KlineEvent.Builder clearClose() {
+      close = null;
       fieldSetFlags()[9] = false;
       return this;
     }
@@ -911,7 +939,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * Gets the value of the 'volume' field.
       * @return The value.
       */
-    public double getVolume() {
+    public java.math.BigDecimal getVolume() {
       return volume;
     }
 
@@ -921,7 +949,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @param value The value of 'volume'.
       * @return This builder.
       */
-    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setVolume(double value) {
+    public com.oyakov.binance_shared_model.avro.KlineEvent.Builder setVolume(java.math.BigDecimal value) {
       validate(fields()[10], value);
       this.volume = value;
       fieldSetFlags()[10] = true;
@@ -942,6 +970,7 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
       * @return This builder.
       */
     public com.oyakov.binance_shared_model.avro.KlineEvent.Builder clearVolume() {
+      volume = null;
       fieldSetFlags()[10] = false;
       return this;
     }
@@ -957,11 +986,11 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
         record.interval = fieldSetFlags()[3] ? this.interval : (java.lang.String) defaultValue(fields()[3]);
         record.openTime = fieldSetFlags()[4] ? this.openTime : (java.lang.Long) defaultValue(fields()[4]);
         record.closeTime = fieldSetFlags()[5] ? this.closeTime : (java.lang.Long) defaultValue(fields()[5]);
-        record.open = fieldSetFlags()[6] ? this.open : (java.lang.Double) defaultValue(fields()[6]);
-        record.high = fieldSetFlags()[7] ? this.high : (java.lang.Double) defaultValue(fields()[7]);
-        record.low = fieldSetFlags()[8] ? this.low : (java.lang.Double) defaultValue(fields()[8]);
-        record.close = fieldSetFlags()[9] ? this.close : (java.lang.Double) defaultValue(fields()[9]);
-        record.volume = fieldSetFlags()[10] ? this.volume : (java.lang.Double) defaultValue(fields()[10]);
+        record.open = fieldSetFlags()[6] ? this.open : (java.math.BigDecimal) defaultValue(fields()[6]);
+        record.high = fieldSetFlags()[7] ? this.high : (java.math.BigDecimal) defaultValue(fields()[7]);
+        record.low = fieldSetFlags()[8] ? this.low : (java.math.BigDecimal) defaultValue(fields()[8]);
+        record.close = fieldSetFlags()[9] ? this.close : (java.math.BigDecimal) defaultValue(fields()[9]);
+        record.volume = fieldSetFlags()[10] ? this.volume : (java.math.BigDecimal) defaultValue(fields()[10]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -989,115 +1018,6 @@ public class KlineEvent extends org.apache.avro.specific.SpecificRecordBase impl
     READER$.read(this, SpecificData.getDecoder(in));
   }
 
-  @Override protected boolean hasCustomCoders() { return true; }
-
-  @Override public void customEncode(org.apache.avro.io.Encoder out)
-    throws java.io.IOException
-  {
-    out.writeString(this.eventType);
-
-    out.writeLong(this.eventTime);
-
-    out.writeString(this.symbol);
-
-    out.writeString(this.interval);
-
-    out.writeLong(this.openTime);
-
-    out.writeLong(this.closeTime);
-
-    out.writeDouble(this.open);
-
-    out.writeDouble(this.high);
-
-    out.writeDouble(this.low);
-
-    out.writeDouble(this.close);
-
-    out.writeDouble(this.volume);
-
-  }
-
-  @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
-    throws java.io.IOException
-  {
-    org.apache.avro.Schema.Field[] fieldOrder = in.readFieldOrderIfDiff();
-    if (fieldOrder == null) {
-      this.eventType = in.readString();
-
-      this.eventTime = in.readLong();
-
-      this.symbol = in.readString();
-
-      this.interval = in.readString();
-
-      this.openTime = in.readLong();
-
-      this.closeTime = in.readLong();
-
-      this.open = in.readDouble();
-
-      this.high = in.readDouble();
-
-      this.low = in.readDouble();
-
-      this.close = in.readDouble();
-
-      this.volume = in.readDouble();
-
-    } else {
-      for (int i = 0; i < 11; i++) {
-        switch (fieldOrder[i].pos()) {
-        case 0:
-          this.eventType = in.readString();
-          break;
-
-        case 1:
-          this.eventTime = in.readLong();
-          break;
-
-        case 2:
-          this.symbol = in.readString();
-          break;
-
-        case 3:
-          this.interval = in.readString();
-          break;
-
-        case 4:
-          this.openTime = in.readLong();
-          break;
-
-        case 5:
-          this.closeTime = in.readLong();
-          break;
-
-        case 6:
-          this.open = in.readDouble();
-          break;
-
-        case 7:
-          this.high = in.readDouble();
-          break;
-
-        case 8:
-          this.low = in.readDouble();
-          break;
-
-        case 9:
-          this.close = in.readDouble();
-          break;
-
-        case 10:
-          this.volume = in.readDouble();
-          break;
-
-        default:
-          throw new java.io.IOException("Corrupt ResolvingDecoder.");
-        }
-      }
-    }
-  }
 }
 
 

@@ -5,5 +5,6 @@ import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import java.util.Optional;
 
 public interface SignalAnalyzer<T> {
+    Integer getMinDataPointCount();
     Optional<TradeSignal> tryExtractSignal(Iterable<T> data);
 }

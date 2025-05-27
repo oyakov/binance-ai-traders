@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,15 +22,15 @@ public class Kline {
     @JsonAlias("t")
     private long openTime;
     @JsonAlias("o")
-    private double open;
+    private BigDecimal open;
     @JsonAlias("h")
-    private double high;
+    private BigDecimal high;
     @JsonAlias("l")
-    private double low;
+    private BigDecimal low;
     @JsonAlias("c")
-    private double close;
+    private BigDecimal close;
     @JsonAlias("v")
-    private double volume;
+    private BigDecimal volume;
     @JsonAlias("T")
     private long closeTime;
     @JsonAlias("x")

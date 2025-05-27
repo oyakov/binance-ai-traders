@@ -9,10 +9,50 @@
     {"name": "interval", "type": "string"},
     {"name": "openTime", "type": "long"},
     {"name": "closeTime", "type": "long"},
-    {"name": "open", "type": "double"},
-    {"name": "high", "type": "double"},
-    {"name": "low", "type": "double"},
-    {"name": "close", "type": "double"},
-    {"name": "volume", "type": "double"}
+    {
+        "name": "open",
+        "type": {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 18,
+            "scale": 8
+        }
+    },
+    {
+        "name": "high",
+        "type": {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 18,
+            "scale": 8
+        }
+    },
+    {
+        "name": "low",
+        "type": {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 18,
+            "scale": 8
+        }
+    },
+    {
+        "name": "close",
+        "type": {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 18,
+            "scale": 8
+        }
+    },
+    {
+        "name": "volume",
+        "type": {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 18,
+            "scale": 8
+        }
+    }
   ]
 } 
