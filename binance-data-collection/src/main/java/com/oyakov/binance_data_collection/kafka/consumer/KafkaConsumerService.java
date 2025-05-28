@@ -6,6 +6,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+/*
+    This listener is implemented for debugging purposes
+ */
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -14,6 +17,6 @@ public class KafkaConsumerService {
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", 
                   groupId = "${binance.data.kline.kafka-consumer-group}")
     public void listen(KlineEvent message) {
-        log.debug("Received message: {}", message);
+        log.debug("Kline event: {}", message);
     }
 }

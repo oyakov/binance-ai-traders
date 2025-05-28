@@ -47,7 +47,7 @@ public class KlineStreamManagerBinance {
 
         for (String symbol : symbols) {
             for (String interval : intervals) {
-                klineStreams.add(new KlineStream(new KlineStream.KlineStreamKey(symbol, interval), -1, -1, null));
+                klineStreams.add(new KlineStream(new KlineStream.Key(symbol, interval), -1, -1, null));
             }
         }
 
@@ -56,19 +56,19 @@ public class KlineStreamManagerBinance {
 
 
     public void connect(List<KlineStream> klineStreams) {
-        log.info("Binance data collection streaming reconfiguration...");
+        log.info("Binance kline streaming reconfiguration...");
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-        Set<KlineStream.KlineStreamKey> updatedFingerprints =
+        Set<KlineStream.Key> updatedFingerprints =
                 klineStreams.stream().map(KlineStream::fingerprint).collect(Collectors.toSet());
 
-        Set<KlineStream.KlineStreamKey> activeFingerprints = klineStreamCache.getActiveSSFingerprints();
+        Set<KlineStream.Key> activeFingerprints = klineStreamCache.getActiveSSFingerprints();
 
-        log.info("Existing connections: {}", activeFingerprints);
-        log.info("Updated configuration: {}", updatedFingerprints);
+        log.info("Existing kline streams: {}", activeFingerprints);
+        log.info("Updated kline streams: {}", updatedFingerprints);
 
         log.info("Closing obsolete sessions...");
-        Set<KlineStream.KlineStreamKey> toClose =
+        Set<KlineStream.Key> toClose =
                 activeFingerprints.stream()
                         .filter(fingerprint -> !updatedFingerprints.contains(fingerprint))
                         .collect(Collectors.toSet());
@@ -87,7 +87,7 @@ public class KlineStreamManagerBinance {
                     log.info("Connecting to Websocket URI {}", uri);
                     return client.execute(textMessageHandler, headers, uri)
                             .thenAccept(session -> {
-                        log.info("Connected: session {} is opened for {} at {} with headers: {}",
+                        log.info("Connected: session {} is open for {} at {} with headers: {}",
                                 session.getId(), streamSource, LocalDateTime.now(), headers);
                         klineStreamCache.putStreamSource(streamSource.withSession(session));
                     }).exceptionally(throwable -> {

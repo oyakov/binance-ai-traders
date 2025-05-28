@@ -30,9 +30,15 @@ spring:
 
 binance:
   rest:
-    base-url: https://api.binance.com
+    base-url: https://testnet.binance.vision
   websocket:
-    base-url: wss://stream.binance.com:9443/ws
+    base-url: wss://stream.testnet.binance.vision/ws
+  trader:
+    test-order-mode-enabled: true
+    stop-loss-percentage: 0.98
+    take-profit-percentage: 1.05
+    order-quantity: 0.05
+    sliding-window-size: 78
   data:
     kline:
       entity-name: kline

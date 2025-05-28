@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class OrderServiceImpl implements OrderServiceApi {
     private final ConversionService conversionService;
 
     @Override
+    @Transactional
     public OrderItem createOrderGroup(String symbol,
                                       BigDecimal entryPrice,
                                       BigDecimal quantity,
@@ -114,9 +116,7 @@ public class OrderServiceImpl implements OrderServiceApi {
                         default -> log.info("Tried to cancel the order that is already closed");
                     }
                 },
-                () -> {
-                    log.warn("Order Id not found. Trying to close an unmanaged order");
-                }
+                () -> log.warn("Order Id not found. Trying to close an unmanaged order")
         );
     }
 

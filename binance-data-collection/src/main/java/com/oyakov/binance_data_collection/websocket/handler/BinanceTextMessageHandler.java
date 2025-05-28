@@ -1,11 +1,13 @@
 package com.oyakov.binance_data_collection.websocket.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyakov.binance_data_collection.domain.kline.KlineStream;
 import com.oyakov.binance_data_collection.domain.kline.KlineStreamCache;
 import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
 import com.oyakov.binance_data_collection.model.binance.BinanceWebsocketEventData;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.convert.ConversionService;
@@ -26,31 +28,37 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
     private final ConversionService conversionService;
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String payload = message.getPayload();
-        log.debug("Received message: {} for session {}", payload, session.getId());
-        BinanceWebsocketEventData binanceWebsocketEventData = MAPPER.readValue(payload, BinanceWebsocketEventData.class);
-        log.debug("Parsed message: {}", binanceWebsocketEventData);
-
+    protected void handleTextMessage(WebSocketSession session, @NonNull TextMessage message) {
         klineStreamCache.findStreamSourceBySessionId(session.getId())
-                .ifPresent(streamSource -> sendKlineEvent(streamSource, binanceWebsocketEventData));
+                .ifPresentOrElse(
+                        streamSource -> handleKlineUpdate(streamSource, message),
+                        () -> log.warn("Received kline update for unknown session {}", session.getId()));
     }
 
-    private void sendKlineEvent(KlineStream klineStream, BinanceWebsocketEventData eventData) {
+    private void handleKlineUpdate(KlineStream klineStream, TextMessage message) {
+        String payload = message.getPayload();
+        log.debug("Received message: {} for session {}", payload, klineStream.session().getId());
+        BinanceWebsocketEventData eventData;
+        try {
+            eventData = MAPPER.readValue(payload, BinanceWebsocketEventData.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error decoding binance kline event data", e);
+            throw new RuntimeException(e);
+        }
+
+        log.debug("Parsed message: {}", eventData);
         long newOpenTime = eventData.getKline().getOpenTime();
         long newCloseTime = eventData.getKline().getCloseTime();
 
-        KlineEvent klineEvent = null;
         if (newOpenTime != klineStream.lastOpenTime() || newCloseTime != klineStream.lastCloseTime()) {
             log.debug("New kline received");
             KlineStream updatedKlineStream = klineStream.withTimestamps(newOpenTime, newCloseTime);
             klineStreamCache.putStreamSource(updatedKlineStream);
 
-            klineEvent = conversionService.convert(eventData, KlineEvent.class);
-
+            KlineEvent klineEvent = conversionService.convert(eventData, KlineEvent.class);
             kafkaProducerService.sendKlineEvent(klineEvent);
         } else {
-            log.debug("Kline update received with already existing timestamp {}", klineEvent);
+            log.debug("Kline update received with already existing timestamp {}", eventData);
         }
     }
 

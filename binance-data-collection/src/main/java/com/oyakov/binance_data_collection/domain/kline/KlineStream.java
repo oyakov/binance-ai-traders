@@ -6,7 +6,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Objects;
 
-public record KlineStream(KlineStreamKey fingerprint,
+public record KlineStream(Key fingerprint,
                           long lastOpenTime,
                           long lastCloseTime,
                           WebSocketSession session) {
@@ -19,8 +19,8 @@ public record KlineStream(KlineStreamKey fingerprint,
         return new KlineStream(this.fingerprint, openTime, closeTime, this.session);
     }
 
-    public record KlineStreamKey(String symbol, String interval) {
-        public KlineStreamKey {
+    public record Key(String symbol, String interval) {
+        public Key {
             Objects.requireNonNull(symbol, "symbol must not be null");
             Objects.requireNonNull(interval, "interval must not be null");
         }

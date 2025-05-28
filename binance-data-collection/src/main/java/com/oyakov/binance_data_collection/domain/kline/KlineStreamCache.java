@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Component
 @Log4j2
 public class KlineStreamCache {
-    private final Map<KlineStream.KlineStreamKey, KlineStream> activeStreamSources = new ConcurrentHashMap<>();
+    private final Map<KlineStream.Key, KlineStream> activeStreamSources = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock streamLock = new ReentrantReadWriteLock();
 
     public Optional<KlineStream> findStreamSourceBySessionId(String sessionId) {
@@ -35,7 +35,7 @@ public class KlineStreamCache {
         }
     }
 
-    public Set<KlineStream.KlineStreamKey> getActiveSSFingerprints() {
+    public Set<KlineStream.Key> getActiveSSFingerprints() {
         streamLock.readLock().lock();
         try {
             return new HashSet<>(activeStreamSources.keySet());
@@ -63,11 +63,11 @@ public class KlineStreamCache {
     /**
      * Closes the given stream sources and returns the session IDs that were closed.
      */
-    public Set<String> closeStreamSources(Set<KlineStream.KlineStreamKey> fingerprints) {
+    public Set<String> closeStreamSources(Set<KlineStream.Key> fingerprints) {
         Set<String> closedSessionIds = new HashSet<>();
         streamLock.writeLock().lock();
         try {
-            for (KlineStream.KlineStreamKey fingerprint : fingerprints) {
+            for (KlineStream.Key fingerprint : fingerprints) {
                 KlineStream removed = activeStreamSources.remove(fingerprint);
                 if (removed != null && removed.session() != null) {
                     try {

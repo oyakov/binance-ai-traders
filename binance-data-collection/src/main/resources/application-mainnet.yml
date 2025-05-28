@@ -3,6 +3,11 @@ server:
 logging:
   level:
     com.oyakov.binance_data_collection.kafka.consumer: DEBUG
+    com:
+      oyakov:
+        binance_data_collection:
+          websocket:
+            handler: DEBUG
 spring:
   application:
     name: binance-data-collection
@@ -50,7 +55,6 @@ binance:
     base-url: wss://stream.binance.com:9443/ws
     kline-url-template: /%s@kline_%s
   data:
-    config-topic: config-ss
     kline:
       kafka-topic: binance-kline
       kafka-consumer-group: binance-data-collection
@@ -58,5 +62,3 @@ binance:
       #intervals: 5m,15m,1h,1d,1w,1M
       intervals: 15m
       symbols: btcusdt
-
-
