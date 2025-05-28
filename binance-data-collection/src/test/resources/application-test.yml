@@ -35,3 +35,20 @@ spring:
 logging:
   level:
     org.springframework: DEBUG
+
+binance:
+  rest:
+    base-url: https://testnet.binance.vision
+    api-token: F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU
+    secret-api-token: N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20
+  websocket:
+    base-url: wss://stream.binance.com:9443/ws
+    kline-url-template: /%s@kline_%s
+    auto-connect: false
+  data:
+    config-topic: config-ss
+    kline:
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-collection
+      intervals: 5m,15m,1h,1d,1w,1M
+      symbols: btcusdt,ethusdt

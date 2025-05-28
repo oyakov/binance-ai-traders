@@ -14,6 +14,7 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -79,14 +80,15 @@ public class KlineStreamManagerBinance {
                 .filter(streamSource -> !activeFingerprints.contains(streamSource.fingerprint()))
                 .map(streamSource -> {
                     log.info("New stream source to be added {}", streamSource);
-                    List<KlineEvent> warmupKlines = restKlineClient.fetchWarmupKlines(streamSource, 50);
+                    List<KlineEvent> warmupKlines = restKlineClient.fetchWarmupKlines(streamSource,
+                            config.getData().getKline().getWarmupKlineCount());
                     kafkaProducerService.sendKlineEvents(config.getData().getKline().getKafkaTopic(), warmupKlines);
                     URI uri = urlFormatter.formatWebsocketKlineURLTemplate(streamSource);
                     log.info("Connecting to Websocket URI {}", uri);
                     return client.execute(textMessageHandler, headers, uri)
                             .thenAccept(session -> {
                         log.info("Connected: session {} is opened for {} at {} with headers: {}",
-                                session.getId(), streamSource, System.currentTimeMillis() / 1000, headers);
+                                session.getId(), streamSource, LocalDateTime.now(), headers);
                         klineStreamCache.putStreamSource(streamSource.withSession(session));
                     }).exceptionally(throwable -> {
                         log.error("Failed to connect to Binance WebSocket {}", streamSource, throwable);

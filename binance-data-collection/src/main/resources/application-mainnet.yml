@@ -1,5 +1,8 @@
 server:
   port: 8083
+logging:
+  level:
+    com.oyakov.binance_data_collection.kafka.consumer: DEBUG
 spring:
   application:
     name: binance-data-collection
@@ -51,7 +54,9 @@ binance:
     kline:
       kafka-topic: binance-kline
       kafka-consumer-group: binance-data-collection
+      warmup-kline-count: 50
       #intervals: 5m,15m,1h,1d,1w,1M
       intervals: 15m
       symbols: btcusdt
+
 

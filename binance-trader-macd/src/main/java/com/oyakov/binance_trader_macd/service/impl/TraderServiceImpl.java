@@ -88,7 +88,7 @@ public class TraderServiceImpl implements KlineEventListener {
 
     private void executeKlineUpdate(KlineEvent klineEvent) {
         String symbol = klineEvent.getSymbol();
-        BigDecimal currentPrice = BigDecimal.valueOf(klineEvent.getClose());
+        BigDecimal currentPrice = klineEvent.getClose();
         log.info("Kline update [symbol %s, price %s]".formatted(symbol, currentPrice));
         orderService.getActiveOrder(symbol).ifPresentOrElse(
                 orderItem -> {
@@ -124,7 +124,7 @@ public class TraderServiceImpl implements KlineEventListener {
 
     private void executeTradeSignal(TradeSignal signal, KlineEvent klineEvent) {
         String symbol = klineEvent.getSymbol();
-        BigDecimal currentPrice = BigDecimal.valueOf(klineEvent.getClose());
+        BigDecimal currentPrice = klineEvent.getClose();
         log.info("%s signal is triggered for symbol %s at price %s".formatted(OrderSide.of(signal), symbol, currentPrice));
         orderService.getActiveOrder(symbol).ifPresentOrElse(
                 orderItem -> {

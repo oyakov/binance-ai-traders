@@ -2,6 +2,7 @@ package com.oyakov.binance_data_collection.rest.client.binance;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oyakov.binance_data_collection.domain.converter.JsonToKlineEventMapper;
 import com.oyakov.binance_data_collection.domain.kline.KlineStream;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -23,28 +25,25 @@ public class BinanceRestKlineClient {
 
     private final BinanceDataCollectionConfig config;
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+    private final JsonToKlineEventMapper mapper;
 
     public List<KlineEvent> fetchWarmupKlines(KlineStream klineStream, int limit) {
         String symbol = klineStream.fingerprint().symbol().toUpperCase();
         String interval = klineStream.fingerprint().interval();
-        String url = UriComponentsBuilder.fromHttpUrl("%s/api/v3/klines".formatted(config.getRest().getBaseUrl()))
+        String url = UriComponentsBuilder.fromHttpUrl(config.getRest().getBaseUrl())
+                .path("/api/v3/klines")
                 .queryParam("symbol", symbol)
                 .queryParam("interval", interval)
                 .queryParam("limit", limit)
+                .encode()
                 .build()
                 .toUriString();
 
         log.info("Fetching warm-up klines from: {}", url);
-
         try {
             String json = restTemplate.getForObject(url, String.class);
-            List<List<Object>> rawList = objectMapper.readValue(json, new TypeReference<>() {});
-
-            List<KlineEvent> events = new ArrayList<>();
-            for (List<Object> row : rawList) {
-                events.add(mapToKlineEvent(row, symbol, interval));
-            }
+            List<KlineEvent> events = mapper.mapJsonToKlineEvents(json, symbol, interval);
+            log.debug("{} warmup klines received from ", events.size());
             return events;
         } catch (Exception e) {
             log.error("Failed to fetch warm-up klines for {}-{}", symbol, interval, e);
@@ -52,20 +51,6 @@ public class BinanceRestKlineClient {
         }
     }
 
-    private KlineEvent mapToKlineEvent(List<Object> row, String symbol, String interval) {
-        return KlineEvent.newBuilder()
-                .setEventType("kline")
-                .setEventTime(System.currentTimeMillis())
-                .setSymbol(symbol)
-                .setInterval(interval)
-                .setOpenTime(((Number) row.get(0)).longValue())
-                .setOpen(Double.parseDouble((String) row.get(1)))
-                .setHigh(Double.parseDouble((String) row.get(2)))
-                .setLow(Double.parseDouble((String) row.get(3)))
-                .setClose(Double.parseDouble((String) row.get(4)))
-                .setVolume(Double.parseDouble((String) row.get(5)))
-                .setCloseTime(((Number) row.get(6)).longValue())
-                .build();
-    }
+
 
 }

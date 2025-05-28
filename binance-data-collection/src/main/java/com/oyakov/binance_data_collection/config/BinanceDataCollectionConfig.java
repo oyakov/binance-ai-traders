@@ -11,13 +11,15 @@ import java.util.List;
 @ConfigurationProperties(prefix = "binance")
 public class BinanceDataCollectionConfig {
 
-    private Rest rest;
-    private Websocket websocket;
-    private Data data;
+    private Rest rest = new Rest();
+    private Websocket websocket = new Websocket();
+    private Data data = new Data();
 
     @lombok.Data
     public static class Rest {
         private String baseUrl;
+        private String apiToken;
+        private String secretApiToken;
     }
 
     @lombok.Data
@@ -29,14 +31,15 @@ public class BinanceDataCollectionConfig {
 
     @lombok.Data
     public static class Data {
-        private Kline kline;
+        private Kline kline = new Kline();
 
         @lombok.Data
         public static class Kline {
             private String kafkaTopic;
             private String kafkaConsumerGroup;
-            private List<String> intervals;
-            private List<String> symbols;
+            private Integer warmupKlineCount = 50;
+            private List<String> intervals = List.of("15m");
+            private List<String> symbols = List.of("btcusdt");
         }
     }
 }
