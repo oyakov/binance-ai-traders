@@ -22,6 +22,7 @@ public interface OrderServiceApi {
 
     void closeOrderWithState(Long orderId, OrderState state);
 
+    @Transactional
     @Lock(LockModeType.PESSIMISTIC_READ)
     Optional<OrderItem> getActiveOrder(String symbol);
 }

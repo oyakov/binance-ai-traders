@@ -35,14 +35,14 @@ public class TraderServiceImpl implements KlineEventListener {
     private final Deque<KlineEvent> slidingWindow = new ArrayDeque<>();
     private final Lock eventQLock = new ReentrantLock();
 
-    private static final int SLIDING_WINDOW_SIZE = 35;
-
+    private int SLIDING_WINDOW_SIZE = 78;
     private BigDecimal TAKE_PROFIT_THRESHOLD;
     private BigDecimal STOP_LOSS_THRESHOLD;
     public BigDecimal QUANTITY;
 
     @PostConstruct
     private void init() {
+        SLIDING_WINDOW_SIZE = traderConfig.getSlidingWindowSize();
         TAKE_PROFIT_THRESHOLD = traderConfig.getTakeProfitPercentage();
         STOP_LOSS_THRESHOLD = traderConfig.getStopLossPercentage();
         QUANTITY = traderConfig.getOrderQuantity();

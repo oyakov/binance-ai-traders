@@ -61,6 +61,7 @@ binance:
     stop-loss-percentage: 0.98
     take-profit-percentage: 1.05
     order-quantity: 0.05
+    sliding-window-size: 78
   data:
     kline:
       entity-name: kline

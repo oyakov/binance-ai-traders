@@ -14,4 +14,5 @@ public class MACDTraderConfig {
     private BigDecimal stopLossPercentage = BigDecimal.valueOf(0.98);
     private BigDecimal takeProfitPercentage = BigDecimal.valueOf(1.05);
     private BigDecimal orderQuantity = BigDecimal.valueOf(0.05);
+    private Integer slidingWindowSize = 78;
 }
