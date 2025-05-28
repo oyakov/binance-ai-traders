@@ -57,7 +57,7 @@ public class OrderItem {
     private BigDecimal cummulativeQuoteQty;
 
     @Column(length = 20, nullable = false)
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private OrderState status;
 
     @Column(name = "time_in_force", length = 10, nullable = false)

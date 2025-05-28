@@ -10,7 +10,6 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Component
@@ -38,7 +37,7 @@ public class MACDSignalAnalyzer implements SignalAnalyzer<KlineEvent> {
     public Optional<TradeSignal> tryExtractSignal(Iterable<KlineEvent> klines) {
         List<KlineEvent> sorted = StreamSupport.stream(klines.spliterator(), false)
                 .sorted(Comparator.comparingLong(KlineEvent::getCloseTime))
-                .collect(Collectors.toList());
+                .toList();
 
         if (sorted.size() < getMinDataPointCount()) return Optional.empty();
 
@@ -57,7 +56,7 @@ public class MACDSignalAnalyzer implements SignalAnalyzer<KlineEvent> {
 
         List<BigDecimal> alignedFast = emaFast.stream()
                 .skip(offset)
-                .collect(Collectors.toList());
+                .toList();
 
         List<BigDecimal> macd = IntStream.range(0, emaSlow.size())
                 .mapToObj(i -> alignedFast.get(i)
@@ -67,26 +66,20 @@ public class MACDSignalAnalyzer implements SignalAnalyzer<KlineEvent> {
 
         List<BigDecimal> signalLine = calculateEMA(macd, SIGNAL_PERIOD, SIGNAL_MULTIPLIER);
 
-        if (signalLine.size() < 2 || macd.size() < 2) return Optional.empty();
+        if (signalLine.size() < 2 || macd.size() < 2)
+            throw new IllegalStateException("Signal size calculated is < 2, can't derive signal");
 
         int last = signalLine.size() - 1;
         BigDecimal prevDiff = macd.get(last - 1).subtract(signalLine.get(last - 1));
         BigDecimal currDiff = macd.get(last).subtract(signalLine.get(last));
 
-        return Stream.of(
-                        new AbstractMap.SimpleEntry<>(prevDiff, currDiff)
-                ).map(entry -> {
-                    BigDecimal pd = entry.getKey();
-                    BigDecimal cd = entry.getValue();
-                    if (pd.compareTo(BigDecimal.ZERO) <= 0 && cd.compareTo(BigDecimal.ZERO) > 0) {
-                        return TradeSignal.BUY;
-                    } else if (pd.compareTo(BigDecimal.ZERO) >= 0 && cd.compareTo(BigDecimal.ZERO) < 0) {
-                        return TradeSignal.SELL;
-                    } else {
-                        return null;
-                    }
-                }).filter(Objects::nonNull)
-                .findFirst();
+        if (prevDiff.compareTo(BigDecimal.ZERO) <= 0 && currDiff.compareTo(BigDecimal.ZERO) > 0) {
+            return Optional.of(TradeSignal.BUY);
+        } else if (prevDiff.compareTo(BigDecimal.ZERO) >= 0 && currDiff.compareTo(BigDecimal.ZERO) < 0) {
+            return Optional.of(TradeSignal.SELL);
+        } else {
+            return Optional.empty();
+        }
     }
 
     private List<BigDecimal> calculateEMA(List<BigDecimal> values, int period, BigDecimal multiplier) {
@@ -103,7 +96,7 @@ public class MACDSignalAnalyzer implements SignalAnalyzer<KlineEvent> {
         values.stream()
                 .skip(period)
                 .forEach(value -> {
-                    BigDecimal prev = ema.get(ema.size() - 1);
+                    BigDecimal prev = ema.getLast();
                     BigDecimal next = value.subtract(prev)
                             .multiply(multiplier)
                             .add(prev)
