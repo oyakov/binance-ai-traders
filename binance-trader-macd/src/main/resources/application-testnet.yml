@@ -1,6 +1,6 @@
 spring:
   application:
-    name: binance-data-collection
+    name: binance-trader-macd
   elasticsearch:
     uris: http://elasticsearch:9200
     username: elastic
@@ -17,15 +17,38 @@ spring:
     baseline-on-migrate: true
     history-table: schema_version
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
+    properties:
+      schema.registry.url: http://schema-registry:8081
+      schema.registry.max.retries: 5
+      schema.registry.retry.backoff.ms: 1000
+      security.protocol: PLAINTEXT
+      auto.register.schemas: true
+      use.latest.version: true
+      specific.avro.reader: true
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        enable.idempotence: true
+        acks: all
+        retries: 3
+        max.in.flight.requests.per.connection: 1
+        schema.registry.url: http://schema-registry:8081
+        use.latest.version: true
+        specific.avro.reader: true
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       group-id: test-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: com.oyakov.binance_data_storage.broker.kafka.deserializer.KlineCollectedCommandDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        specific.avro.reader: true
+        schema.registry.url: http://schema-registry:8081
+        auto.register.schemas: true
+        use.latest.version: true
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
       auto-offset-reset: earliest
 
 binance:

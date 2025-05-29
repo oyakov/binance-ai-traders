@@ -72,6 +72,7 @@ public class MACDSignalAnalyzer implements SignalAnalyzer<KlineEvent> {
         int last = signalLine.size() - 1;
         BigDecimal prevDiff = macd.get(last - 1).subtract(signalLine.get(last - 1));
         BigDecimal currDiff = macd.get(last).subtract(signalLine.get(last));
+        log.info("Prev diff: {}, Curr diff: {}", prevDiff, currDiff);
 
         if (prevDiff.compareTo(BigDecimal.ZERO) <= 0 && currDiff.compareTo(BigDecimal.ZERO) > 0) {
             return Optional.of(TradeSignal.BUY);

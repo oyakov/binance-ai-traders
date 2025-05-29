@@ -18,7 +18,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", groupId = "${binance.data.kline.kafka-consumer-group}")
     public void listen(KlineEvent command) {
-        log.info("Received kline command: {}", command);
+        log.debug("Received kline command: {}", command);
         eventPublisher.publishEvent(command);
     }
 }

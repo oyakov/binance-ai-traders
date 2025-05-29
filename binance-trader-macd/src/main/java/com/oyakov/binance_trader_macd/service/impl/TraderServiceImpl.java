@@ -42,22 +42,22 @@ public class TraderServiceImpl implements KlineEventListener {
 
     @PostConstruct
     private void init() {
-        SLIDING_WINDOW_SIZE = traderConfig.getSlidingWindowSize();
-        TAKE_PROFIT_THRESHOLD = traderConfig.getTakeProfitPercentage();
-        STOP_LOSS_THRESHOLD = traderConfig.getStopLossPercentage();
-        QUANTITY = traderConfig.getOrderQuantity();
+        SLIDING_WINDOW_SIZE = traderConfig.getTrader().getSlidingWindowSize();
+        TAKE_PROFIT_THRESHOLD = traderConfig.getTrader().getTakeProfitPercentage();
+        STOP_LOSS_THRESHOLD = traderConfig.getTrader().getStopLossPercentage();
+        QUANTITY = traderConfig.getTrader().getOrderQuantity();
     }
 
     @Override
     public void onNewKline(KlineEvent klineEvent) {
-        log.info("Kline event received for processing: {}", klineEvent);
+        log.debug("Kline event received for processing: {}", klineEvent);
         boolean locked = eventQLock.tryLock();
         try {
             if (locked) {
-                log.info("Event Q lock acquired, processing the next event");
+                log.debug("Event Q lock acquired, processing the next event");
                 slidingWindow.addLast(klineEvent);
                 while (slidingWindow.size() > SLIDING_WINDOW_SIZE) {
-                    log.info("Queue size = {} > {}. Removing oldest element", slidingWindow.size(), SLIDING_WINDOW_SIZE);
+                    log.debug("Queue size = {} > {}. Removing oldest element", slidingWindow.size(), SLIDING_WINDOW_SIZE);
                     slidingWindow.removeFirst();
                 }
 
@@ -126,20 +126,20 @@ public class TraderServiceImpl implements KlineEventListener {
         String symbol = klineEvent.getSymbol();
         BigDecimal currentPrice = klineEvent.getClose();
         log.info("%s signal is triggered for symbol %s at price %s".formatted(OrderSide.of(signal), symbol, currentPrice));
-        orderService.getActiveOrder(symbol).ifPresentOrElse(
-                orderItem -> {
-                    log.info("Active order present: %s".formatted(orderItem));
-                    processOrderSLTP(orderItem.getOrderId(), orderItem.getPrice(), currentPrice);
-                    processTradeSignalUpdate(orderItem.getOrderId(), orderItem.getSide(), OrderSide.of(signal));
-                },
-                () -> {
-                    log.info("No active order detected, creating a new one...");
-                    // Create order with stop-loss and take-profit
-                    OrderItem order = orderService.createOrderGroup(
-                            symbol, currentPrice, QUANTITY, OrderSide.of(signal),
-                            currentPrice.multiply(STOP_LOSS_THRESHOLD), // stop loss price
-                            currentPrice.multiply(TAKE_PROFIT_THRESHOLD)); // take profit price
-                    log.info("Order group created: %s".formatted(order));
-                });
+//        orderService.getActiveOrder(symbol).ifPresentOrElse(
+//                orderItem -> {
+//                    log.info("Active order present: %s".formatted(orderItem));
+//                    processOrderSLTP(orderItem.getOrderId(), orderItem.getPrice(), currentPrice);
+//                    processTradeSignalUpdate(orderItem.getOrderId(), orderItem.getSide(), OrderSide.of(signal));
+//                },
+//                () -> {
+//                    log.info("No active order detected, creating a new one...");
+//                    // Create order with stop-loss and take-profit
+//                    OrderItem order = orderService.createOrderGroup(
+//                            symbol, currentPrice, QUANTITY, OrderSide.of(signal),
+//                            currentPrice.multiply(STOP_LOSS_THRESHOLD), // stop loss price
+//                            currentPrice.multiply(TAKE_PROFIT_THRESHOLD)); // take profit price
+//                    log.info("Order group created: %s".formatted(order));
+//                });
     }
 }

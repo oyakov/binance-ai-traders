@@ -58,7 +58,7 @@ binance:
     kline:
       kafka-topic: binance-kline
       kafka-consumer-group: binance-data-collection
-      warmup-kline-count: 100
+      warmup-kline-count: 200
       #intervals: 5m,15m,1h,1d,1w,1M
-      intervals: 15m
+      intervals: 1h
       symbols: btcusdt
