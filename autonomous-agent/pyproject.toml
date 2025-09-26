@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autonomous-agent"
+version = "0.1.0"
+description = "Autonomous coding agent with local LLM and MCP support"
+authors = [{name = "Binance AI Traders"}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+autonomous-agent = "autonomous_agent.cli:main"
