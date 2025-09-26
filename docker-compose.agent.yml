@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  llm:
+    image: ollama/ollama:latest
+    container_name: local-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  agent:
+    build:
+      context: ./autonomous-agent
+    environment:
+      - AGENT_BASE_URL=http://llm:11434/v1
+      - AGENT_MODEL=llama3.1:8b-instruct
+      - AGENT_WORKSPACE=/workspace
+      - AGENT_CONFIG=/workspace/config.toml
+    volumes:
+      - ./:/workspace
+    depends_on:
+      - llm
+    working_dir: /workspace
+    command: ["autonomous-agent", "--task", "Describe the repository"]
+
+volumes:
+  ollama-data:
