@@ -1,5 +1,11 @@
 version: '3.8'
 
+# Required secrets/environment variables when wiring the binance-trader-macd service into this stack:
+#   BINANCE_API_KEY - Binance API key exposed to the trader container.
+#   BINANCE_API_SECRET - Binance API secret consumed for request signing.
+#   BINANCE_REST_BASE_URL - Optional override for selecting mainnet vs testnet endpoints.
+#   BINANCE_TRADER_TEST_ORDER_MODE_ENABLED - Toggle to run `/api/v3/order/test` dry runs from the trader container.
+
 services:
   binance-data-collection:
     build: 

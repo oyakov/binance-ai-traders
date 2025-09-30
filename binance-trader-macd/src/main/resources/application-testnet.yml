@@ -53,11 +53,13 @@ spring:
 
 binance:
   rest:
-    base-url: https://testnet.binance.vision
+    base-url: ${BINANCE_REST_BASE_URL:https://testnet.binance.vision}
+    api-token: ${BINANCE_API_KEY:}
+    secret-api-token: ${BINANCE_API_SECRET:}
   websocket:
     base-url: wss://stream.testnet.binance.vision/ws
   trader:
-    test-order-mode-enabled: true
+    test-order-mode-enabled: ${BINANCE_TRADER_TEST_ORDER_MODE_ENABLED:true}
     stop-loss-percentage: 0.98
     take-profit-percentage: 1.05
     order-quantity: 0.05
@@ -69,4 +71,20 @@ binance:
       kafka-consumer-group: binance-data-storage
       intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
       symbols: btcusdt,ethusdt,bnbusdt,adausdt,dogeusdt,xrpusdt,dotusdt,ltcusdt,linkusdt,uniusdt
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
 

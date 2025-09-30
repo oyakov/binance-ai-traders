@@ -1,16 +1,19 @@
 package com.oyakov.binance_trader_macd.rest.client;
 
+import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.domain.OrderSide;
 import com.oyakov.binance_trader_macd.domain.OrderType;
 import com.oyakov.binance_trader_macd.domain.TimeInForce;
-import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.rest.dto.BinanceOcoOrderResponse;
 import com.oyakov.binance_trader_macd.rest.dto.BinanceOrderResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,8 +24,11 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -30,11 +36,12 @@ import java.util.*;
 public class BinanceOrderClient {
 
     public static final String X_MBX_APIKEY = "X-MBX-APIKEY";
+    private static final String ORDER_PATH = "/api/v3/order";
+    private static final String ORDER_TEST_PATH = "/api/v3/order/test";
+    private static final String OCO_PATH = "/api/v3/orderList/oco";
+
     private final RestTemplate restTemplate;
-    private final String apiKey = "F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU";
-    private final String secretKey = "N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20";
-    private final String mainnetBaseUrl = "https://api.binance.com";
-    private final String testnetBaseUrl = "https://testnet.binance.vision";
+    private final MACDTraderConfig traderConfig;
 
     public BinanceOrderResponse placeOrder(String symbol, OrderType type, OrderSide side, BigDecimal quantity,
                                 BigDecimal price, BigDecimal stopPrice, TimeInForce timeInForce) {
@@ -77,19 +84,19 @@ public class BinanceOrderClient {
             params.put("recvWindow", "5000");
             params.put("timestamp", String.valueOf(timestamp));
 
-            String queryString = buildQueryString(params);
-            String signature = sign(queryString, secretKey);
-            String finalUrl = testnetBaseUrl + "/api/v3/order?" + queryString + "&signature=" + signature;
+            boolean testMode = Boolean.TRUE.equals(traderConfig.getTrader().getTestOrderModeEnabled());
+            String path = testMode ? ORDER_TEST_PATH : ORDER_PATH;
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set(X_MBX_APIKEY, apiKey);
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            BinanceOrderResponse response = restTemplate.exchange(
-                    URI.create(finalUrl), HttpMethod.POST, entity, BinanceOrderResponse.class
-            ).getBody();
-
-            log.info("Order placed: {}", response);
+            BinanceOrderResponse response;
+            if (testMode) {
+                executeSignedPost(path, params, String.class);
+                response = buildTestOrderResponse(symbol, type, side, quantity, price, timeInForce, clientOrderId);
+                log.info("Validated order in test mode: {}", response);
+            } else {
+                ResponseEntity<BinanceOrderResponse> exchange = executeSignedPost(path, params, BinanceOrderResponse.class);
+                response = Objects.requireNonNull(exchange.getBody(), "Binance order response must not be null");
+                log.info("Order placed: {}", response);
+            }
             return response;
         } catch (Exception e) {
             log.error("Error placing order", e);
@@ -131,19 +138,13 @@ public class BinanceOrderClient {
             params.put("recvWindow", "5000");
             params.put("timestamp", String.valueOf(timestamp));
 
-            String queryString = buildQueryString(params);
-            String signature = sign(queryString, secretKey);
-            String finalUrl = testnetBaseUrl + "/api/v3/orderList/oco?" + queryString + "&signature=" + signature;
+            boolean testMode = Boolean.TRUE.equals(traderConfig.getTrader().getTestOrderModeEnabled());
+            if (testMode) {
+                log.info("Test order mode enabled, skipping live OCO placement for symbol {}", symbol);
+                return buildTestOcoOrderResponse(symbol, side, quantity, abovePrice, aboveStopPrice, belowStopPrice, belowLimitPrice);
+            }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("X-MBX-APIKEY", apiKey);
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<BinanceOcoOrderResponse> response = restTemplate.exchange(
-                    URI.create(finalUrl), HttpMethod.POST, entity, BinanceOcoOrderResponse.class
-            );
-
-
+            ResponseEntity<BinanceOcoOrderResponse> response = executeSignedPost(OCO_PATH, params, BinanceOcoOrderResponse.class);
             return response.getBody();
         } catch (Exception e) {
             log.error("Error placing OCO order (new endpoint)", e);
@@ -160,17 +161,13 @@ public class BinanceOrderClient {
             params.put("orderId", orderId.toString());
             params.put("timestamp", String.valueOf(timestamp));
 
-            String queryString = buildQueryString(params);
-            String signature = sign(queryString, secretKey);
-            String finalUrl = testnetBaseUrl + "/api/v3/order?" + queryString + "&signature=" + signature;
+            boolean testMode = Boolean.TRUE.equals(traderConfig.getTrader().getTestOrderModeEnabled());
+            if (testMode) {
+                log.info("Test order mode enabled, skipping cancel for {}:{}", symbol, orderId);
+                return true;
+            }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("X-MBX-APIKEY", apiKey);
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<OrderItem> response = restTemplate.exchange(
-                    URI.create(finalUrl), HttpMethod.DELETE, entity, OrderItem.class
-            );
+            ResponseEntity<String> response = executeSignedDelete(ORDER_PATH, params);
 
             return response.getStatusCode() == HttpStatus.OK;
         } catch (Exception e) {
@@ -205,5 +202,76 @@ public class BinanceOrderClient {
         hmacSha256.init(secretKeySpec);
         byte[] hash = hmacSha256.doFinal(data.getBytes(StandardCharsets.UTF_8));
         return Hex.encodeHexString(hash);
+    }
+
+    private <T> ResponseEntity<T> executeSignedPost(String path, Map<String, String> params, Class<T> responseType) throws Exception {
+        return executeSignedRequest(HttpMethod.POST, path, params, responseType);
+    }
+
+    private ResponseEntity<String> executeSignedDelete(String path, Map<String, String> params) throws Exception {
+        return executeSignedRequest(HttpMethod.DELETE, path, params, String.class);
+    }
+
+    private <T> ResponseEntity<T> executeSignedRequest(HttpMethod method, String path, Map<String, String> params, Class<T> responseType) throws Exception {
+        MACDTraderConfig.Rest rest = traderConfig.getRest();
+        String queryString = buildQueryString(params);
+        String secret = Objects.requireNonNull(rest.getSecretApiToken(), "Binance API secret must be configured");
+        String signature = sign(queryString, secret);
+        String baseUrl = Objects.requireNonNull(rest.getBaseUrl(), "Binance REST base URL must be configured");
+        String finalUrl = baseUrl + path + "?" + queryString + "&signature=" + signature;
+
+        HttpHeaders headers = new HttpHeaders();
+        String apiKey = Objects.requireNonNull(rest.getApiToken(), "Binance API key must be configured");
+        headers.set(X_MBX_APIKEY, apiKey);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        return restTemplate.exchange(URI.create(finalUrl), method, entity, responseType);
+    }
+
+    private BinanceOrderResponse buildTestOrderResponse(String symbol, OrderType type, OrderSide side,
+                                                        BigDecimal quantity, BigDecimal price, TimeInForce timeInForce,
+                                                        String clientOrderId) {
+        long now = Instant.now().toEpochMilli();
+        BinanceOrderResponse response = new BinanceOrderResponse();
+        response.setSymbol(symbol);
+        response.setOrderId(0L);
+        response.setOrderListId(0L);
+        response.setClientOrderId(clientOrderId);
+        response.setTransactTime(now);
+        response.setPrice(price);
+        response.setOrigQty(quantity);
+        response.setExecutedQty(BigDecimal.ZERO);
+        response.setOrigQuoteOrderQty(BigDecimal.ZERO);
+        response.setCummulativeQuoteQty(BigDecimal.ZERO);
+        response.setStatus("ACTIVE");
+        response.setTimeInForce(timeInForce.getValue());
+        response.setType(type.getValue());
+        response.setSide(side.getValue());
+        response.setWorkingTime(now);
+        response.setSelfTradePreventionMode("NONE");
+        response.setFills(List.of());
+        return response;
+    }
+
+    private BinanceOcoOrderResponse buildTestOcoOrderResponse(String symbol, OrderSide side,
+                                                              BigDecimal quantity, BigDecimal abovePrice,
+                                                              BigDecimal aboveStopPrice, BigDecimal belowStopPrice,
+                                                              BigDecimal belowLimitPrice) {
+        BinanceOcoOrderResponse response = new BinanceOcoOrderResponse();
+        long now = Instant.now().toEpochMilli();
+        response.setOrderListId(0L);
+        response.setContingencyType("OCO");
+        response.setListStatusType("EXEC_STARTED");
+        response.setListOrderStatus("EXECUTING");
+        response.setListClientOrderId(generateClientOrderId());
+        response.setTransactionTime(now);
+        response.setSymbol(symbol);
+        response.setOrders(List.of());
+        response.setOrderReports(List.of());
+
+        log.info("Simulated OCO order in test mode for symbol {} with quantity {}", symbol, quantity);
+        log.debug("Test OCO parameters: side={}, abovePrice={}, aboveStopPrice={}, belowStopPrice={}, belowLimitPrice={}",
+                side, abovePrice, aboveStopPrice, belowStopPrice, belowLimitPrice);
+        return response;
     }
 }
