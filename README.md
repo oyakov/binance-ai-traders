@@ -2,7 +2,7 @@
 
 This repository contains multiple microservices designed to handle Binance data collection, storage, and trading activities. The services communicate through Kafka, ensuring decoupled and efficient communication between them. The system also includes a Python-based Telegram bot for interaction.
 
-> **New:** The `autonomous-agent/` directory hosts a fully local autonomous coding assistant that can be launched together with a local LLM via Docker Compose. See [`autonomous-agent/README.md`](autonomous-agent/README.md) for setup instructions.
+> **Note:** The autonomous coding assistant previously bundled in this repository now lives in its own project.
 
 ## Architecture Overview
 
