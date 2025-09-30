@@ -105,7 +105,7 @@ public class OrderServiceImpl implements OrderServiceApi {
 
     @Override
     public void closeOrderWithState(Long orderId, OrderState state) {
-        orderRepository.findById(orderId).ifPresentOrElse(
+        orderRepository.findByOrderId(orderId).ifPresentOrElse(
                 orderItem -> {
                     switch (orderItem.getStatus()) {
                         case NEW, ACTIVE, PENDING -> {
