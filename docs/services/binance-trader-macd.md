@@ -13,6 +13,17 @@ Implements a MACD-based automated trading strategy that reacts to Kafka-delivere
 - Broker packages (`broker/kafka/consumer` & `broker/kafka/producer`) exist, signalling an intent to consume indicator signals and publish orders, but the concrete consumer/producer implementations are not present in the repository snapshot.
 - REST client scaffolding under `rest/client` and DTOs under `rest/dto` suggest an HTTP-based interaction with Binance; implementation details need review to confirm completeness.
 
+## Configuration
+
+The MACD trader pulls REST credentials and runtime switches from environment variables (falling back to sensible defaults for URLs):
+
+| Variable | Description |
+| --- | --- |
+| `BINANCE_REST_BASE_URL` | Binance REST API endpoint. Defaults to the testnet URL in the test profile and the production URL in the mainnet profile. |
+| `BINANCE_API_KEY` | API key injected into the `X-MBX-APIKEY` header for authenticated REST calls. |
+| `BINANCE_API_SECRET` | Secret key used to sign Binance REST requests. |
+| `BINANCE_TRADER_TEST_ORDER_MODE_ENABLED` | When `true`, the trader submits orders to `/api/v3/order/test` and skips live OCO/cancel calls to support dry-run validation. |
+
 ## Missing Pieces & Risks
 - Without visible Kafka consumer/producer classes it is unclear how signals enter or orders leave the system.
 - Strategy logic (calculating MACD crossovers, managing open positions) is absent; the repository currently provides only configuration and model scaffolding.
