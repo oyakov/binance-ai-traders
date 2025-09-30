@@ -18,11 +18,40 @@ jobs:
         with:
           distribution: temurin
           java-version: '23'
+          cache: maven
 
-      - name: Run shared model tests
+      - name: Build shared model
         working-directory: binance-shared-model
-        run: ./mvnw -B -ntp test
+        run: ./mvnw -B -ntp clean install
 
-      - name: Run MACD trader tests
-        working-directory: binance-trader-macd
-        run: ./mvnw -B -ntp test
+      - name: Run service test suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules=(
+            binance-data-collection
+            binance-data-storage
+            binance-trader-grid
+            binance-trader-macd
+          )
+          for module in "${modules[@]}"; do
+            echo "::group::Running tests for ${module}"
+            (cd "${module}" && ./mvnw -B -ntp clean test)
+            echo "::endgroup::"
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Telegram frontend dependencies
+        working-directory: telegram-frontend-python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+          pip install -e .
+
+      - name: Run Telegram frontend tests
+        working-directory: telegram-frontend-python
+        run: python -m unittest discover -s tests -p '*_test.py'
