@@ -16,12 +16,17 @@ import org.mockito.Spy;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 public class KlineDataServiceTest {
+
+    private static BigDecimal decimal(double value) {
+        return BigDecimal.valueOf(value);
+    }
 
     @Mock
     private KlineElasticRepository klineElasticRepository;
@@ -52,11 +57,11 @@ public class KlineDataServiceTest {
                 .setEventType("test")
                 .setEventTime(1620000000000L)
                 .setOpenTime(1620000000000L)
-                .setOpen(1000.0)
-                .setHigh(1100.0)
-                .setLow(900.0)
-                .setClose(1050.0)
-                .setVolume(1000.0)
+                .setOpen(decimal(1000.0))
+                .setHigh(decimal(1100.0))
+                .setLow(decimal(900.0))
+                .setClose(decimal(1050.0))
+                .setVolume(decimal(1000.0))
                 .setCloseTime(1620000999000L)
                 .build();
 
@@ -72,11 +77,11 @@ public class KlineDataServiceTest {
                 .fingerprint(fingerprint)
                 .timestamp(incomingCommand.getEventTime())
                 .displayTime(eventDisplayTime)
-                .open(incomingCommand.getOpen())
-                .high(incomingCommand.getHigh())
-                .low(incomingCommand.getLow())
-                .close(incomingCommand.getClose())
-                .volume(incomingCommand.getVolume())
+                .open(incomingCommand.getOpen().doubleValue())
+                .high(incomingCommand.getHigh().doubleValue())
+                .low(incomingCommand.getLow().doubleValue())
+                .close(incomingCommand.getClose().doubleValue())
+                .volume(incomingCommand.getVolume().doubleValue())
                 .build();
 
         when(klineElasticRepository.save(expectedItem)).thenReturn(expectedItem);
@@ -107,11 +112,11 @@ public class KlineDataServiceTest {
                 .setEventType("test")
                 .setEventTime(1620000000000L)
                 .setOpenTime(1620000000000L)
-                .setOpen(1000.0)
-                .setHigh(1100.0)
-                .setLow(900.0)
-                .setClose(1050.0)
-                .setVolume(1000.0)
+                .setOpen(decimal(1000.0))
+                .setHigh(decimal(1100.0))
+                .setLow(decimal(900.0))
+                .setClose(decimal(1050.0))
+                .setVolume(decimal(1000.0))
                 .setCloseTime(1620000999000L)
                 .build();
 
@@ -139,11 +144,11 @@ public class KlineDataServiceTest {
                     .setEventType("test")
                     .setEventTime(1620000000000L)
                     .setOpenTime(1620000000000L)
-                    .setOpen(1000.0)
-                    .setHigh(1100.0)
-                    .setLow(900.0)
-                    .setClose(1050.0)
-                    .setVolume(1000.0)
+                    .setOpen(decimal(1000.0))
+                    .setHigh(decimal(1100.0))
+                    .setLow(decimal(900.0))
+                    .setClose(decimal(1050.0))
+                    .setVolume(decimal(1000.0))
                     .setCloseTime(1620000999000L)
                     .build();
 
@@ -153,11 +158,11 @@ public class KlineDataServiceTest {
                     .fingerprint(fingerprint)
                     .timestamp(incomingCommand.getEventTime())
                     .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                    .open(incomingCommand.getOpen())
-                    .high(incomingCommand.getHigh())
-                    .low(incomingCommand.getLow())
-                    .close(incomingCommand.getClose())
-                    .volume(incomingCommand.getVolume())
+                    .open(incomingCommand.getOpen().doubleValue())
+                    .high(incomingCommand.getHigh().doubleValue())
+                    .low(incomingCommand.getLow().doubleValue())
+                    .close(incomingCommand.getClose().doubleValue())
+                    .volume(incomingCommand.getVolume().doubleValue())
                     .build();
 
             when(klineElasticRepository.save(expectedItem)).thenThrow(new RuntimeException("Elasticsearch is down"));
@@ -188,11 +193,11 @@ public class KlineDataServiceTest {
                     .setEventType("test")
                     .setEventTime(1620000000000L)
                     .setOpenTime(1620000000000L)
-                    .setOpen(1000.0)
-                    .setHigh(1100.0)
-                    .setLow(900.0)
-                    .setClose(1050.0)
-                    .setVolume(1000.0)
+                    .setOpen(decimal(1000.0))
+                    .setHigh(decimal(1100.0))
+                    .setLow(decimal(900.0))
+                    .setClose(decimal(1050.0))
+                    .setVolume(decimal(1000.0))
                     .setCloseTime(1620000999000L)
                     .build();
 
@@ -202,11 +207,11 @@ public class KlineDataServiceTest {
                     .fingerprint(fingerprint)
                     .timestamp(incomingCommand.getEventTime())
                     .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                    .open(incomingCommand.getOpen())
-                    .high(incomingCommand.getHigh())
-                    .low(incomingCommand.getLow())
-                    .close(incomingCommand.getClose())
-                    .volume(incomingCommand.getVolume())
+                    .open(incomingCommand.getOpen().doubleValue())
+                    .high(incomingCommand.getHigh().doubleValue())
+                    .low(incomingCommand.getLow().doubleValue())
+                    .close(incomingCommand.getClose().doubleValue())
+                    .volume(incomingCommand.getVolume().doubleValue())
                     .build();
 
             when(klineElasticRepository.save(expectedItem)).thenReturn(expectedItem);

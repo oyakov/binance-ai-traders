@@ -30,11 +30,11 @@
 		<url/>
 	</scm>
         <properties>
-                <java.version>23</java.version>
-                <maven.compiler.source>23</maven.compiler.source>
-                <maven.compiler.target>23</maven.compiler.target>
-		<lombok.version>1.18.34</lombok.version>
-	</properties>
+                <java.version>21</java.version>
+                <maven.compiler.source>21</maven.compiler.source>
+                <maven.compiler.target>21</maven.compiler.target>
+                <lombok.version>1.18.34</lombok.version>
+        </properties>
 	<dependencies>
 		<!-- Spring Data -->
 		<dependency>
