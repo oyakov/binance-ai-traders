@@ -1,2 +1,0 @@
-recursive-include autonomous_agent *.txt *.md *.py
-include config.sample.toml
