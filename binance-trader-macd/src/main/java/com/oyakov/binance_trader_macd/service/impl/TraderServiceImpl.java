@@ -124,12 +124,12 @@ public class TraderServiceImpl implements KlineEventListener {
         BigDecimal ratio = currentPrice.divide(entryPrice, RoundingMode.HALF_UP);
         log.info("SLTP - %s / %s = %s".formatted(entryPrice, currentPrice, ratio));
 
-        if (ratio.compareTo(TAKE_PROFIT_THRESHOLD) >= 0) {
+        if (ratio.compareTo(TAKE_PROFIT_THRESHOLD) > 0) {
             log.info("Close the deal, take profit threshold crossed");
             orderService.closeOrderWithState(orderId, OrderState.CLOSED_TP);
         } else {
             log.info("Take profit threshold not reached yet");
-            if (ratio.compareTo(STOP_LOSS_THRESHOLD) <= 0) {
+            if (ratio.compareTo(STOP_LOSS_THRESHOLD) < 0) {
                 log.warn("Stop loss threshold has been crossed for the order %s. Triggering order cancellation...".formatted(orderId));
                 orderService.closeOrderWithState(orderId, OrderState.CLOSED_SL);
             }
