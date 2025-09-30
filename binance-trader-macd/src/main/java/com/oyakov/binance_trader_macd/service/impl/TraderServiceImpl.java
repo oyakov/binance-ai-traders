@@ -102,18 +102,16 @@ public class TraderServiceImpl implements KlineEventListener {
         BigDecimal ratio = currentPrice.divide(entryPrice, RoundingMode.HALF_UP);
         log.info("SLTP - %s / %s = %s".formatted(entryPrice, currentPrice, ratio));
 
-        // TODO: check if SLTP is handled automatically by OCO LIMIT, i.e. we shouldn't be cancelling any orders, just log the ratio for now
-        // TODO: need to monitor order updates somehow to understand that the order has been closed, maybe also with websocket?
-//        if (ratio.compareTo(TAKE_PROFIT_THRESHOLD) > 0) {
-//            log.info("Close the deal, take profit threshold crossed");
-//            orderService.closeOrderWithState(orderId, OrderState.CLOSED_TP);
-//        } else {
-//            log.info("Take profit threshold not reached yet");
-//            if (ratio.compareTo(STOP_LOSS_THRESHOLD) < 0) {
-//                log.warn("Stop loss threshold has been crossed for the order %s. Triggering order cancellation...".formatted(orderId));
-//                orderService.closeOrderWithState(orderId, OrderState.CLOSED_SL);
-//            }
-//        }
+        if (ratio.compareTo(TAKE_PROFIT_THRESHOLD) >= 0) {
+            log.info("Close the deal, take profit threshold crossed");
+            orderService.closeOrderWithState(orderId, OrderState.CLOSED_TP);
+        } else {
+            log.info("Take profit threshold not reached yet");
+            if (ratio.compareTo(STOP_LOSS_THRESHOLD) <= 0) {
+                log.warn("Stop loss threshold has been crossed for the order %s. Triggering order cancellation...".formatted(orderId));
+                orderService.closeOrderWithState(orderId, OrderState.CLOSED_SL);
+            }
+        }
     }
 
     private void processTradeSignalUpdate(Long orderId, OrderSide orderSide, OrderSide signalSide) {
@@ -126,20 +124,26 @@ public class TraderServiceImpl implements KlineEventListener {
         String symbol = klineEvent.getSymbol();
         BigDecimal currentPrice = klineEvent.getClose();
         log.info("%s signal is triggered for symbol %s at price %s".formatted(OrderSide.of(signal), symbol, currentPrice));
-//        orderService.getActiveOrder(symbol).ifPresentOrElse(
-//                orderItem -> {
-//                    log.info("Active order present: %s".formatted(orderItem));
-//                    processOrderSLTP(orderItem.getOrderId(), orderItem.getPrice(), currentPrice);
-//                    processTradeSignalUpdate(orderItem.getOrderId(), orderItem.getSide(), OrderSide.of(signal));
-//                },
-//                () -> {
-//                    log.info("No active order detected, creating a new one...");
-//                    // Create order with stop-loss and take-profit
-//                    OrderItem order = orderService.createOrderGroup(
-//                            symbol, currentPrice, QUANTITY, OrderSide.of(signal),
-//                            currentPrice.multiply(STOP_LOSS_THRESHOLD), // stop loss price
-//                            currentPrice.multiply(TAKE_PROFIT_THRESHOLD)); // take profit price
-//                    log.info("Order group created: %s".formatted(order));
-//                });
+        orderService.getActiveOrder(symbol).ifPresentOrElse(
+                orderItem -> {
+                    log.info("Active order present: %s".formatted(orderItem));
+                    processOrderSLTP(orderItem.getOrderId(), orderItem.getPrice(), currentPrice);
+                    processTradeSignalUpdate(orderItem.getOrderId(), orderItem.getSide(), OrderSide.of(signal));
+                },
+                () -> {
+                    log.info("No active order detected, creating a new one...");
+                    BigDecimal stopLossPrice = currentPrice.multiply(STOP_LOSS_THRESHOLD)
+                            .setScale(currentPrice.scale(), RoundingMode.HALF_UP);
+                    BigDecimal takeProfitPrice = currentPrice.multiply(TAKE_PROFIT_THRESHOLD)
+                            .setScale(currentPrice.scale(), RoundingMode.HALF_UP);
+                    OrderItem order = orderService.createOrderGroup(
+                            symbol,
+                            currentPrice,
+                            QUANTITY,
+                            OrderSide.of(signal),
+                            stopLossPrice,
+                            takeProfitPrice);
+                    log.info("Order group created: %s".formatted(order));
+                });
     }
 }

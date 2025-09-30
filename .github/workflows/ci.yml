@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '23'
+
+      - name: Run shared model tests
+        working-directory: binance-shared-model
+        run: ./mvnw -B -ntp test
+
+      - name: Run MACD trader tests
+        working-directory: binance-trader-macd
+        run: ./mvnw -B -ntp test
