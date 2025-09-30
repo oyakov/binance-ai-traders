@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -18,6 +20,13 @@ public interface OrderPostgresRepository extends JpaRepository<OrderItem, Long> 
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     Optional<OrderItem> findBySymbolAndStatusEquals(String symbol, OrderState status);
+
+    long countByStatus(OrderState status);
+
+    @Query("SELECT COALESCE(SUM(CASE WHEN o.side = com.oyakov.binance_trader_macd.domain.OrderSide.BUY " +
+            "THEN -o.cummulativeQuoteQty ELSE o.cummulativeQuoteQty END), 0) " +
+            "FROM OrderItem o WHERE o.status IN :statuses")
+    BigDecimal calculateNetQuoteChangeByStatuses(@Param("statuses") Collection<OrderState> statuses);
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     Optional<OrderItem> findByOrderId(Long orderId);

@@ -12,6 +12,8 @@ import com.oyakov.binance_trader_macd.service.api.KlineEventListener;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class TraderServiceImpl implements KlineEventListener {
     private final MACDSignalAnalyzer macdSignalAnalyzer;
     private final OrderServiceApi orderService;
     private final MACDTraderConfig traderConfig;
+    private final MeterRegistry meterRegistry;
 
     private final Deque<KlineEvent> slidingWindow = new ArrayDeque<>();
     private final Lock eventQLock = new ReentrantLock();
@@ -40,12 +43,31 @@ public class TraderServiceImpl implements KlineEventListener {
     private BigDecimal STOP_LOSS_THRESHOLD;
     public BigDecimal QUANTITY;
 
+    private Counter totalSignalCounter;
+    private Counter buySignalCounter;
+    private Counter sellSignalCounter;
+
     @PostConstruct
     private void init() {
         SLIDING_WINDOW_SIZE = traderConfig.getTrader().getSlidingWindowSize();
         TAKE_PROFIT_THRESHOLD = traderConfig.getTrader().getTakeProfitPercentage();
         STOP_LOSS_THRESHOLD = traderConfig.getTrader().getStopLossPercentage();
         QUANTITY = traderConfig.getTrader().getOrderQuantity();
+
+        totalSignalCounter = Counter.builder("binance.trader.signals")
+                .description("Total trade signals processed by the Binance MACD trader")
+                .tag("direction", "total")
+                .register(meterRegistry);
+
+        buySignalCounter = Counter.builder("binance.trader.signals")
+                .description("Buy signals processed by the Binance MACD trader")
+                .tag("direction", "buy")
+                .register(meterRegistry);
+
+        sellSignalCounter = Counter.builder("binance.trader.signals")
+                .description("Sell signals processed by the Binance MACD trader")
+                .tag("direction", "sell")
+                .register(meterRegistry);
     }
 
     @Override

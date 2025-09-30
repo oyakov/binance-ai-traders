@@ -35,3 +35,21 @@ The MACD trader pulls REST credentials and runtime switches from environment var
 2. Flesh out Kafka listener and producer components with retry/backoff strategies and idempotency safeguards.
 3. Centralize shared infrastructure beans (Elasticsearch, Kafka) to reduce duplication across services.
 4. Create integration tests that mock Binance REST endpoints and assert order submission behavior in both test and live modes.
+
+## Observability & Metrics
+- Spring Boot Actuator is bundled with the service. Health, info, metrics, and Prometheus scrape endpoints are available under `/actuator/**` (e.g., `/actuator/health`, `/actuator/metrics`, `/actuator/prometheus`).
+- Micrometer publishes trading-specific telemetry:
+  - `binance.trader.active.positions` (gauge, `positions`) – number of currently open orders tracked in PostgreSQL.
+  - `binance.trader.realized.pnl` (gauge, `quote_asset`) – realized PnL aggregated from closed orders (positive for net earnings, negative for losses).
+  - `binance.trader.signals{direction="total|buy|sell"}` (counter) – cumulative MACD signals processed by the strategy.
+- Prometheus scrape example:
+
+  ```yaml
+  scrape_configs:
+    - job_name: binance-macd-trader
+      metrics_path: /actuator/prometheus
+      static_configs:
+        - targets: ['macd-trader:8080']
+  ```
+
+- Grafana dashboards: import the community “Spring Boot Statistics” dashboard (ID 11378) or build a custom board with panels for the metrics above. Tag charts by `direction` to split buy/sell signal rates. Pair with Loki/ELK by shipping logs (Logback) to a centralized aggregator and correlating log-based alerts with Prometheus rule evaluations (e.g., high error rate combined with zero open positions).
