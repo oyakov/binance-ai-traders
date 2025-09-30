@@ -37,7 +37,7 @@ db.sqlite3-journal
 *.log
 
 # Maven
-*.mvn/
+# Keep wrapper metadata committed so the wrapper scripts remain functional
 target/
 
 # Eclipse
