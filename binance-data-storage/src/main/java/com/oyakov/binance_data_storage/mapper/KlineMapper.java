@@ -20,14 +20,14 @@ public class KlineMapper {
                 .interval(event.getInterval())
                 .openTime(event.getOpenTime())
                 .closeTime(event.getCloseTime())
-                .open(event.getOpen())
-                .high(event.getHigh())
-                .low(event.getLow())
-                .close(event.getClose())
-                .volume(event.getVolume())
+                .open(toDouble(event.getOpen()))
+                .high(toDouble(event.getHigh()))
+                .low(toDouble(event.getLow()))
+                .close(toDouble(event.getClose()))
+                .volume(toDouble(event.getVolume()))
                 .build();
     }
-    
+
     public KlineItem toItem(KlineEvent event) {
         KlineFingerprint fingerprint = KlineFingerprint.fromKlineEvent(event);
 
@@ -35,11 +35,11 @@ public class KlineMapper {
                 .timestamp(event.getEventTime())
                 .fingerprint(fingerprint)
                 .displayTime(LocalDateTime.ofEpochSecond(event.getEventTime() / 1000, 0, ZoneOffset.UTC))
-                .open(event.getOpen())
-                .high(event.getHigh())
-                .low(event.getLow())
-                .close(event.getClose())
-                .volume(event.getVolume())
+                .open(toDouble(event.getOpen()))
+                .high(toDouble(event.getHigh()))
+                .low(toDouble(event.getLow()))
+                .close(toDouble(event.getClose()))
+                .volume(toDouble(event.getVolume()))
                 .build();
     }
     
@@ -62,4 +62,8 @@ public class KlineMapper {
                 .build();
     }
 
-} 
+    private double toDouble(java.math.BigDecimal value) {
+        return value != null ? value.doubleValue() : 0.0d;
+    }
+
+}
