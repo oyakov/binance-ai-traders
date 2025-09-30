@@ -76,10 +76,11 @@ public class OrderServiceImpl implements OrderServiceApi {
             OrderItem ocoItem = conversionService.convert(oco, OrderItem.class);
             if (ocoItem != null) {
                 ocoItem.setParentOrderId(entryOrder.getOrderId());
+                ocoOrders.add(ocoItem);
                 log.debug("Linked OCO order {} created for parent {}", ocoItem.getOrderId(), entryOrder.getOrderId());
             }
         }
-        log.debug("OCO orders created: {}", entryOrder);
+        log.debug("OCO orders created for parent {}: {}", entryOrder.getOrderId(), ocoOrders);
         return ocoOrders;
     }
 
