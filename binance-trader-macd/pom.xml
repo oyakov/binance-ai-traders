@@ -39,12 +39,16 @@
 		<confluent.version>7.5.1</confluent.version>
 		<spring-kafka.version>3.3.5</spring-kafka.version>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>com.oyakov</groupId>
-			<artifactId>binance-shared-model</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
-		</dependency>
+        <dependencies>
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-actuator</artifactId>
+                </dependency>
+                <dependency>
+                        <groupId>com.oyakov</groupId>
+                        <artifactId>binance-shared-model</artifactId>
+                        <version>0.1.1-SNAPSHOT</version>
+                </dependency>
 		<!-- Spring Data -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -91,10 +95,14 @@
 			<artifactId>kafka-avro-serializer</artifactId>
 			<version>${confluent.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-		</dependency>
+                <dependency>
+                        <groupId>io.projectreactor</groupId>
+                        <artifactId>reactor-core</artifactId>
+                </dependency>
+                <dependency>
+                        <groupId>io.micrometer</groupId>
+                        <artifactId>micrometer-registry-prometheus</artifactId>
+                </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
