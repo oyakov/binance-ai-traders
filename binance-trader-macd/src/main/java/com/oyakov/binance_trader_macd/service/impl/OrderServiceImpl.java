@@ -76,10 +76,11 @@ public class OrderServiceImpl implements OrderServiceApi {
             OrderItem ocoItem = conversionService.convert(oco, OrderItem.class);
             if (ocoItem != null) {
                 ocoItem.setParentOrderId(entryOrder.getOrderId());
+                ocoOrders.add(ocoItem);
                 log.debug("Linked OCO order {} created for parent {}", ocoItem.getOrderId(), entryOrder.getOrderId());
             }
         }
-        log.debug("OCO orders created: {}", entryOrder);
+        log.debug("OCO orders created for parent {}: {}", entryOrder.getOrderId(), ocoOrders);
         return ocoOrders;
     }
 
@@ -105,7 +106,7 @@ public class OrderServiceImpl implements OrderServiceApi {
 
     @Override
     public void closeOrderWithState(Long orderId, OrderState state) {
-        orderRepository.findById(orderId).ifPresentOrElse(
+        orderRepository.findByOrderId(orderId).ifPresentOrElse(
                 orderItem -> {
                     switch (orderItem.getStatus()) {
                         case NEW, ACTIVE, PENDING -> {

@@ -1,6 +1,12 @@
 # Use the Liberica JDK as the base image
 FROM bellsoft/liberica-openjdk-alpine:latest
 
+# Runtime environment variables (provided via secrets or compose overrides):
+#   BINANCE_API_KEY - Binance API key forwarded to the REST client header.
+#   BINANCE_API_SECRET - Binance API secret used for HMAC signatures.
+#   BINANCE_REST_BASE_URL - Optional override for the Binance REST endpoint.
+#   BINANCE_TRADER_TEST_ORDER_MODE_ENABLED - Switch to enable `/api/v3/order/test` dry runs.
+
 # Set the working directory
 WORKDIR /app
 
