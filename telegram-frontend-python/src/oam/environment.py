@@ -27,6 +27,12 @@ ELASTIC_PORT = os.getenv('ELASTIC_PORT')
 ELASTIC_SCHEME = os.getenv('ELASTIC_SCHEME')
 ELASTIC_USERNAME = os.getenv('ELASTIC_USERNAME')
 ELASTIC_PASSWORD = os.getenv('ELASTIC_PASSWORD')
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092')
+KAFKA_COMMAND_TOPIC = os.getenv('KAFKA_COMMAND_TOPIC', 'trading-command')
+KAFKA_STATUS_TOPIC = os.getenv('KAFKA_STATUS_TOPIC', 'trading-status')
+KAFKA_NOTIFICATION_TOPIC = os.getenv('KAFKA_NOTIFICATION_TOPIC', 'trading-notification')
+KAFKA_CONSUMER_GROUP = os.getenv('KAFKA_CONSUMER_GROUP', 'telegram-frontend')
+KAFKA_CLIENT_ID = os.getenv('KAFKA_CLIENT_ID', 'telegram-frontend-bot')
 ############################################################################
 
 DELIMITER: str = '🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊'

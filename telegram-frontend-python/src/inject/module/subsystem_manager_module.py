@@ -17,6 +17,7 @@ from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
 from service.crypto.signals.signals_service import SignalsService
+from service.messaging.kafka_service import KafkaMessagingService
 from service.os.filesystem_service import FilesystemService
 from service.telegram_service import TelegramService
 from subsystem.actuator_subsystem import ActuatorSubsystem
@@ -25,6 +26,7 @@ from subsystem.binance_subsystem import BinanceSubsystem
 from subsystem.binance_trader_process_subsystem import BinanceMACDRSITraderProcessSubsystem
 from subsystem.configuration_subsystem import ConfigurationSubsystem
 from subsystem.database_subsystem import DatabaseSubsystem
+from subsystem.kafka_notification_subsystem import KafkaNotificationSubsystem
 from subsystem.logger_subsystem import LoggerSubsystem
 from subsystem.openai_subsystem import OpenAiSubsystem
 from subsystem.scheduler_subsystem import SchedulerSubsystem
@@ -113,6 +115,11 @@ class SubsystemManagerModule(Module):
 
     @singleton
     @provider
+    def provide_kafka_notification_subsystem(self, bot: Bot, kafka_service: KafkaMessagingService) -> KafkaNotificationSubsystem:
+        return KafkaNotificationSubsystem(bot, kafka_service)
+
+    @singleton
+    @provider
     def provide_slave_bot_subsystem(self, bot: Bot, routers: list[BaseRouter]) -> SlaveBotSubsystem:
         return SlaveBotSubsystem(bot, routers=routers)
 
@@ -124,7 +131,8 @@ class SubsystemManagerModule(Module):
                                scheduler_subsystem: SchedulerSubsystem, openai_subsystem: OpenAiSubsystem,
                                binance_subsystem: BinanceSubsystem,
                                binance_data_offload_subsystem: BinanceDataOffloadSubsystem,
-                               binance_trade_process_subsystem: BinanceMACDRSITraderProcessSubsystem
+                               binance_trade_process_subsystem: BinanceMACDRSITraderProcessSubsystem,
+                               kafka_notification_subsystem: KafkaNotificationSubsystem
                                ) -> list[Subsystem]:
         return [
             actuator_subsystem,
@@ -135,7 +143,8 @@ class SubsystemManagerModule(Module):
             openai_subsystem,
             binance_subsystem,
             binance_data_offload_subsystem,
-            binance_trade_process_subsystem
+            binance_trade_process_subsystem,
+            kafka_notification_subsystem,
         ]
 
     @singleton

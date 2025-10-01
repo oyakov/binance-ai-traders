@@ -31,7 +31,10 @@ class BaseRouter(Router):
         # Iterate over the service configurations
         for service in self.services:
             # Create an instance of the middleware
-            middleware_instance = ServiceMiddleware(service['name'], service['service_class']())
+            instance = service.get('service_instance')
+            if instance is None:
+                instance = service['service_class']()
+            middleware_instance = ServiceMiddleware(service['name'], instance)
             # Add the middleware to the router
             self.message.middleware(middleware_instance)
             self.callback_query.middleware(middleware_instance)
