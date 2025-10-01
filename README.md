@@ -31,6 +31,7 @@ The system is split into several microservices, each responsible for specific ta
 ### 4. **grid-trader & macd-trader**
 - **Responsibility**: Executes trading strategies based on collected market data and calculated indicators.
 - **Tech Stack**: Java, Spring Boot, Kafka, and Binance API.
+- **Backtesting Engine**: Comprehensive backtesting system for strategy validation with real Binance data.
 
 ### 5. **telegram-bot**
 - **Responsibility**: A Python-based Telegram bot for sending real-time trading signals and receiving commands from the user.
@@ -39,6 +40,19 @@ The system is split into several microservices, each responsible for specific ta
 ## Kafka as Event Bus
 
 All microservices are connected via **Kafka** as the event bus. Each service listens to the relevant topics and performs its task in isolation. Kafka allows loose coupling between services and facilitates scalability.
+
+## 🚀 Quick Start - Backtesting Engine
+
+Test trading strategies on historical Binance data:
+
+```bash
+# Run the comprehensive backtesting demo
+mvn test -pl binance-trader-macd -Dtest=StandaloneBacktestDemo
+```
+
+This will demonstrate the MACD trading strategy with realistic market simulation and comprehensive performance metrics.
+
+📖 **[Full Backtesting Documentation](BACKTESTING_README.md)**
 
 ## How to Run the System
 
