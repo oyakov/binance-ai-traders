@@ -6,13 +6,13 @@
 -- DROP TABLE public.order_books;
 
 CREATE TABLE public.order_books (
-                                    id serial4 NOT NULL,
-                                    symbol varchar NOT NULL,
-                                    last_update_id int8 NOT NULL,
-                                    tx_time timestamp NOT NULL,
-                                    "type" varchar NOT NULL,
-                                    price int8 NOT NULL,
-                                    quantity int8 NOT NULL,
+                                    id BIGINT AUTO_INCREMENT NOT NULL,
+                                    symbol VARCHAR(255) NOT NULL,
+                                    last_update_id BIGINT NOT NULL,
+                                    tx_time TIMESTAMP NOT NULL,
+                                    "type" VARCHAR(255) NOT NULL,
+                                    price BIGINT NOT NULL,
+                                    quantity BIGINT NOT NULL,
                                     CONSTRAINT order_books_pkey PRIMARY KEY (id)
 );
 
@@ -24,7 +24,7 @@ CREATE TABLE public.order_books (
 -- DROP TABLE public.orders;
 
 CREATE TABLE public.orders (
-                               id SERIAL PRIMARY KEY,
+                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                symbol VARCHAR(10) NOT NULL,
                                order_id BIGINT NOT NULL UNIQUE,
                                parent_order_id BIGINT,
@@ -43,5 +43,5 @@ CREATE TABLE public.orders (
                                working_time BIGINT NOT NULL,
                                display_working_time TIMESTAMP NOT NULL,
                                self_trade_prevention_mode VARCHAR(20) NOT NULL,
-                               fills JSON NOT NULL
+                               fills CLOB NOT NULL
 );
