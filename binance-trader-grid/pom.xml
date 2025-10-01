@@ -9,10 +9,10 @@
                 <relativePath/> <!-- lookup parent from repository -->
         </parent>
 	<groupId>com.oyakov.</groupId>
-	<artifactId>binance-data-storage</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
-	<name>binance-data-storage</name>
-	<description>Binance Data Storage</description>
+        <artifactId>binance-trader-grid</artifactId>
+        <version>0.1.1-SNAPSHOT</version>
+        <name>binance-trader-grid</name>
+        <description>Binance Grid Trader</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -134,41 +134,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
-
 </project>
