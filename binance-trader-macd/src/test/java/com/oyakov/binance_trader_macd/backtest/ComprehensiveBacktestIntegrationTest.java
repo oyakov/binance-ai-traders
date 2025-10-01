@@ -8,8 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration test for the comprehensive backtesting system.
@@ -109,6 +111,47 @@ class ComprehensiveBacktestIntegrationTest {
         System.out.println("Sharpe Ratio: " + result.getMetrics().getSharpeRatio());
         System.out.println("Summary: " + result.getAnalysis().getSummary());
         System.out.println("Risk Assessment: " + result.getAnalysis().getRiskAssessment());
+    }
+
+    @Test
+    void shouldRunRealDataBacktestsAcrossMultipleScopes() {
+        // Given
+        String symbol = "BTCUSDT";
+        List<String> intervals = List.of("1h", "4h");
+        List<Integer> dayRanges = List.of(3, 7);
+        BigDecimal initialCapital = BigDecimal.valueOf(10000);
+
+        // When
+        MultiScopeBacktestReport report = backtestService.runRealDataBacktestAcrossScopes(symbol, intervals, dayRanges, initialCapital);
+
+        // Then
+        assertThat(report).isNotNull();
+        assertThat(report.getScopeResults()).hasSize(intervals.size() * dayRanges.size());
+        assertThat(report.getOverallSummary()).isNotBlank();
+        assertThat(report.getKeyFindings()).isNotEmpty();
+        assertThat(report.getRiskWarnings()).isNotEmpty();
+        assertThat(report.getNextSteps()).isNotEmpty();
+
+        // Log aggregated report for inspection
+        System.out.println("=== MULTI-SCOPE BACKTEST REPORT ===");
+        System.out.println(report.getOverallSummary());
+        report.getScopeResults().forEach(scope -> System.out.println(" - " + scope.getHeadline()));
+        System.out.println("Key Findings: " + report.getKeyFindings());
+        System.out.println("Risk Warnings: " + report.getRiskWarnings());
+        System.out.println("Next Steps: " + report.getNextSteps());
+    }
+
+    @Test
+    void shouldValidateScopeInputsForMultiScopeBacktest() {
+        BigDecimal initialCapital = BigDecimal.valueOf(10000);
+
+        assertThatThrownBy(() -> backtestService.runRealDataBacktestAcrossScopes("BTCUSDT", List.of(), List.of(3), initialCapital))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("interval");
+
+        assertThatThrownBy(() -> backtestService.runRealDataBacktestAcrossScopes("BTCUSDT", List.of("1h"), List.of(), initialCapital))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("day range");
     }
 
     @Test
