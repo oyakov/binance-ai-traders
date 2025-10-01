@@ -5,21 +5,81 @@ This module provides common test utilities, fixtures, and helper functions
 to improve testability and reduce code duplication across test files.
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+import importlib.util
 import sys
-import os
 
 # Add src to path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+SRC_PATH = Path(__file__).resolve().parents[1] / 'src'
+if SRC_PATH.exists():
+    sys.path.insert(0, str(SRC_PATH))
 
-from db.model.binance.kline import Kline
-from db.model.binance.macd import MACD
-from db.model.binance.order import Order
-from db.model.binance.ticker import Ticker
-from service.crypto.signals.signals_service import SignalsService
+
+def import_from_src(module_relative_path: str, module_name: str):
+    """Dynamically import a module from the src directory."""
+
+    module_path = SRC_PATH / Path(module_relative_path)
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load module {module_name} from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+SignalsService = import_from_src(
+    'service/crypto/signals/signals_service.py',
+    'telegram_frontend.service.crypto.signals.signals_service'
+).SignalsService
+
+
+@dataclass
+class Kline:
+    symbol: str
+    interval: str
+    open_time: int
+    close_time: int
+    open_price: float
+    high_price: float
+    low_price: float
+    close_price: float
+    volume: float
+    quote_volume: Optional[float] = None
+    number_of_trades: Optional[int] = None
+
+
+@dataclass
+class MACD:
+    symbol: str
+    interval: str
+    timestamp: int
+    macd: float
+    signal: float
+    histogram: float
+
+
+@dataclass
+class Order:
+    order_id: int
+    symbol: str
+    side: str
+    order_type: str
+    quantity: float
+    price: float
+    status: str
+    client_order_id: Optional[str] = None
+
+
+@dataclass
+class Ticker:
+    symbol: str
+    price: float
+    volume: float
 
 
 class TestDataFactory:

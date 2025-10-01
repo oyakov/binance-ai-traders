@@ -1,13 +1,17 @@
 import unittest
 from unittest.async_case import IsolatedAsyncioTestCase
 
-from pandas import Series, DataFrame
+from pandas import Series
 
 import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'src'))
+from pathlib import Path
 
-from service.crypto.signals.signals_service import SignalsService
+# Ensure the src directory is available on the import path when tests are executed
+SRC_PATH = Path(__file__).resolve().parents[4] / 'src'
+if SRC_PATH.exists():
+    sys.path.insert(0, str(SRC_PATH))
+
+from tests.test_utils import SignalsService
 
 
 class MyTestCase(IsolatedAsyncioTestCase):
