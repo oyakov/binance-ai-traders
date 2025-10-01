@@ -1,0 +1,41 @@
+package com.oyakov.binance_data_collection.sampler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oyakov.binance_shared_model.backtest.BacktestDataset;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+
+@Component
+@Log4j2
+@RequiredArgsConstructor
+public class BacktestDatasetFileWriter {
+
+    private static final DateTimeFormatter FILE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
+    private final ObjectMapper objectMapper;
+
+    public Path writeDataset(BacktestDataset dataset, String outputDirectory) {
+        try {
+            Path directory = Path.of(outputDirectory);
+            Files.createDirectories(directory);
+            String timestamp = FILE_TIME_FORMATTER.format(dataset.getCollectedAt());
+            String fileName = "%s_%s_%s.json".formatted(
+                    dataset.getSymbol().toLowerCase(),
+                    dataset.getInterval(),
+                    timestamp);
+            Path file = directory.resolve(fileName);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), dataset);
+            log.info("Saved dataset {} with {} klines to {}", dataset.getName(), dataset.getKlines().size(), file);
+            return file;
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to write dataset " + dataset.getName(), e);
+        }
+    }
+}
