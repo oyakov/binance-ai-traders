@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 public class BacktestMetricsCalculator {
 
     private static final MathContext MATH_CONTEXT = MathContext.DECIMAL64;
+    private static final int MONEY_SCALE = 2;
+    private static final int PERCENT_SCALE = 4;
     private static final BigDecimal RISK_FREE_RATE = BigDecimal.valueOf(0.02); // 2% annual risk-free rate
 
     public BacktestMetrics calculate(String datasetName, List<SimulatedTrade> trades) {
@@ -40,11 +42,14 @@ public class BacktestMetricsCalculator {
         BigDecimal netProfit = trades.stream()
                 .map(SimulatedTrade::getProfit)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal netProfitRounded = scaleMoney(netProfit);
 
         BigDecimal winRate = total == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(winning)
                 .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP);
         BigDecimal lossRate = total == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(losing)
                 .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP);
+        BigDecimal winRateRounded = scalePercent(winRate);
+        BigDecimal lossRateRounded = scalePercent(lossRate);
 
         // Trade analysis
         List<BigDecimal> profits = trades.stream().map(SimulatedTrade::getProfit).collect(Collectors.toList());
@@ -52,26 +57,37 @@ public class BacktestMetricsCalculator {
         
         BigDecimal bestTrade = profits.stream().max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
         BigDecimal worstTrade = profits.stream().min(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
-        
-        BigDecimal averageWin = winning == 0 ? BigDecimal.ZERO : 
+        BigDecimal bestTradeRounded = scaleMoney(bestTrade);
+        BigDecimal worstTradeRounded = scaleMoney(worstTrade);
+
+        BigDecimal averageWin = winning == 0 ? BigDecimal.ZERO :
                 profits.stream().filter(p -> p.compareTo(BigDecimal.ZERO) > 0)
                         .reduce(BigDecimal.ZERO, BigDecimal::add)
                         .divide(BigDecimal.valueOf(winning), MATH_CONTEXT);
-        
-        BigDecimal averageLoss = losing == 0 ? BigDecimal.ZERO : 
+
+        BigDecimal averageLoss = losing == 0 ? BigDecimal.ZERO :
                 profits.stream().filter(p -> p.compareTo(BigDecimal.ZERO) < 0)
                         .reduce(BigDecimal.ZERO, BigDecimal::add)
                         .divide(BigDecimal.valueOf(losing), MATH_CONTEXT);
 
-        BigDecimal averageReturn = total == 0 ? BigDecimal.ZERO : 
+        BigDecimal averageWinRounded = scaleMoney(averageWin);
+        BigDecimal averageLossRounded = scaleMoney(averageLoss);
+
+        BigDecimal averageReturn = total == 0 ? BigDecimal.ZERO :
                 returns.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
                         .divide(BigDecimal.valueOf(total), MATH_CONTEXT);
+        BigDecimal averageReturnRounded = scalePercent(averageReturn);
 
         // Risk metrics
         Drawdown drawdown = calculateDrawdown(trades);
         BigDecimal sharpeRatio = calculateSharpeRatio(returns);
         BigDecimal sortinoRatio = calculateSortinoRatio(returns);
         BigDecimal profitFactor = calculateProfitFactor(trades);
+        BigDecimal maxDrawdown = scaleMoney(drawdown.absolute());
+        BigDecimal maxDrawdownPercent = scalePercent(drawdown.relative());
+        BigDecimal sharpeRatioRounded = scaleMetric(sharpeRatio);
+        BigDecimal sortinoRatioRounded = scaleMetric(sortinoRatio);
+        BigDecimal profitFactorRounded = scaleMetric(profitFactor);
 
         // Consecutive trades analysis
         ConsecutiveTrades consecutiveTrades = calculateConsecutiveTrades(trades);
@@ -80,17 +96,22 @@ public class BacktestMetricsCalculator {
         TimeAnalysis timeAnalysis = calculateTimeAnalysis(trades, klines);
 
         // Market analysis
-        MarketAnalysis marketAnalysis = calculateMarketAnalysis(klines, initialCapital);
+        MarketAnalysis marketAnalysis = calculateMarketAnalysis(klines, initialCapital, netProfit);
 
         // Additional metrics
-        BigDecimal recoveryFactor = drawdown.absolute().compareTo(BigDecimal.ZERO) > 0 ? 
+        BigDecimal recoveryFactor = drawdown.absolute().compareTo(BigDecimal.ZERO) > 0 ?
                 netProfit.divide(drawdown.absolute(), MATH_CONTEXT) : BigDecimal.ZERO;
-        
-        BigDecimal calmarRatio = drawdown.relative().compareTo(BigDecimal.ZERO) > 0 ? 
+
+        BigDecimal calmarRatio = drawdown.relative().compareTo(BigDecimal.ZERO) > 0 ?
                 averageReturn.multiply(BigDecimal.valueOf(252)).divide(drawdown.relative(), MATH_CONTEXT) : BigDecimal.ZERO;
-        
+
         BigDecimal expectancy = calculateExpectancy(trades);
         BigDecimal kellyPercentage = calculateKellyPercentage(winRate, averageWin, averageLoss);
+
+        BigDecimal recoveryFactorRounded = scaleMetric(recoveryFactor);
+        BigDecimal calmarRatioRounded = scaleMetric(calmarRatio);
+        BigDecimal expectancyRounded = scaleMoney(expectancy);
+        BigDecimal kellyPercentageRounded = scalePercent(kellyPercentage);
 
         return BacktestMetrics.builder()
                 .datasetName(datasetName)
@@ -103,37 +124,37 @@ public class BacktestMetricsCalculator {
                 .winningTrades(winning)
                 .losingTrades(losing)
                 .breakEvenTrades(breakEven)
-                .netProfit(netProfit)
-                .netProfitPercent(marketAnalysis.netProfitPercent)
-                .averageReturn(averageReturn)
-                .winRate(winRate)
-                .lossRate(lossRate)
-                .maxDrawdown(drawdown.absolute())
-                .maxDrawdownPercent(drawdown.relative())
-                .sharpeRatio(sharpeRatio)
-                .sortinoRatio(sortinoRatio)
-                .profitFactor(profitFactor)
-                .bestTrade(bestTrade)
-                .worstTrade(worstTrade)
-                .averageWin(averageWin)
-                .averageLoss(averageLoss)
-                .largestWin(bestTrade)
-                .largestLoss(worstTrade)
+                .netProfit(netProfitRounded)
+                .netProfitPercent(scalePercent(marketAnalysis.netProfitPercent))
+                .averageReturn(averageReturnRounded)
+                .winRate(winRateRounded)
+                .lossRate(lossRateRounded)
+                .maxDrawdown(maxDrawdown)
+                .maxDrawdownPercent(maxDrawdownPercent)
+                .sharpeRatio(sharpeRatioRounded)
+                .sortinoRatio(sortinoRatioRounded)
+                .profitFactor(profitFactorRounded)
+                .bestTrade(bestTradeRounded)
+                .worstTrade(worstTradeRounded)
+                .averageWin(averageWinRounded)
+                .averageLoss(averageLossRounded)
+                .largestWin(bestTradeRounded)
+                .largestLoss(worstTradeRounded)
                 .maxConsecutiveWins(consecutiveTrades.maxWins)
                 .maxConsecutiveLosses(consecutiveTrades.maxLosses)
                 .currentConsecutiveWins(consecutiveTrades.currentWins)
                 .currentConsecutiveLosses(consecutiveTrades.currentLosses)
-                .averageTradeDurationHours(timeAnalysis.averageTradeDurationHours)
-                .totalTradingTimeHours(timeAnalysis.totalTradingTimeHours)
-                .tradingFrequency(timeAnalysis.tradingFrequency)
-                .initialPrice(marketAnalysis.initialPrice)
-                .finalPrice(marketAnalysis.finalPrice)
-                .marketReturn(marketAnalysis.marketReturn)
-                .strategyOutperformance(marketAnalysis.strategyOutperformance)
-                .recoveryFactor(recoveryFactor)
-                .calmarRatio(calmarRatio)
-                .expectancy(expectancy)
-                .kellyPercentage(kellyPercentage)
+                .averageTradeDurationHours(scale(timeAnalysis.averageTradeDurationHours, MONEY_SCALE))
+                .totalTradingTimeHours(scale(timeAnalysis.totalTradingTimeHours, MONEY_SCALE))
+                .tradingFrequency(scaleMetric(timeAnalysis.tradingFrequency))
+                .initialPrice(scaleMoney(marketAnalysis.initialPrice))
+                .finalPrice(scaleMoney(marketAnalysis.finalPrice))
+                .marketReturn(scalePercent(marketAnalysis.marketReturn))
+                .strategyOutperformance(scalePercent(marketAnalysis.strategyOutperformance))
+                .recoveryFactor(recoveryFactorRounded)
+                .calmarRatio(calmarRatioRounded)
+                .expectancy(expectancyRounded)
+                .kellyPercentage(kellyPercentageRounded)
                 .build();
     }
 
@@ -256,37 +277,49 @@ public class BacktestMetricsCalculator {
         
         Duration duration = Duration.between(startTime, endTime);
         
-        BigDecimal totalTradeDuration = trades.stream()
-                .map(trade -> BigDecimal.valueOf(Duration.between(trade.getEntryTime(), trade.getExitTime()).toHours()))
+        BigDecimal totalTradeDurationMinutes = trades.stream()
+                .map(trade -> BigDecimal.valueOf(Duration.between(trade.getEntryTime(), trade.getExitTime()).toMinutes()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        BigDecimal averageTradeDurationHours = trades.size() == 0 ? BigDecimal.ZERO :
-                totalTradeDuration.divide(BigDecimal.valueOf(trades.size()), MATH_CONTEXT);
-        
-        BigDecimal totalTradingTimeHours = BigDecimal.valueOf(duration.toHours());
-        
-        BigDecimal tradingFrequency = totalTradingTimeHours.compareTo(BigDecimal.ZERO) > 0 ?
-                BigDecimal.valueOf(trades.size()).divide(totalTradingTimeHours.multiply(BigDecimal.valueOf(24)), MATH_CONTEXT) :
+
+        BigDecimal averageTradeDurationHours = trades.isEmpty() ? BigDecimal.ZERO :
+                totalTradeDurationMinutes
+                        .divide(BigDecimal.valueOf(trades.size()), MATH_CONTEXT)
+                        .divide(BigDecimal.valueOf(60), MATH_CONTEXT);
+
+        BigDecimal totalTradingTimeHours = BigDecimal.valueOf(duration.toMinutes())
+                .divide(BigDecimal.valueOf(60), MATH_CONTEXT);
+
+        BigDecimal totalTradingTimeDays = totalTradingTimeHours
+                .divide(BigDecimal.valueOf(24), MATH_CONTEXT);
+
+        BigDecimal tradingFrequency = totalTradingTimeDays.compareTo(BigDecimal.ZERO) > 0 ?
+                BigDecimal.valueOf(trades.size()).divide(totalTradingTimeDays, MATH_CONTEXT) :
                 BigDecimal.ZERO;
-        
+
         return new TimeAnalysis(startTime, endTime, duration, averageTradeDurationHours, totalTradingTimeHours, tradingFrequency);
     }
 
-    private MarketAnalysis calculateMarketAnalysis(List<KlineEvent> klines, BigDecimal initialCapital) {
+    private MarketAnalysis calculateMarketAnalysis(List<KlineEvent> klines, BigDecimal initialCapital, BigDecimal netProfit) {
         if (klines == null || klines.isEmpty()) {
             return new MarketAnalysis(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         }
-        
-        BigDecimal initialPrice = klines.get(0).getClose();
-        BigDecimal finalPrice = klines.get(klines.size() - 1).getClose();
-        BigDecimal marketReturn = finalPrice.subtract(initialPrice).divide(initialPrice, MATH_CONTEXT);
-        
-        BigDecimal netProfitPercent = initialCapital != null && initialCapital.compareTo(BigDecimal.ZERO) > 0 ?
-                BigDecimal.ZERO : marketReturn; // This would be calculated from actual trades
-        
-        BigDecimal strategyOutperformance = BigDecimal.ZERO; // This would be calculated from actual strategy performance
-        
-        return new MarketAnalysis(initialPrice, finalPrice, marketReturn, netProfitPercent, strategyOutperformance);
+
+        BigDecimal rawInitialPrice = klines.get(0).getClose();
+        BigDecimal rawFinalPrice = klines.get(klines.size() - 1).getClose();
+        BigDecimal marketReturn = rawFinalPrice.subtract(rawInitialPrice).divide(rawInitialPrice, MATH_CONTEXT);
+
+        BigDecimal netProfitPercent;
+        BigDecimal strategyOutperformance;
+
+        if (initialCapital != null && initialCapital.compareTo(BigDecimal.ZERO) > 0) {
+            netProfitPercent = netProfit.divide(initialCapital, MATH_CONTEXT);
+            strategyOutperformance = netProfitPercent.subtract(marketReturn);
+        } else {
+            netProfitPercent = marketReturn;
+            strategyOutperformance = BigDecimal.ZERO;
+        }
+
+        return new MarketAnalysis(rawInitialPrice, rawFinalPrice, marketReturn, netProfitPercent, strategyOutperformance);
     }
 
     private BigDecimal calculateExpectancy(List<SimulatedTrade> trades) {
@@ -371,6 +404,22 @@ public class BacktestMetricsCalculator {
     private record TimeAnalysis(Instant startTime, Instant endTime, Duration duration, 
                               BigDecimal averageTradeDurationHours, BigDecimal totalTradingTimeHours, 
                               BigDecimal tradingFrequency) { }
-    private record MarketAnalysis(BigDecimal initialPrice, BigDecimal finalPrice, BigDecimal marketReturn, 
+    private record MarketAnalysis(BigDecimal initialPrice, BigDecimal finalPrice, BigDecimal marketReturn,
                                 BigDecimal netProfitPercent, BigDecimal strategyOutperformance) { }
+
+    private BigDecimal scaleMoney(BigDecimal value) {
+        return scale(value, MONEY_SCALE);
+    }
+
+    private BigDecimal scalePercent(BigDecimal value) {
+        return scale(value, PERCENT_SCALE);
+    }
+
+    private BigDecimal scaleMetric(BigDecimal value) {
+        return scale(value, PERCENT_SCALE);
+    }
+
+    private BigDecimal scale(BigDecimal value, int scale) {
+        return value.setScale(scale, RoundingMode.HALF_UP);
+    }
 }

@@ -7,6 +7,7 @@ import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +82,19 @@ class StandaloneBacktestDemo {
         List<KlineEvent> klines = new ArrayList<>();
         long currentTime = System.currentTimeMillis() - (dataPoints * 60 * 60 * 1000L);
         BigDecimal basePrice = BigDecimal.valueOf(50000);
+        final BigDecimal anchorPrice = basePrice;
         
         for (int i = 0; i < dataPoints; i++) {
             // Generate realistic price movement
-            double trend = Math.sin(i / 20.0) * 0.15; // Long-term trend
-            double noise = (Math.random() - 0.5) * 0.08; // Random noise
-            double volatility = Math.sin(i / 5.0) * 0.05; // Volatility cycles
-            double priceChange = trend + noise + volatility;
-            
+            double trend = Math.sin(i / 30.0) * 0.02; // Long-term trend limited to ±2%
+            double noise = (Math.random() - 0.5) * 0.01; // Random noise capped at ±1%
+            double volatility = Math.sin(i / 7.5) * 0.015; // Volatility cycles limited to ±1.5%
+            double reversion = anchorPrice.subtract(basePrice)
+                    .divide(anchorPrice, 10, RoundingMode.HALF_UP)
+                    .doubleValue() * 0.01; // Gentle pull towards anchor price
+            double rawPriceChange = trend + noise + volatility + reversion;
+            double priceChange = Math.max(-0.025, Math.min(0.025, rawPriceChange));
+
             BigDecimal price = basePrice.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(priceChange)));
             
             // Ensure price doesn't go negative
@@ -136,69 +142,81 @@ class StandaloneBacktestDemo {
         System.out.println("Symbol: " + metrics.getSymbol());
         System.out.println("Interval: " + metrics.getInterval());
         System.out.println("Duration: " + metrics.getDuration());
-        
+
         System.out.println("\n=== TRADE STATISTICS ===");
         System.out.println("Total Trades: " + metrics.getTotalTrades());
         System.out.println("Winning Trades: " + metrics.getWinningTrades());
         System.out.println("Losing Trades: " + metrics.getLosingTrades());
         System.out.println("Break Even Trades: " + metrics.getBreakEvenTrades());
-        System.out.println("Win Rate: " + metrics.getWinRate().multiply(BigDecimal.valueOf(100)) + "%");
-        System.out.println("Loss Rate: " + metrics.getLossRate().multiply(BigDecimal.valueOf(100)) + "%");
-        
+        System.out.println("Win Rate: " + formatPercent(metrics.getWinRate()) + "%");
+        System.out.println("Loss Rate: " + formatPercent(metrics.getLossRate()) + "%");
+
         System.out.println("\n=== PROFITABILITY METRICS ===");
-        System.out.println("Net Profit: $" + metrics.getNetProfit());
-        System.out.println("Net Profit %: " + metrics.getNetProfitPercent().multiply(BigDecimal.valueOf(100)) + "%");
-        System.out.println("Average Return: " + metrics.getAverageReturn().multiply(BigDecimal.valueOf(100)) + "%");
-        System.out.println("Best Trade: $" + metrics.getBestTrade());
-        System.out.println("Worst Trade: $" + metrics.getWorstTrade());
-        System.out.println("Average Win: $" + metrics.getAverageWin());
-        System.out.println("Average Loss: $" + metrics.getAverageLoss());
-        
+        System.out.println("Net Profit: $" + formatMoney(metrics.getNetProfit()));
+        System.out.println("Net Profit %: " + formatPercent(metrics.getNetProfitPercent()) + "%");
+        System.out.println("Average Return: " + formatPercent(metrics.getAverageReturn()) + "%");
+        System.out.println("Best Trade: $" + formatMoney(metrics.getBestTrade()));
+        System.out.println("Worst Trade: $" + formatMoney(metrics.getWorstTrade()));
+        System.out.println("Average Win: $" + formatMoney(metrics.getAverageWin()));
+        System.out.println("Average Loss: $" + formatMoney(metrics.getAverageLoss()));
+
         System.out.println("\n=== RISK METRICS ===");
-        System.out.println("Max Drawdown: $" + metrics.getMaxDrawdown());
-        System.out.println("Max Drawdown %: " + metrics.getMaxDrawdownPercent().multiply(BigDecimal.valueOf(100)) + "%");
-        System.out.println("Sharpe Ratio: " + metrics.getSharpeRatio());
-        System.out.println("Sortino Ratio: " + metrics.getSortinoRatio());
-        System.out.println("Profit Factor: " + metrics.getProfitFactor());
-        System.out.println("Recovery Factor: " + metrics.getRecoveryFactor());
-        System.out.println("Calmar Ratio: " + metrics.getCalmarRatio());
-        
+        System.out.println("Max Drawdown: $" + formatMoney(metrics.getMaxDrawdown()));
+        System.out.println("Max Drawdown %: " + formatPercent(metrics.getMaxDrawdownPercent()) + "%");
+        System.out.println("Sharpe Ratio: " + formatMetric(metrics.getSharpeRatio()));
+        System.out.println("Sortino Ratio: " + formatMetric(metrics.getSortinoRatio()));
+        System.out.println("Profit Factor: " + formatMetric(metrics.getProfitFactor()));
+        System.out.println("Recovery Factor: " + formatMetric(metrics.getRecoveryFactor()));
+        System.out.println("Calmar Ratio: " + formatMetric(metrics.getCalmarRatio()));
+
         System.out.println("\n=== CONSECUTIVE TRADES ===");
         System.out.println("Max Consecutive Wins: " + metrics.getMaxConsecutiveWins());
         System.out.println("Max Consecutive Losses: " + metrics.getMaxConsecutiveLosses());
         System.out.println("Current Consecutive Wins: " + metrics.getCurrentConsecutiveWins());
         System.out.println("Current Consecutive Losses: " + metrics.getCurrentConsecutiveLosses());
-        
+
         System.out.println("\n=== TIME ANALYSIS ===");
-        System.out.println("Average Trade Duration: " + metrics.getAverageTradeDurationHours() + " hours");
-        System.out.println("Total Trading Time: " + metrics.getTotalTradingTimeHours() + " hours");
-        System.out.println("Trading Frequency: " + metrics.getTradingFrequency() + " trades/day");
-        
+        System.out.println("Average Trade Duration: " + formatMetric(metrics.getAverageTradeDurationHours()) + " hours");
+        System.out.println("Total Trading Time: " + formatMetric(metrics.getTotalTradingTimeHours()) + " hours");
+        System.out.println("Trading Frequency: " + formatMetric(metrics.getTradingFrequency()) + " trades/day");
+
         System.out.println("\n=== MARKET ANALYSIS ===");
-        System.out.println("Initial Price: $" + metrics.getInitialPrice());
-        System.out.println("Final Price: $" + metrics.getFinalPrice());
-        System.out.println("Market Return: " + metrics.getMarketReturn().multiply(BigDecimal.valueOf(100)) + "%");
-        System.out.println("Strategy Outperformance: " + metrics.getStrategyOutperformance().multiply(BigDecimal.valueOf(100)) + "%");
-        
+        System.out.println("Initial Price: $" + formatMoney(metrics.getInitialPrice()));
+        System.out.println("Final Price: $" + formatMoney(metrics.getFinalPrice()));
+        System.out.println("Market Return: " + formatPercent(metrics.getMarketReturn()) + "%");
+        System.out.println("Strategy Outperformance: " + formatPercent(metrics.getStrategyOutperformance()) + "%");
+
         System.out.println("\n=== ADDITIONAL METRICS ===");
-        System.out.println("Expectancy: $" + metrics.getExpectancy());
-        System.out.println("Kelly Percentage: " + metrics.getKellyPercentage().multiply(BigDecimal.valueOf(100)) + "%");
-        
+        System.out.println("Expectancy: $" + formatMoney(metrics.getExpectancy()));
+        System.out.println("Kelly Percentage: " + formatPercent(metrics.getKellyPercentage()) + "%");
+
         System.out.println("\n=== TRADE DETAILS ===");
-        if (trades.size() <= 10) {
-            for (int i = 0; i < trades.size(); i++) {
-                SimulatedTrade trade = trades.get(i);
-                System.out.println("Trade " + (i + 1) + ": " + trade.getSide() + " $" + trade.getProfit() + 
-                                 " (" + trade.getReturnPercentage().multiply(BigDecimal.valueOf(100)) + "%)");
-            }
-        } else {
-            System.out.println("First 5 trades:");
-            for (int i = 0; i < 5; i++) {
-                SimulatedTrade trade = trades.get(i);
-                System.out.println("Trade " + (i + 1) + ": " + trade.getSide() + " $" + trade.getProfit() + 
-                                 " (" + trade.getReturnPercentage().multiply(BigDecimal.valueOf(100)) + "%)");
-            }
-            System.out.println("... and " + (trades.size() - 5) + " more trades");
+        if (trades.isEmpty()) {
+            System.out.println("No trades executed.");
+            return;
         }
+
+        int tradesToShow = Math.min(trades.size(), 10);
+        for (int i = 0; i < tradesToShow; i++) {
+            SimulatedTrade trade = trades.get(i);
+            System.out.println("Trade " + (i + 1) + ": " + trade.getSide() + " $" + formatMoney(trade.getProfit()) +
+                    " (" + formatPercent(trade.getReturnPercentage()) + "%)");
+        }
+
+        if (trades.size() > tradesToShow) {
+            System.out.println("... and " + (trades.size() - tradesToShow) + " more trades");
+        }
+    }
+
+    private String formatMoney(BigDecimal value) {
+        return value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private String formatPercent(BigDecimal value) {
+        return value.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private String formatMetric(BigDecimal value) {
+        return value.setScale(4, RoundingMode.HALF_UP).toPlainString();
     }
 }
