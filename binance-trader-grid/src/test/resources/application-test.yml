@@ -4,15 +4,21 @@ spring:
     username: elastic
     password: admin
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:binance_trader_grid;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    history-table: schema_version
+    enabled: false
+  test:
+    database:
+      replace: none
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -35,3 +41,9 @@ spring:
 logging:
   level:
     org.springframework: DEBUG
+
+binance:
+  data:
+    kline:
+      kafka-topic: binance-kline
+      kafka-consumer-group: test-group

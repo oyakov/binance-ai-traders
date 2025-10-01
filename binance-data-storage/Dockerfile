@@ -1,5 +1,5 @@
-# Use the Liberica JDK 23 as the base image
-FROM bellsoft/liberica-openjdk-alpine:23
+# Use the Liberica JDK 21 as the base image
+FROM bellsoft/liberica-openjdk-alpine:21
 
 # Set the working directory
 WORKDIR /app

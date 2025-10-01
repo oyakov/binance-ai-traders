@@ -12,3 +12,25 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+      missing-topics-fatal: false
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+  elasticsearch:
+    uris: http://localhost:9200
+    username: test
+    password: test
+
+binance:
+  data:
+    kline:
+      kafka-topic: test-topic
+      kafka-consumer-group: test-group
+  trader:
+    macd:
+      kafka:
+        enabled: false
