@@ -4,6 +4,18 @@ version = "0.1.0"
 description = ""
 authors = ["Oleg Yakovlev <oyakovinbox@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "bots", from = "src" },
+    { include = "db", from = "src" },
+    { include = "inject", from = "src" },
+    { include = "markup", from = "src" },
+    { include = "middleware", from = "src" },
+    { include = "oam", from = "src" },
+    { include = "routers", from = "src" },
+    { include = "schedule", from = "src" },
+    { include = "service", from = "src" },
+    { include = "subsystem", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
