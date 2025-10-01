@@ -10,7 +10,10 @@ import com.oyakov.binance_trader_macd.rest.dto.BinanceOcoOrderResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+
+import com.oyakov.binance_trader_macd.repository.elastic.OrderElasticRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +31,9 @@ class OrderPostgresRepositoryTest {
 
     @Autowired
     private OrderPostgresRepository orderRepository;
+
+    @MockBean
+    private OrderElasticRepository orderElasticRepository;
 
     private final BinanceOcoOrderReportToOrderConverter converter = new BinanceOcoOrderReportToOrderConverter();
 

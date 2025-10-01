@@ -11,8 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.oyakov.binance_trader_macd.repository.elastic.OrderElasticRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,6 +30,9 @@ class OrderServiceImplTest {
 
     @Autowired
     private OrderPostgresRepository orderRepository;
+
+    @MockBean
+    private OrderElasticRepository orderElasticRepository;
 
     private BinanceOrderClient binanceOrderClient;
 

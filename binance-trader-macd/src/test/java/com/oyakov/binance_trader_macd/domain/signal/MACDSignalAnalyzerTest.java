@@ -33,7 +33,7 @@ class MACDSignalAnalyzerTest {
 
     @Test
     void shouldGenerateBuySignalWhenMacdCrossesAboveSignalLine() {
-        List<KlineEvent> klines = buildSinusoidalKlines(62);
+        List<KlineEvent> klines = buildSinusoidalKlines(48);
 
         Optional<TradeSignal> signal = analyzer.tryExtractSignal(klines);
 
@@ -42,7 +42,7 @@ class MACDSignalAnalyzerTest {
 
     @Test
     void shouldGenerateSellSignalWhenMacdCrossesBelowSignalLine() {
-        List<KlineEvent> klines = buildSinusoidalKlines(78);
+        List<KlineEvent> klines = buildSinusoidalKlines(63);
 
         Optional<TradeSignal> signal = analyzer.tryExtractSignal(klines);
 

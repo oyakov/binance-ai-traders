@@ -9,6 +9,7 @@ import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -161,11 +163,11 @@ public class KlineDataServiceTest {
                 .setEventType("test")
                 .setEventTime(1620000000000L)
                 .setOpenTime(1620000000000L)
-                .setOpen(1000.0)
-                .setHigh(1100.0)
-                .setLow(900.0)
-                .setClose(1050.0)
-                .setVolume(1000.0)
+                .setOpen(decimal(1000.0))
+                .setHigh(decimal(1100.0))
+                .setLow(decimal(900.0))
+                .setClose(decimal(1050.0))
+                .setVolume(decimal(1000.0))
                 .setCloseTime(1620000999000L)
                 .build();
 
@@ -175,11 +177,11 @@ public class KlineDataServiceTest {
                 .fingerprint(fingerprint)
                 .timestamp(incomingCommand.getEventTime())
                 .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                .open(incomingCommand.getOpen())
-                .high(incomingCommand.getHigh())
-                .low(incomingCommand.getLow())
-                .close(incomingCommand.getClose())
-                .volume(incomingCommand.getVolume())
+                .open(incomingCommand.getOpen().doubleValue())
+                .high(incomingCommand.getHigh().doubleValue())
+                .low(incomingCommand.getLow().doubleValue())
+                .close(incomingCommand.getClose().doubleValue())
+                .volume(incomingCommand.getVolume().doubleValue())
                 .build();
 
         when(klineElasticRepository.save(expectedItem)).thenThrow(new RuntimeException("Elasticsearch is down"));
@@ -210,11 +212,11 @@ public class KlineDataServiceTest {
                 .setEventType("test")
                 .setEventTime(1620000000000L)
                 .setOpenTime(1620000000000L)
-                .setOpen(1000.0)
-                .setHigh(1100.0)
-                .setLow(900.0)
-                .setClose(1050.0)
-                .setVolume(1000.0)
+                .setOpen(decimal(1000.0))
+                .setHigh(decimal(1100.0))
+                .setLow(decimal(900.0))
+                .setClose(decimal(1050.0))
+                .setVolume(decimal(1000.0))
                 .setCloseTime(1620000999000L)
                 .build();
 
@@ -224,11 +226,11 @@ public class KlineDataServiceTest {
                 .fingerprint(fingerprint)
                 .timestamp(incomingCommand.getEventTime())
                 .displayTime(LocalDateTime.ofEpochSecond(incomingCommand.getEventTime() / 1000, 0, java.time.ZoneOffset.UTC))
-                .open(incomingCommand.getOpen())
-                .high(incomingCommand.getHigh())
-                .low(incomingCommand.getLow())
-                .close(incomingCommand.getClose())
-                .volume(incomingCommand.getVolume())
+                .open(incomingCommand.getOpen().doubleValue())
+                .high(incomingCommand.getHigh().doubleValue())
+                .low(incomingCommand.getLow().doubleValue())
+                .close(incomingCommand.getClose().doubleValue())
+                .volume(incomingCommand.getVolume().doubleValue())
                 .build();
 
         when(klineElasticRepository.save(expectedItem)).thenReturn(expectedItem);
@@ -270,21 +272,26 @@ public class KlineDataServiceTest {
                 .setEventType("test")
                 .setEventTime(1620000000000L)
                 .setOpenTime(1620000000000L)
-                .setOpen(1000.0)
-                .setHigh(1100.0)
-                .setLow(900.0)
-                .setClose(1050.0)
-                .setVolume(1000.0)
+                .setOpen(decimal(1000.0))
+                .setHigh(decimal(1100.0))
+                .setLow(decimal(900.0))
+                .setClose(decimal(1050.0))
+                .setVolume(decimal(1000.0))
                 .setCloseTime(1620000999000L)
                 .build();
 
         serviceWithoutRepositories.saveKlineData(incomingCommand);
 
         verifyNoInteractions(klineElasticRepository, klinePostgresRepository);
-        verify(eventPublisher).publishEvent(argThat(notification ->
-                notification.getEventType().equals("KlineNotWritten") &&
-                        Optional.ofNullable(notification.getErrorMessage())
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+
+        Object publishedEvent = eventCaptor.getValue();
+        assertTrue(
+                publishedEvent instanceof DataItemWrittenNotification<?> dataNotification &&
+                        dataNotification.getEventType().equals("KlineNotWritten") &&
+                        Optional.ofNullable(dataNotification.getErrorMessage())
                                 .orElse("").contains("No storage repositories")
-        ));
+        );
     }
 }
