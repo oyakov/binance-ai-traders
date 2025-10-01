@@ -28,13 +28,13 @@ import java.util.Optional;
 @Log4j2
 public class KlineDataService implements KlineDataServiceApi {
 
-    private final List<CrudRepository<KlineItem, Long>> repositories;
+    private final List<CrudRepository<KlineItem, ?>> repositories;
     private final ApplicationEventPublisher eventPublisher;
     private final KlineMapper klineMapper;
     private final Optional<KlineElasticRepository> elasticRepository;
     private final Optional<KlinePostgresRepository> postgresRepository;
 
-    public KlineDataService(List<CrudRepository<KlineItem, Long>> repositories,
+    public KlineDataService(List<CrudRepository<KlineItem, ?>> repositories,
                           ApplicationEventPublisher eventPublisher,
                           KlineMapper klineMapper,
                           ObjectProvider<KlineElasticRepository> elasticRepositoryProvider,

@@ -5,101 +5,65 @@ import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.domain.OrderSide;
 import com.oyakov.binance_trader_macd.domain.OrderState;
 import com.oyakov.binance_trader_macd.domain.TradeSignal;
+import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
-import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.service.impl.TraderServiceImpl;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.context.annotation.Bean;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TraderServiceImplSimulationTest.TraderServiceTestConfig.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class TraderServiceImplSimulationTest {
 
     private static final String SYMBOL = "BTCUSDT";
 
-    @TestConfiguration
-    static class TraderServiceTestConfig {
+    @Mock
+    private MACDSignalAnalyzer macdSignalAnalyzer;
 
-        @Bean
-        MACDTraderConfig traderConfig() {
-            MACDTraderConfig config = new MACDTraderConfig();
-            MACDTraderConfig.Trader trader = new MACDTraderConfig.Trader();
-            trader.setSlidingWindowSize(3);
-            trader.setOrderQuantity(new BigDecimal("0.01"));
-            trader.setStopLossPercentage(new BigDecimal("0.95"));
-            trader.setTakeProfitPercentage(new BigDecimal("1.05"));
-            config.setTrader(trader);
-            return config;
-        }
+    @Mock
+    private OrderServiceApi orderService;
 
-        @Bean
-        OrderServiceApi orderServiceApi() {
-            return Mockito.mock(OrderServiceApi.class);
-        }
-
-        @Bean
-        MACDSignalAnalyzer macdSignalAnalyzer() {
-            return Mockito.mock(MACDSignalAnalyzer.class);
-        }
-
-        @Bean
-        MeterRegistry meterRegistry() {
-            return Mockito.mock(MeterRegistry.class);
-        }
-
-        @Bean
-        TraderServiceImpl traderService(MACDSignalAnalyzer analyzer,
-                                        OrderServiceApi orderServiceApi,
-                                        MACDTraderConfig traderConfig,
-                                        MeterRegistry meterRegistry) {
-            return new TraderServiceImpl(analyzer, orderServiceApi, traderConfig, meterRegistry);
-        }
-    }
-
-    private final TraderServiceImpl traderService;
-    private final MACDSignalAnalyzer macdSignalAnalyzer;
-    private final OrderServiceApi orderService;
-
-    TraderServiceImplSimulationTest(TraderServiceImpl traderService,
-                                    MACDSignalAnalyzer macdSignalAnalyzer,
-                                    OrderServiceApi orderService) {
-        this.traderService = traderService;
-        this.macdSignalAnalyzer = macdSignalAnalyzer;
-        this.orderService = orderService;
-    }
+    private TraderServiceImpl traderService;
+    private MACDTraderConfig traderConfig;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(macdSignalAnalyzer, orderService);
-        Mockito.when(orderService.createOrderGroup(anyString(), any(), any(), any(), any(), any()))
-                .thenReturn(OrderItem.builder().orderId(777L).build());
+        traderConfig = new MACDTraderConfig();
+        MACDTraderConfig.Trader trader = new MACDTraderConfig.Trader();
+        trader.setSlidingWindowSize(3);
+        trader.setOrderQuantity(new BigDecimal("0.01"));
+        trader.setStopLossPercentage(new BigDecimal("0.95"));
+        trader.setTakeProfitPercentage(new BigDecimal("1.05"));
+        traderConfig.setTrader(trader);
+
+        traderService = new TraderServiceImpl(macdSignalAnalyzer, orderService, traderConfig, new SimpleMeterRegistry());
+        ReflectionTestUtils.invokeMethod(traderService, "init");
     }
 
     @Test
     void createsOrderGroupWhenSignalDetectedAndNoActiveOrder() {
-        Mockito.when(macdSignalAnalyzer.tryExtractSignal(any()))
-                .thenReturn(Optional.of(TradeSignal.BUY));
-        Mockito.when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.empty());
+        when(macdSignalAnalyzer.tryExtractSignal(any())).thenReturn(Optional.of(TradeSignal.BUY));
+        when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.empty());
+        when(orderService.createOrderGroup(anyString(), any(), any(), any(), any(), any()))
+                .thenReturn(OrderItem.builder().orderId(777L).build());
 
         replayKlines(
                 new BigDecimal("100.00"),
@@ -109,9 +73,13 @@ class TraderServiceImplSimulationTest {
         ArgumentCaptor<BigDecimal> stopLossCaptor = ArgumentCaptor.forClass(BigDecimal.class);
         ArgumentCaptor<BigDecimal> takeProfitCaptor = ArgumentCaptor.forClass(BigDecimal.class);
 
-        verify(orderService).createOrderGroup(eq(SYMBOL), eq(new BigDecimal("102.00")),
-                eq(new BigDecimal("0.01")), eq(OrderSide.BUY),
-                stopLossCaptor.capture(), takeProfitCaptor.capture());
+        verify(orderService).createOrderGroup(
+                eq(SYMBOL),
+                eq(new BigDecimal("102.00")),
+                eq(new BigDecimal("0.01")),
+                eq(OrderSide.BUY),
+                stopLossCaptor.capture(),
+                takeProfitCaptor.capture());
 
         Assertions.assertThat(stopLossCaptor.getValue()).isEqualByComparingTo(new BigDecimal("96.90"));
         Assertions.assertThat(takeProfitCaptor.getValue()).isEqualByComparingTo(new BigDecimal("107.10"));
@@ -125,9 +93,8 @@ class TraderServiceImplSimulationTest {
                 .side(OrderSide.BUY)
                 .build();
 
-        Mockito.when(macdSignalAnalyzer.tryExtractSignal(any()))
-                .thenReturn(Optional.of(TradeSignal.SELL));
-        Mockito.when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.of(activeOrder));
+        when(macdSignalAnalyzer.tryExtractSignal(any())).thenReturn(Optional.of(TradeSignal.SELL));
+        when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.of(activeOrder));
 
         replayKlines(
                 new BigDecimal("100.00"),
@@ -146,8 +113,8 @@ class TraderServiceImplSimulationTest {
                 .side(OrderSide.BUY)
                 .build();
 
-        Mockito.when(macdSignalAnalyzer.tryExtractSignal(any())).thenReturn(Optional.empty());
-        Mockito.when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.of(activeOrder));
+        when(macdSignalAnalyzer.tryExtractSignal(any())).thenReturn(Optional.empty());
+        when(orderService.getActiveOrder(SYMBOL)).thenReturn(Optional.of(activeOrder));
 
         replayKlines(
                 new BigDecimal("100.00"),
@@ -182,4 +149,3 @@ class TraderServiceImplSimulationTest {
         return event;
     }
 }
-

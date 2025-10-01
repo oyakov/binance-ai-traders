@@ -5,7 +5,6 @@ import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository
 import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.mockito.Mockito;
@@ -52,12 +51,11 @@ public class KafkaTestConfig {
     }
 
     @Bean
-    public ProducerFactory<String, KlineEvent> producerFactory() {
+    public ProducerFactory<String, KlineEvent> producerFactory(EmbeddedKafkaBroker embeddedKafkaBroker) {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaBroker.getBrokersAsString());
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        configProps.put("schema.registry.url", "http://localhost:8081");
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 }

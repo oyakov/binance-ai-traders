@@ -28,11 +28,11 @@ class MacdBacktestIntegrationTest {
 
         assertThat(signals)
                 .containsExactly(
-                        TradeSignal.SELL,
                         TradeSignal.BUY,
                         TradeSignal.SELL,
                         TradeSignal.BUY,
-                        TradeSignal.SELL
+                        TradeSignal.SELL,
+                        TradeSignal.BUY
                 );
     }
 

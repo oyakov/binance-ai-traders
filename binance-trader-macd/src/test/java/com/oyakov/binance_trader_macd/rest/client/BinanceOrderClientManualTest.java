@@ -30,14 +30,17 @@ class BinanceOrderClientManualTest {
     private RestTemplate restTemplate;
     private MockRestServiceServer server;
     private BinanceOrderClient client;
-    private MACDTraderConfig config;
+    private MACDTraderConfig traderConfig;
 
     @BeforeEach
     void setUp() {
         this.restTemplate = new RestTemplate();
         this.server = MockRestServiceServer.createServer(restTemplate);
-        this.config = new MACDTraderConfig();
-        this.client = new BinanceOrderClient(restTemplate, config);
+        this.traderConfig = new MACDTraderConfig();
+        MACDTraderConfig.Trader trader = new MACDTraderConfig.Trader();
+        trader.setTestOrderModeEnabled(true);
+        traderConfig.setTrader(trader);
+        this.client = new BinanceOrderClient(restTemplate, traderConfig);
     }
 
     @Test

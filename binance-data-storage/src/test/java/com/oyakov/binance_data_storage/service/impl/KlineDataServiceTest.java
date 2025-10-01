@@ -9,6 +9,7 @@ import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -282,6 +284,15 @@ public class KlineDataServiceTest {
         serviceWithoutRepositories.saveKlineData(incomingCommand);
 
         verifyNoInteractions(klineElasticRepository, klinePostgresRepository);
-        verify(eventPublisher).publishEvent(any(DataItemWrittenNotification.class));
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+
+        Object publishedEvent = eventCaptor.getValue();
+        assertTrue(
+                publishedEvent instanceof DataItemWrittenNotification<?> dataNotification &&
+                        dataNotification.getEventType().equals("KlineNotWritten") &&
+                        Optional.ofNullable(dataNotification.getErrorMessage())
+                                .orElse("").contains("No storage repositories")
+        );
     }
 }

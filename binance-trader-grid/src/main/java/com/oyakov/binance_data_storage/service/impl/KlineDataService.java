@@ -26,7 +26,7 @@ public class KlineDataService implements KlineDataServiceApi {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final List<CrudRepository<KlineItem, Long>> repositories = new ArrayList<>();
+    private final List<CrudRepository<KlineItem, ?>> repositories = new ArrayList<>();
 
     public KlineDataService(
             KlineElasticRepository klineElasticRepository,
@@ -88,7 +88,7 @@ public class KlineDataService implements KlineDataServiceApi {
                 .build();
 
         try {
-            for (CrudRepository<KlineItem, Long> repository : repositories) {
+            for (CrudRepository<KlineItem, ?> repository : repositories) {
                 log.info("Saving kline data to repository: {}", repository);
                 repository.save(kline);
             }
@@ -112,7 +112,7 @@ public class KlineDataService implements KlineDataServiceApi {
 
     @Override
     public void compensateKlineData(DataItemWrittenNotification<KlineItem> event) {
-        for (CrudRepository<KlineItem, Long> repository : repositories) {
+        for (CrudRepository<KlineItem, ?> repository : repositories) {
             log.info("Rolling back kline data from repository: {}", repository.getClass().getSimpleName());
             repository.delete(event.getDataItem());
         }

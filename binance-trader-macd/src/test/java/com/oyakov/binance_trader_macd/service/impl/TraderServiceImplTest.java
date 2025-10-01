@@ -8,11 +8,10 @@ import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,10 +44,8 @@ class TraderServiceImplTest {
     @Mock
     private OrderServiceApi orderServiceApi;
 
-    @Mock
-    private MeterRegistry meterRegistry;
-
     private TraderServiceImpl traderService;
+    private SimpleMeterRegistry meterRegistry;
 
     @BeforeEach
     void setUp() {
@@ -59,6 +55,7 @@ class TraderServiceImplTest {
         config.getTrader().setStopLossPercentage(STOP_LOSS_THRESHOLD);
         config.getTrader().setTakeProfitPercentage(TAKE_PROFIT_THRESHOLD);
 
+        meterRegistry = new SimpleMeterRegistry();
         traderService = new TraderServiceImpl(macdSignalAnalyzer, orderServiceApi, config, meterRegistry);
         ReflectionTestUtils.invokeMethod(traderService, "init");
     }
