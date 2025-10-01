@@ -9,6 +9,11 @@ readme = "README.md"
 python = "^3.13"
 
 
+[tool.pytest.ini_options]
+markers = [
+    "asyncio: mark test as using asyncio"
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

@@ -10,14 +10,15 @@ from routers.gateway_router import GatewayRouter
 from routers.new_message_router import NewMessageRouter
 from routers.openai_router import OpenAIRouter
 from service.crypto.binance.binance_service import BinanceService
+from service.messaging.kafka_service import KafkaMessagingService
 from service.openai.openai_api_service import OpenAIAPIService
 
 
 class RouterModule(Module):
     @singleton
     @provider
-    def provide_actuator_router(self) -> ActuatorRouter:
-        return ActuatorRouter()
+    def provide_actuator_router(self, kafka_service: KafkaMessagingService) -> ActuatorRouter:
+        return ActuatorRouter(kafka_service)
 
     @singleton
     @provider
