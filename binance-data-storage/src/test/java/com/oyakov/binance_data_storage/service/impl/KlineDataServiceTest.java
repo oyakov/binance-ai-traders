@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -193,16 +193,17 @@ public class KlineDataServiceTest {
         verify(klineElasticRepository, times(1)).save(expectedItem);
         verify(klinePostgresRepository, times(1)).upsertKline(expectedItem);
 
-        DataItemWrittenNotification<KlineItem> expectedNotification =
-                DataItemWrittenNotification.<KlineItem>builder()
-                        .eventType("KlineNotWritten")
-                        .eventTime(incomingCommand.getEventTime())
-                        .dataItem(expectedItem)
-                        .errorMessage("Elasticsearch is down")
-                        .build();
-
-        // check that eventPublisher.publishEvent was called with expectedNotification
-        verify(eventPublisher, times(1)).publishEvent(expectedNotification);
+        // check that eventPublisher.publishEvent was called with expected notification
+        ArgumentCaptor<DataItemWrittenNotification<KlineItem>> eventCaptor = ArgumentCaptor.forClass(DataItemWrittenNotification.class);
+        verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
+        
+        DataItemWrittenNotification<KlineItem> capturedEvent = eventCaptor.getValue();
+        assertEquals("KlineNotWritten", capturedEvent.getEventType());
+        assertEquals(incomingCommand.getEventTime(), capturedEvent.getEventTime());
+        assertEquals(expectedItem, capturedEvent.getDataItem());
+        assertEquals("Elasticsearch is down", capturedEvent.getErrorMessage());
+        assertTrue(capturedEvent.getError() instanceof RuntimeException);
+        assertEquals("Elasticsearch is down", capturedEvent.getError().getMessage());
     }
 
     @Test
@@ -242,16 +243,17 @@ public class KlineDataServiceTest {
         verify(klinePostgresRepository, times(1)).upsertKline(expectedItem);
         verify(klineElasticRepository, times(0)).save(expectedItem);
 
-        DataItemWrittenNotification<KlineItem> expectedNotification =
-                DataItemWrittenNotification.<KlineItem>builder()
-                        .eventType("KlineNotWritten")
-                        .eventTime(incomingCommand.getEventTime())
-                        .dataItem(expectedItem)
-                        .errorMessage("Postgres is down")
-                        .build();
-
-        // check that eventPublisher.publishEvent was called with expectedNotification
-        verify(eventPublisher, times(1)).publishEvent(expectedNotification);
+        // check that eventPublisher.publishEvent was called with expected notification
+        ArgumentCaptor<DataItemWrittenNotification<KlineItem>> eventCaptor = ArgumentCaptor.forClass(DataItemWrittenNotification.class);
+        verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
+        
+        DataItemWrittenNotification<KlineItem> capturedEvent = eventCaptor.getValue();
+        assertEquals("KlineNotWritten", capturedEvent.getEventType());
+        assertEquals(incomingCommand.getEventTime(), capturedEvent.getEventTime());
+        assertEquals(expectedItem, capturedEvent.getDataItem());
+        assertEquals("Postgres is down", capturedEvent.getErrorMessage());
+        assertTrue(capturedEvent.getError() instanceof RuntimeException);
+        assertEquals("Postgres is down", capturedEvent.getError().getMessage());
     }
 
     @Test
@@ -283,16 +285,15 @@ public class KlineDataServiceTest {
 
         serviceWithoutRepositories.saveKlineData(incomingCommand);
 
-        verifyNoInteractions(klineElasticRepository, klinePostgresRepository);
-        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        // Verify that an event was published
+        ArgumentCaptor<DataItemWrittenNotification<KlineItem>> eventCaptor = ArgumentCaptor.forClass(DataItemWrittenNotification.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());
 
-        Object publishedEvent = eventCaptor.getValue();
-        assertTrue(
-                publishedEvent instanceof DataItemWrittenNotification<?> dataNotification &&
-                        dataNotification.getEventType().equals("KlineNotWritten") &&
-                        Optional.ofNullable(dataNotification.getErrorMessage())
-                                .orElse("").contains("No storage repositories")
-        );
+        DataItemWrittenNotification<KlineItem> publishedEvent = eventCaptor.getValue();
+        assertEquals("KlineNotWritten", publishedEvent.getEventType());
+        assertEquals(incomingCommand.getEventTime(), publishedEvent.getEventTime());
+        assertNotNull(publishedEvent.getDataItem());
+        assertTrue(publishedEvent.getErrorMessage().contains("No storage repositories"));
+        assertNull(publishedEvent.getError());
     }
 }

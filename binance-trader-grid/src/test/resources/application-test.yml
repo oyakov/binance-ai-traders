@@ -47,9 +47,3 @@ binance:
 logging:
   level:
     org.springframework: DEBUG
-
-binance:
-  data:
-    kline:
-      kafka-topic: binance-kline
-      kafka-consumer-group: test-group

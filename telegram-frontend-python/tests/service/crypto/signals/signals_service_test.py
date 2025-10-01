@@ -3,6 +3,10 @@ from unittest.async_case import IsolatedAsyncioTestCase
 
 from pandas import Series, DataFrame
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'src'))
+
 from service.crypto.signals.signals_service import SignalsService
 
 
