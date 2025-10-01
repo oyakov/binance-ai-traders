@@ -47,7 +47,7 @@ public class KlineStreamCache {
     public void closeAllCurrentStreamSources() {
         streamLock.writeLock().lock();
         try {
-            activeStreamSources.forEach((_, ss) -> {
+            activeStreamSources.forEach((fingerprint, ss) -> {
                 try {
                     ss.session().close();
                 } catch (IOException e) {
