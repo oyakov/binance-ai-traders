@@ -12,6 +12,7 @@ import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -66,7 +67,7 @@ public class BacktestTraderEngine {
     }
 
     private void processOrderSLTP(Long orderId, BigDecimal entryPrice, BigDecimal currentPrice) {
-        BigDecimal ratio = currentPrice.divide(entryPrice, RoundingMode.HALF_UP);
+        BigDecimal ratio = currentPrice.divide(entryPrice, MathContext.DECIMAL64);
         if (ratio.compareTo(takeProfitThreshold) > 0) {
             orderService.closeOrderWithState(orderId, OrderState.CLOSED_TP);
         } else if (ratio.compareTo(stopLossThreshold) < 0) {
