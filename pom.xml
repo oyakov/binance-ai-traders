@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.oyakov.</groupId>
+    <artifactId>binance-ai-traders</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>binance-ai-traders</name>
+    <description>Aggregator project for Binance AI Traders services</description>
+
+    <modules>
+        <module>binance-shared-model</module>
+        <module>binance-data-collection</module>
+        <module>binance-data-storage</module>
+        <module>binance-trader-grid</module>
+        <module>binance-trader-macd</module>
+    </modules>
+</project>

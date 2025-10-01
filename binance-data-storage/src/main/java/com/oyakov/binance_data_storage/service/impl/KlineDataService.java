@@ -8,6 +8,7 @@ import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository
 import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
+import org.springframework.beans.factory.ObjectProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for writing collected kline data to multiple data storage repositories.
@@ -29,19 +31,19 @@ public class KlineDataService implements KlineDataServiceApi {
     private final List<CrudRepository<KlineItem, Long>> repositories;
     private final ApplicationEventPublisher eventPublisher;
     private final KlineMapper klineMapper;
-    private final KlineElasticRepository elasticRepository;
-    private final KlinePostgresRepository postgresRepository;
+    private final Optional<KlineElasticRepository> elasticRepository;
+    private final Optional<KlinePostgresRepository> postgresRepository;
 
     public KlineDataService(List<CrudRepository<KlineItem, Long>> repositories,
                           ApplicationEventPublisher eventPublisher,
                           KlineMapper klineMapper,
-                          KlineElasticRepository elasticRepository,
-                          KlinePostgresRepository postgresRepository) {
+                          ObjectProvider<KlineElasticRepository> elasticRepositoryProvider,
+                          ObjectProvider<KlinePostgresRepository> postgresRepositoryProvider) {
         this.repositories = repositories;
         this.eventPublisher = eventPublisher;
         this.klineMapper = klineMapper;
-        this.elasticRepository = elasticRepository;
-        this.postgresRepository = postgresRepository;
+        this.elasticRepository = Optional.ofNullable(elasticRepositoryProvider.getIfAvailable());
+        this.postgresRepository = Optional.ofNullable(postgresRepositoryProvider.getIfAvailable());
     }
 
     @PostConstruct
@@ -80,15 +82,40 @@ public class KlineDataService implements KlineDataServiceApi {
     public void saveKlineData(KlineEvent event) {
         KlineItem klineItem = klineMapper.toItem(event);
         
+        boolean persisted = false;
+
         try {
-            postgresRepository.upsertKline(klineItem);
-            elasticRepository.save(klineItem);
-            eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
-                    .eventType("KlineWritten")
-                    .eventTime(event.getEventTime())
-                    .dataItem(klineItem)
-                    .build());
-            log.info("Kline data saved successfully: {}", klineItem);
+            if (postgresRepository.isPresent()) {
+                postgresRepository.get().upsertKline(klineItem);
+                persisted = true;
+            } else {
+                log.warn("Postgres repository is unavailable; skipping persistence for {}", klineItem);
+            }
+
+            if (elasticRepository.isPresent()) {
+                elasticRepository.get().save(klineItem);
+                persisted = true;
+            } else {
+                log.warn("Elasticsearch repository is unavailable; skipping persistence for {}", klineItem);
+            }
+
+            if (persisted) {
+                eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
+                        .eventType("KlineWritten")
+                        .eventTime(event.getEventTime())
+                        .dataItem(klineItem)
+                        .build());
+                log.info("Kline data saved successfully: {}", klineItem);
+            } else {
+                String message = "No storage repositories available for kline data persistence";
+                log.error("{}: {}", message, klineItem);
+                eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
+                        .eventType("KlineNotWritten")
+                        .eventTime(event.getEventTime())
+                        .dataItem(klineItem)
+                        .errorMessage(message)
+                        .build());
+            }
         } catch (Exception e) {
             log.error("Failed to save kline data: {}", klineItem, e);
             eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
@@ -111,10 +138,21 @@ public class KlineDataService implements KlineDataServiceApi {
         KlineFingerprint fingerprint = KlineFingerprint.fromKlineEvent(event.getDataItem());
         
         try {
-            elasticRepository.deleteByFingerprint(fingerprint);
-            postgresRepository.deleteByFingerprint(fingerprint);
-            
-            log.info("Successfully rolled back kline data with fingerprint: {}", fingerprint);
+            elasticRepository.ifPresentOrElse(
+                    repository -> repository.deleteByFingerprint(fingerprint),
+                    () -> log.warn("Elasticsearch repository unavailable during rollback for {}", fingerprint)
+            );
+
+            postgresRepository.ifPresentOrElse(
+                    repository -> repository.deleteByFingerprint(fingerprint),
+                    () -> log.warn("Postgres repository unavailable during rollback for {}", fingerprint)
+            );
+
+            if (elasticRepository.isPresent() || postgresRepository.isPresent()) {
+                log.info("Successfully rolled back kline data with fingerprint: {}", fingerprint);
+            } else {
+                log.warn("No repositories available to rollback kline data for fingerprint: {}", fingerprint);
+            }
         } catch (Exception e) {
             log.error("Failed to rollback kline data with fingerprint: {}", fingerprint, e);
             throw e; // Re-throw to trigger transaction rollback

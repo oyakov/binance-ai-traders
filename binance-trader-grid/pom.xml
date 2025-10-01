@@ -9,10 +9,10 @@
                 <relativePath/> <!-- lookup parent from repository -->
         </parent>
 	<groupId>com.oyakov.</groupId>
-	<artifactId>binance-data-storage</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
-	<name>binance-data-storage</name>
-	<description>Binance Data Storage</description>
+        <artifactId>binance-trader-grid</artifactId>
+        <version>0.1.1-SNAPSHOT</version>
+        <name>binance-trader-grid</name>
+        <description>Binance Grid Trader</description>
 	<url/>
 	<licenses>
 		<license/>

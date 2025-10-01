@@ -25,20 +25,7 @@ jobs:
         run: ./mvnw -B -ntp clean install
 
       - name: Run service test suites
-        shell: bash
-        run: |
-          set -euo pipefail
-          modules=(
-            binance-data-collection
-            binance-data-storage
-            binance-trader-grid
-            binance-trader-macd
-          )
-          for module in "${modules[@]}"; do
-            echo "::group::Running tests for ${module}"
-            (cd "${module}" && ./mvnw -B -ntp clean test)
-            echo "::endgroup::"
-          done
+        run: ./mvnw -B -ntp -am -pl binance-data-collection,binance-data-storage,binance-trader-grid,binance-trader-macd clean test
 
       - name: Set up Python
         uses: actions/setup-python@v5
