@@ -1,5 +1,5 @@
-# Use the Liberica JDK as the base image
-FROM bellsoft/liberica-openjdk-alpine:latest
+# Use the Liberica JDK 23 as the base image
+FROM bellsoft/liberica-openjdk-alpine:23
 
 # Runtime environment variables (provided via secrets or compose overrides):
 #   BINANCE_API_KEY - Binance API key forwarded to the REST client header.
