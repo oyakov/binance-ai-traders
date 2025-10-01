@@ -74,6 +74,24 @@ binance:
 - **Trade Analysis**: Win rate, average win/loss, consecutive streaks
 - **Advanced**: Kelly percentage, expectancy, Calmar ratio
 
+### Multi-scope Analysis
+- Evaluate a matrix of intervals and historical ranges in a single call
+- Automatically highlight the most profitable and most stable scopes
+- Generate aggregated findings, risk warnings, and next-step suggestions
+- Ideal for comparing short-term vs long-term behaviour without manual repetition
+
+```java
+MultiScopeBacktestReport report = backtestService.runRealDataBacktestAcrossScopes(
+        "BTCUSDT",
+        List.of("1h", "4h", "1d"),
+        List.of(3, 7, 30),
+        BigDecimal.valueOf(10_000)
+);
+
+System.out.println(report.getOverallSummary());
+report.getScopeResults().forEach(scope -> System.out.println(scope.getHeadline()));
+```
+
 ### Realistic Simulation
 - Position sizing and portfolio tracking
 - Stop-loss and take-profit logic
