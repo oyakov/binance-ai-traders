@@ -37,7 +37,6 @@ SignalsService = import_from_src(
     'telegram_frontend.service.crypto.signals.signals_service'
 ).SignalsService
 
-
 @dataclass
 class Kline:
     symbol: str
