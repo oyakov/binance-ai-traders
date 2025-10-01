@@ -22,7 +22,7 @@ spring:
       bootstrap-servers: localhost:9092
       group-id: test-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: com.oyakov.binance_data_storage.broker.kafka.deserializer.KlineCollectedCommandDeserializer
       auto-offset-reset: earliest
   data:
     elasticsearch:
@@ -31,6 +31,12 @@ spring:
           endpoints: http://elasticsearch:9200
           username: elastic
           password: admin
+
+binance:
+  data:
+    kline:
+      kafka-topic: binance-kline
+      kafka-consumer-group: test-group
 
 logging:
   level:

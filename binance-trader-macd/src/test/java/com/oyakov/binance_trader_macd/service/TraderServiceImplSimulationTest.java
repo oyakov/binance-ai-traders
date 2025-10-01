@@ -9,6 +9,7 @@ import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.service.impl.TraderServiceImpl;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,10 +63,16 @@ class TraderServiceImplSimulationTest {
         }
 
         @Bean
+        MeterRegistry meterRegistry() {
+            return Mockito.mock(MeterRegistry.class);
+        }
+
+        @Bean
         TraderServiceImpl traderService(MACDSignalAnalyzer analyzer,
                                         OrderServiceApi orderServiceApi,
-                                        MACDTraderConfig traderConfig) {
-            return new TraderServiceImpl(analyzer, orderServiceApi, traderConfig);
+                                        MACDTraderConfig traderConfig,
+                                        MeterRegistry meterRegistry) {
+            return new TraderServiceImpl(analyzer, orderServiceApi, traderConfig, meterRegistry);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.oyakov.binance_trader_macd.rest.client;
 
+import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.domain.OrderSide;
 import com.oyakov.binance_trader_macd.domain.OrderType;
 import com.oyakov.binance_trader_macd.domain.TimeInForce;
@@ -29,12 +30,14 @@ class BinanceOrderClientManualTest {
     private RestTemplate restTemplate;
     private MockRestServiceServer server;
     private BinanceOrderClient client;
+    private MACDTraderConfig config;
 
     @BeforeEach
     void setUp() {
         this.restTemplate = new RestTemplate();
         this.server = MockRestServiceServer.createServer(restTemplate);
-        this.client = new BinanceOrderClient(restTemplate);
+        this.config = new MACDTraderConfig();
+        this.client = new BinanceOrderClient(restTemplate, config);
     }
 
     @Test

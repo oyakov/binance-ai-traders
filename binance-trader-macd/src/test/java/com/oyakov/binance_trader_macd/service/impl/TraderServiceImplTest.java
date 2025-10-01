@@ -8,6 +8,7 @@ import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBigDecimal;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -45,6 +46,9 @@ class TraderServiceImplTest {
     @Mock
     private OrderServiceApi orderServiceApi;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
     private TraderServiceImpl traderService;
 
     @BeforeEach
@@ -55,7 +59,7 @@ class TraderServiceImplTest {
         config.getTrader().setStopLossPercentage(STOP_LOSS_THRESHOLD);
         config.getTrader().setTakeProfitPercentage(TAKE_PROFIT_THRESHOLD);
 
-        traderService = new TraderServiceImpl(macdSignalAnalyzer, orderServiceApi, config);
+        traderService = new TraderServiceImpl(macdSignalAnalyzer, orderServiceApi, config, meterRegistry);
         ReflectionTestUtils.invokeMethod(traderService, "init");
     }
 
@@ -72,8 +76,8 @@ class TraderServiceImplTest {
                 eq(currentPrice),
                 eq(ORDER_QUANTITY),
                 eq(OrderSide.BUY),
-                argThat(value -> value.compareTo(currentPrice.multiply(STOP_LOSS_THRESHOLD)) == 0),
-                argThat(value -> value.compareTo(currentPrice.multiply(TAKE_PROFIT_THRESHOLD)) == 0)
+                eq(currentPrice.multiply(STOP_LOSS_THRESHOLD).setScale(currentPrice.scale(), RoundingMode.HALF_UP)),
+                eq(currentPrice.multiply(TAKE_PROFIT_THRESHOLD).setScale(currentPrice.scale(), RoundingMode.HALF_UP))
         );
         verify(orderServiceApi, never()).closeOrderWithState(anyLong(), any(OrderState.class));
     }
@@ -93,7 +97,7 @@ class TraderServiceImplTest {
 
         verify(orderServiceApi).closeOrderWithState(1L, OrderState.CLOSED_INVERTED_SIGNAL);
         verify(orderServiceApi, never()).createOrderGroup(
-                anyString(), anyBigDecimal(), anyBigDecimal(), any(OrderSide.class), anyBigDecimal(), anyBigDecimal());
+                anyString(), any(BigDecimal.class), any(BigDecimal.class), any(OrderSide.class), any(BigDecimal.class), any(BigDecimal.class));
     }
 
     @Test

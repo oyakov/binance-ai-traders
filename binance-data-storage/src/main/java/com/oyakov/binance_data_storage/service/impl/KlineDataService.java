@@ -100,30 +100,16 @@ public class KlineDataService implements KlineDataServiceApi {
             }
 
             if (persisted) {
-                eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
-                        .eventType("KlineWritten")
-                        .eventTime(event.getEventTime())
-                        .dataItem(klineItem)
-                        .build());
+                eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
                 log.info("Kline data saved successfully: {}", klineItem);
             } else {
                 String message = "No storage repositories available for kline data persistence";
                 log.error("{}: {}", message, klineItem);
-                eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
-                        .eventType("KlineNotWritten")
-                        .eventTime(event.getEventTime())
-                        .dataItem(klineItem)
-                        .errorMessage(message)
-                        .build());
+                eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, message, null));
             }
         } catch (Exception e) {
             log.error("Failed to save kline data: {}", klineItem, e);
-            eventPublisher.publishEvent(DataItemWrittenNotification.<KlineItem>builder()
-                    .eventType("KlineNotWritten")
-                    .eventTime(event.getEventTime())
-                    .dataItem(klineItem)
-                    .errorMessage(e.getMessage())
-                    .build());
+            eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, e.getMessage(), e));
         }
     }
 

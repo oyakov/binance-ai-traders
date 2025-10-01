@@ -2,9 +2,9 @@ package com.oyakov.binance_data_storage.broker.kafka.consumer;
 
 import com.oyakov.binance_data_storage.model.klines.binance.commands.KlineCollectedCommand;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 @EmbeddedKafka(partitions = 1, topics = {"binance-kline", "binance-notification"})
 public class KafkaConsumerServiceIntegrationTest {
 
-    @Mock
+    @MockBean
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired

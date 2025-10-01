@@ -5,3 +5,4 @@
 - [Shared Libraries](libs/README.md)
 - [Client Integrations](clients/README.md)
 - [Infrastructure](infrastructure/README.md)
+- [Memory System](memory/README.md) - LLM memory and knowledge management
