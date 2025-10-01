@@ -1,8 +1,17 @@
 from injector import Module, singleton, provider
 
+from oam.environment import (
+    KAFKA_BOOTSTRAP_SERVERS,
+    KAFKA_CLIENT_ID,
+    KAFKA_COMMAND_TOPIC,
+    KAFKA_CONSUMER_GROUP,
+    KAFKA_NOTIFICATION_TOPIC,
+    KAFKA_STATUS_TOPIC,
+)
 from service.crypto.binance.binance_service import BinanceService
 from service.crypto.indicator_service import IndicatorService
 from service.elastic.elastic_service import ElasticService
+from service.messaging.kafka_service import KafkaMessagingService
 from service.openai.openai_api_service import OpenAIAPIService
 from service.os.filesystem_service import FilesystemService
 from service.telegram_service import TelegramService
@@ -38,3 +47,15 @@ class ServiceProviderModule(Module):
     @provider
     def provide_filesystem_service(self) -> FilesystemService:
         return FilesystemService()
+
+    @singleton
+    @provider
+    def provide_kafka_messaging_service(self) -> KafkaMessagingService:
+        return KafkaMessagingService(
+            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+            command_topic=KAFKA_COMMAND_TOPIC,
+            status_topic=KAFKA_STATUS_TOPIC,
+            notification_topic=KAFKA_NOTIFICATION_TOPIC,
+            consumer_group=KAFKA_CONSUMER_GROUP,
+            client_id=KAFKA_CLIENT_ID,
+        )
