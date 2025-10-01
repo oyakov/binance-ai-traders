@@ -1,8 +1,22 @@
 import os
+import importlib.util
+import importlib
 
-from dotenv import load_dotenv
 
-load_dotenv()
+def _load_dotenv() -> None:
+    """Load environment variables from a ``.env`` file when python-dotenv is available."""
+
+    dotenv_spec = importlib.util.find_spec("dotenv")
+    if dotenv_spec is None:
+        return
+
+    module = importlib.import_module("dotenv")
+    load = getattr(module, "load_dotenv", None)
+    if callable(load):
+        load()
+
+
+_load_dotenv()
 
 ############################################################################
 # Access the variables
