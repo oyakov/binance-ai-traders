@@ -33,28 +33,34 @@
                 <spring-kafka.version>3.2.0</spring-kafka.version>
                 <avro.version>1.11.4</avro.version>
 	</properties>
-	<dependencies>
-		<!-- Avro -->
-		<dependency>
-			<groupId>org.apache.avro</groupId>
-			<artifactId>avro</artifactId>
-			<version>${avro.version}</version>
-		</dependency>
-		
-		<!-- Kafka -->
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka-clients</artifactId>
-			<version>${kafka.version}</version>
-		</dependency>
-		
-		<!-- SLF4J for logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.13</version>
-		</dependency>
-	</dependencies>
+        <dependencies>
+                <!-- Avro -->
+                <dependency>
+                        <groupId>org.apache.avro</groupId>
+                        <artifactId>avro</artifactId>
+                        <version>${avro.version}</version>
+                </dependency>
+
+                <!-- Kafka -->
+                <dependency>
+                        <groupId>org.apache.kafka</groupId>
+                        <artifactId>kafka-clients</artifactId>
+                        <version>${kafka.version}</version>
+                </dependency>
+
+                <!-- SLF4J for logging -->
+                <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>2.0.13</version>
+                </dependency>
+                <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                        <scope>provided</scope>
+                </dependency>
+        </dependencies>
 
 	<build>
 		<finalName>${name}</finalName>
