@@ -1,36 +1,57 @@
 package com.oyakov.binance_trader_macd.backtest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oyakov.binance_shared_model.avro.KlineEvent;
+import com.oyakov.binance_shared_model.backtest.BacktestDataset;
 import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Integration test for the comprehensive backtesting system.
- * Tests both synthetic and real data backtesting capabilities.
+ * Integration test for the comprehensive backtesting system using a standalone setup.
+ * Tests both synthetic and real data backtesting capabilities without requiring Spring context.
  */
-@SpringBootTest
-@TestPropertySource(properties = {
-        "backtest.enabled=false" // Disable automatic backtest runner
-})
 class ComprehensiveBacktestIntegrationTest {
 
-    @Autowired
     private ComprehensiveBacktestService backtestService;
 
-    @Autowired
-    private MACDSignalAnalyzer signalAnalyzer;
+    @BeforeEach
+    void setUp() {
+        MACDSignalAnalyzer signalAnalyzer = new MACDSignalAnalyzer();
+        MACDTraderConfig traderConfig = new MACDTraderConfig();
+        traderConfig.getTrader().setSlidingWindowSize(35);
+        traderConfig.getTrader().setOrderQuantity(BigDecimal.valueOf(0.01));
 
-    @Autowired
-    private MACDTraderConfig traderConfig;
+        BacktestMetricsCalculator metricsCalculator = new BacktestMetricsCalculator();
+        StubBinanceHistoricalDataFetcher dataFetcher = new StubBinanceHistoricalDataFetcher();
+        dataFetcher.register("BTCUSDT", "1h", 7, createDeterministicDataset("BTCUSDT", "1h", 7 * 24));
+        dataFetcher.register("BTCUSDT", "1h", 3, createDeterministicDataset("BTCUSDT", "1h", 3 * 24));
+        dataFetcher.register("BTCUSDT", "4h", 7, createDeterministicDataset("BTCUSDT", "4h", 7 * 6));
+        dataFetcher.register("BTCUSDT", "4h", 3, createDeterministicDataset("BTCUSDT", "4h", 3 * 6));
+
+        BacktestDatasetLoader datasetLoader = new BacktestDatasetLoader(new ObjectMapper());
+
+        backtestService = new ComprehensiveBacktestService(
+                signalAnalyzer,
+                traderConfig,
+                metricsCalculator,
+                dataFetcher,
+                datasetLoader
+        );
+    }
 
     @Test
     void shouldRunSyntheticBacktestSuccessfully() {
@@ -262,5 +283,112 @@ class ComprehensiveBacktestIntegrationTest {
         System.out.println("Additional Metrics:");
         System.out.println("  Expectancy: " + metrics.getExpectancy());
         System.out.println("  Kelly Percentage: " + metrics.getKellyPercentage());
+    }
+    private BacktestDataset createDeterministicDataset(String symbol, String interval, int candles) {
+        List<KlineEvent> klines = new ArrayList<>(candles);
+        long stepMillis = intervalToMillis(interval);
+        long currentTime = System.currentTimeMillis() - (long) candles * stepMillis;
+        BigDecimal previousClose = BigDecimal.valueOf(50000);
+
+        for (int i = 0; i < candles; i++) {
+            double oscillation = Math.sin(i / 5.0) * 0.02 + Math.cos(i / 9.0) * 0.01;
+            double drift = (i % 10 - 5) * 0.0008;
+            double delta = oscillation + drift;
+
+            BigDecimal open = previousClose;
+            BigDecimal close = open.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(delta))).setScale(8, RoundingMode.HALF_UP);
+
+            if (close.compareTo(BigDecimal.ZERO) <= 0) {
+                close = open.abs().add(BigDecimal.ONE);
+            }
+
+            BigDecimal high = close.max(open).multiply(BigDecimal.valueOf(1.01)).setScale(8, RoundingMode.HALF_UP);
+            BigDecimal low = close.min(open).multiply(BigDecimal.valueOf(0.99)).setScale(8, RoundingMode.HALF_UP);
+            BigDecimal volume = BigDecimal.valueOf(1000 + (i % 5) * 250L);
+
+            klines.add(new KlineEvent(
+                    "kline",
+                    currentTime,
+                    symbol,
+                    interval,
+                    currentTime,
+                    currentTime + stepMillis,
+                    open,
+                    high,
+                    low,
+                    close,
+                    volume
+            ));
+
+            currentTime += stepMillis;
+            previousClose = close;
+        }
+
+        return BacktestDataset.builder()
+                .name(symbol + "_" + interval)
+                .symbol(symbol)
+                .interval(interval)
+                .collectedAt(Instant.now())
+                .klines(klines)
+                .build();
+    }
+
+    private long intervalToMillis(String interval) {
+        return switch (interval) {
+            case "1m" -> 60 * 1000L;
+            case "3m" -> 3 * 60 * 1000L;
+            case "5m" -> 5 * 60 * 1000L;
+            case "15m" -> 15 * 60 * 1000L;
+            case "30m" -> 30 * 60 * 1000L;
+            case "1h" -> 60 * 60 * 1000L;
+            case "2h" -> 2 * 60 * 60 * 1000L;
+            case "4h" -> 4 * 60 * 60 * 1000L;
+            case "6h" -> 6 * 60 * 60 * 1000L;
+            case "8h" -> 8 * 60 * 60 * 1000L;
+            case "12h" -> 12 * 60 * 60 * 1000L;
+            case "1d" -> 24 * 60 * 60 * 1000L;
+            case "3d" -> 3 * 24 * 60 * 60 * 1000L;
+            case "1w" -> 7 * 24 * 60 * 60 * 1000L;
+            case "1M" -> 30L * 24 * 60 * 60 * 1000L;
+            default -> 60 * 1000L;
+        };
+    }
+
+    private static class StubBinanceHistoricalDataFetcher extends BinanceHistoricalDataFetcher {
+
+        private final Map<String, BacktestDataset> datasets = new HashMap<>();
+
+        StubBinanceHistoricalDataFetcher() {
+            super(new RestTemplate());
+        }
+
+        void register(String symbol, String interval, int days, BacktestDataset dataset) {
+            String key = key(symbol, interval, days);
+            datasets.put(key, BacktestDataset.builder()
+                    .name(String.format("%s_%s_%ddays", symbol, interval, days))
+                    .symbol(dataset.getSymbol())
+                    .interval(dataset.getInterval())
+                    .collectedAt(dataset.getCollectedAt())
+                    .klines(dataset.getKlines())
+                    .build());
+        }
+
+        @Override
+        public BacktestDataset fetchLastNDays(String symbol, String interval, int days, String datasetName) {
+            return datasets.getOrDefault(
+                    key(symbol, interval, days),
+                    BacktestDataset.builder()
+                            .name(datasetName)
+                            .symbol(symbol)
+                            .interval(interval)
+                            .collectedAt(Instant.now())
+                            .klines(List.of())
+                            .build()
+            );
+        }
+
+        private String key(String symbol, String interval, int days) {
+            return symbol + "|" + interval + "|" + days;
+        }
     }
 }
