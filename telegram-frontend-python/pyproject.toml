@@ -6,7 +6,7 @@ authors = ["Oleg Yakovlev <oyakovinbox@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = ">=3.11,<4.0"
 
 
 [tool.pytest.ini_options]
