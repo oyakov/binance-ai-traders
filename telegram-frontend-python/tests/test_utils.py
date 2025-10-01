@@ -10,16 +10,36 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Any, Dict, List, Optional
 import sys
-import os
+from pathlib import Path
+import importlib.util
 
 # Add src to path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+SRC_PATH = Path(__file__).resolve().parents[1] / 'src'
+if SRC_PATH.exists():
+    sys.path.insert(0, str(SRC_PATH))
 
-from db.model.binance.kline import Kline
-from db.model.binance.macd import MACD
-from db.model.binance.order import Order
-from db.model.binance.ticker import Ticker
-from service.crypto.signals.signals_service import SignalsService
+
+def import_from_src(module_relative_path: str, module_name: str):
+    """Dynamically import a module from the src directory."""
+
+    module_path = SRC_PATH / Path(module_relative_path)
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load module {module_name} from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+Kline = import_from_src('db/model/binance/kline.py', 'telegram_frontend.db.model.binance.kline').Kline
+MACD = import_from_src('db/model/binance/macd.py', 'telegram_frontend.db.model.binance.macd').MACD
+Order = import_from_src('db/model/binance/order.py', 'telegram_frontend.db.model.binance.order').Order
+Ticker = import_from_src('db/model/binance/ticker.py', 'telegram_frontend.db.model.binance.ticker').Ticker
+SignalsService = import_from_src(
+    'service/crypto/signals/signals_service.py',
+    'telegram_frontend.service.crypto.signals.signals_service'
+).SignalsService
 
 
 class TestDataFactory:

@@ -7,17 +7,23 @@ including RSI, MACD, and other technical indicators.
 
 import pytest
 import sys
-import os
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import asyncio
 from unittest.mock import Mock, patch
 
-# Add src to path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'src'))
+# Add src to path for imports when running the test suite directly
+SRC_PATH = Path(__file__).resolve().parents[4] / 'src'
+if SRC_PATH.exists():
+    sys.path.insert(0, str(SRC_PATH))
 
-from service.crypto.signals.signals_service import SignalsService
-from tests.test_utils import TestDataFactory, MockFactory, assert_approximately_equal
+from tests.test_utils import (
+    TestDataFactory,
+    MockFactory,
+    assert_approximately_equal,
+    SignalsService,
+)
 
 
 class TestSignalsServiceComprehensive:
