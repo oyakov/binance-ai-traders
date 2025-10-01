@@ -49,6 +49,8 @@ All microservices are connected via **Kafka** as the event bus. Each service lis
 - **Python 3.x** (for the Telegram bot).
 - **Maven** for building Java microservices.
 
+> **Maven repositories:** Java modules now resolve dependencies exclusively from Maven Central plus the Confluent repository used for Kafka serializers. Milestone and snapshot repositories from Spring have been removed, so ensure any new dependencies are available from these release repositories before adding them.
+
 ### Docker Setup
 
 You can use the `docker-compose.yml` file to start all the services with the required dependencies (e.g., Kafka, Zookeeper, Elasticsearch).
