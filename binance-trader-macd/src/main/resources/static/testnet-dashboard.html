@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testnet Trading Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #101522; color: #f0f4ff; }
+        .dashboard { padding: 24px; }
+        h1 { margin-bottom: 16px; }
+        .summary-cards { display: flex; gap: 16px; flex-wrap: wrap; }
+        .card { background: #1a2034; padding: 16px; border-radius: 8px; flex: 1 1 220px; box-shadow: 0 8px 16px rgba(0,0,0,0.25); }
+        .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+        .card span { font-size: 1.6rem; font-weight: bold; }
+        .performance-chart { margin-top: 24px; background: #1a2034; padding: 16px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; background: #1a2034; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; }
+        th { background: #232b45; }
+        tr:nth-child(even) { background: #181f33; }
+        .status-active { color: #2ecc71; font-weight: bold; }
+        .status-inactive { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <h1>Testnet Trading Performance</h1>
+    <div class="summary-cards">
+        <div class="card">
+            <h3>Total Instances</h3>
+            <span id="total-instances">0</span>
+        </div>
+        <div class="card">
+            <h3>Active Instances</h3>
+            <span id="active-instances">0</span>
+        </div>
+        <div class="card">
+            <h3>Best Performer</h3>
+            <span id="best-performer">-</span>
+        </div>
+        <div class="card">
+            <h3>Total Profit (USDT)</h3>
+            <span id="total-profit">0</span>
+        </div>
+    </div>
+
+    <div class="performance-chart">
+        <canvas id="performanceChart"></canvas>
+    </div>
+
+    <table id="instancesTable">
+        <thead>
+        <tr>
+            <th>Instance ID</th>
+            <th>Strategy</th>
+            <th>Symbol</th>
+            <th>Total Trades</th>
+            <th>Win Rate</th>
+            <th>Total Profit</th>
+            <th>Sharpe Ratio</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script>
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Total Profit', data: [], borderColor: '#4c9aff', fill: false }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    async function updateDashboard() {
+        const summaryResponse = await fetch('/api/testnet/summary');
+        const summary = await summaryResponse.json();
+        document.getElementById('total-instances').textContent = summary.totalInstances;
+        document.getElementById('active-instances').textContent = summary.activeInstances;
+        document.getElementById('best-performer').textContent = summary.bestPerformer;
+        document.getElementById('total-profit').textContent = summary.totalProfit;
+
+        const instancesResponse = await fetch('/api/testnet/instances');
+        const instances = await instancesResponse.json();
+        const tbody = document.querySelector('#instancesTable tbody');
+        tbody.innerHTML = '';
+        instances.forEach((instance) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${instance.instanceId}</td>
+                <td>${instance.strategyName}</td>
+                <td>${instance.symbol}</td>
+                <td>${instance.totalTrades}</td>
+                <td>${Number(instance.winRate || 0).toFixed(2)}</td>
+                <td>${Number(instance.totalProfit || 0).toFixed(2)}</td>
+                <td>${Number(instance.sharpeRatio || 0).toFixed(2)}</td>
+                <td class="${instance.active ? 'status-active' : 'status-inactive'}">
+                    ${instance.active ? 'Active' : 'Inactive'}
+                </td>`;
+            tbody.appendChild(row);
+        });
+
+        const chartLabels = instances.map(instance => instance.instanceId);
+        const chartData = instances.map(instance => instance.totalProfit || 0);
+        chart.data.labels = chartLabels;
+        chart.data.datasets[0].data = chartData;
+        chart.update();
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 5000);
+</script>
+</body>
+</html>

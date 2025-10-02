@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:testnet-strategies.yml
   application:
     name: binance-trader-macd
   elasticsearch:
@@ -58,6 +60,12 @@ binance:
     secret-api-token: ${BINANCE_API_SECRET:}
   websocket:
     base-url: wss://stream.testnet.binance.vision/ws
+  testnet:
+    api:
+      url: ${TESTNET_API_URL:https://testnet.binance.vision}
+      key: ${TESTNET_API_KEY:}
+      secret: ${TESTNET_SECRET_KEY:}
+    enabled: true
   trader:
     test-order-mode-enabled: ${BINANCE_TRADER_TEST_ORDER_MODE_ENABLED:true}
     stop-loss-percentage: 0.98
@@ -71,6 +79,13 @@ binance:
       kafka-consumer-group: binance-data-storage
       intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
       symbols: btcusdt,ethusdt,bnbusdt,adausdt,dogeusdt,xrpusdt,dotusdt,ltcusdt,linkusdt,uniusdt
+
+trader:
+  testnet:
+    enabled: true
+    virtual-balance: 10000
+    max-position-size: 0.1
+    risk-level: MEDIUM
 
 management:
   endpoints:
