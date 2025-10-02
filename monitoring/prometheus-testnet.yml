@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Binance Trader MACD Testnet
+  - job_name: 'binance-trader-macd-testnet'
+    static_configs:
+      - targets: ['binance-trader-macd-testnet:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # PostgreSQL Testnet
+  - job_name: 'postgres-testnet'
+    static_configs:
+      - targets: ['postgres-testnet:5432']
+    scrape_interval: 60s
+
+  # Elasticsearch Testnet
+  - job_name: 'elasticsearch-testnet'
+    static_configs:
+      - targets: ['elasticsearch-testnet:9200']
+    metrics_path: '/_prometheus/metrics'
+    scrape_interval: 60s
+
+  # Kafka Testnet
+  - job_name: 'kafka-testnet'
+    static_configs:
+      - targets: ['kafka-testnet:9093']
+    scrape_interval: 60s

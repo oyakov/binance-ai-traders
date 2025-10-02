@@ -29,6 +29,8 @@ public class TestnetPerformanceTracker {
     private final AtomicReference<BigDecimal> peakBalance;
     private final AtomicReference<BigDecimal> maxDrawdown = new AtomicReference<>(ZERO);
     private final AtomicReference<BigDecimal> sharpeRatio = new AtomicReference<>(ZERO);
+    private final AtomicReference<BigDecimal> dailyPnL = new AtomicReference<>(ZERO);
+    private final AtomicReference<BigDecimal> currentPositionSize = new AtomicReference<>(ZERO);
     private final AtomicBoolean tracking = new AtomicBoolean(false);
     private volatile Instant lastUpdated;
 
@@ -70,6 +72,20 @@ public class TestnetPerformanceTracker {
         peakBalance.updateAndGet(peak -> peak.max(updatedBalance));
         BigDecimal drawdown = peakBalance.get().subtract(updatedBalance).max(ZERO);
         maxDrawdown.updateAndGet(current -> current.max(drawdown));
+        
+        // Update daily P&L
+        dailyPnL.updateAndGet(current -> current.add(profit));
+        
+        // Update position size based on trade
+        if (trade.getSignal() != null) {
+            BigDecimal tradeSize = strategyConfig.getPositionSize();
+            if (trade.getSignal() == com.oyakov.binance_trader_macd.domain.TradeSignal.BUY) {
+                currentPositionSize.updateAndGet(current -> current.add(tradeSize));
+            } else {
+                currentPositionSize.updateAndGet(current -> current.subtract(tradeSize));
+            }
+        }
+        
         lastUpdated = trade.getExecutedAt() != null ? trade.getExecutedAt() : Instant.now();
         recalculateSharpeRatio();
     }
@@ -148,5 +164,22 @@ public class TestnetPerformanceTracker {
         BigDecimal variance = varianceSum.divide(BigDecimal.valueOf(trades.size()), MATH_CONTEXT);
         double sqrt = Math.sqrt(variance.doubleValue());
         return BigDecimal.valueOf(sqrt).setScale(4, RoundingMode.HALF_UP);
+    }
+    
+    // New methods for testnet trading integration
+    public boolean hasActivePosition() {
+        return currentPositionSize.get().compareTo(BigDecimal.ZERO) > 0;
+    }
+    
+    public BigDecimal getCurrentPositionSize() {
+        return currentPositionSize.get();
+    }
+    
+    public BigDecimal getDailyPnL() {
+        return dailyPnL.get();
+    }
+    
+    public void resetDailyPnL() {
+        dailyPnL.set(ZERO);
     }
 }

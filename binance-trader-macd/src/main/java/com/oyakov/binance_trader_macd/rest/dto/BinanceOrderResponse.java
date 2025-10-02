@@ -48,6 +48,12 @@ public class BinanceOrderResponse {
     private String selfTradePreventionMode;
 
     private List<Fill> fills;
+    
+    private String error;
+
+    public boolean isSuccess() {
+        return error == null && status != null && "FILLED".equals(status);
+    }
 
     @Data
     public static class Fill {

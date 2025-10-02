@@ -29,6 +29,15 @@ public class StrategyConfig {
         MEDIUM,
         HIGH
     }
+    
+    public BigDecimal getMaxDailyLoss() {
+        return switch (riskLevel) {
+            case LOW -> BigDecimal.valueOf(-0.02); // 2% max daily loss
+            case MEDIUM -> BigDecimal.valueOf(-0.05); // 5% max daily loss
+            case HIGH -> BigDecimal.valueOf(-0.10); // 10% max daily loss
+            default -> BigDecimal.valueOf(-0.05); // Default to 5%
+        };
+    }
 
     @Data
     @Builder
