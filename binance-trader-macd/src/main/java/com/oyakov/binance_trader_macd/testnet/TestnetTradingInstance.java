@@ -11,9 +11,6 @@ import com.oyakov.binance_trader_macd.rest.dto.BinanceOrderResponse;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,8 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
-@Component
-@Profile("testnet")
 public class TestnetTradingInstance {
 
     @Getter
@@ -41,20 +36,20 @@ public class TestnetTradingInstance {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private volatile Future<?> executionFuture;
     
-    @Autowired
-    private BinanceHistoricalDataFetcher dataFetcher;
-    
-    @Autowired
-    private MACDSignalAnalyzer macdAnalyzer;
-    
-    @Autowired
-    private BinanceOrderClient binanceOrderClient;
+    private final BinanceHistoricalDataFetcher dataFetcher;
+    private final MACDSignalAnalyzer macdAnalyzer;
+    private final BinanceOrderClient binanceOrderClient;
 
-    public TestnetTradingInstance(String instanceId, StrategyConfig strategyConfig, BigDecimal startingBalance) {
+    public TestnetTradingInstance(String instanceId, StrategyConfig strategyConfig, BigDecimal startingBalance,
+                                  BinanceHistoricalDataFetcher dataFetcher, MACDSignalAnalyzer macdAnalyzer, 
+                                  BinanceOrderClient binanceOrderClient) {
         this.instanceId = instanceId != null ? instanceId : UUID.randomUUID().toString();
         this.strategyConfig = strategyConfig;
         this.performanceTracker = new TestnetPerformanceTracker(this.instanceId, strategyConfig, startingBalance);
         this.executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "testnet-instance-" + this.instanceId));
+        this.dataFetcher = dataFetcher;
+        this.macdAnalyzer = macdAnalyzer;
+        this.binanceOrderClient = binanceOrderClient;
     }
 
     public void start() {

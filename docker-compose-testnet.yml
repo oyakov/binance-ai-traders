@@ -4,8 +4,8 @@ services:
   # Binance Trader MACD Testnet Service
   binance-trader-macd-testnet:
     build: 
-      context: ./binance-trader-macd
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: binance-trader-macd/Dockerfile
     container_name: binance-trader-macd-testnet
     environment:
       - SPRING_PROFILES_ACTIVE=testnet
@@ -16,7 +16,7 @@ services:
       - BINANCE_API_SECRET=${TESTNET_SECRET_KEY}
       - BINANCE_TRADER_TEST_ORDER_MODE_ENABLED=true
     ports:
-      - "8080:8080"
+      - "8083:8080"
     depends_on:
       - postgres-testnet
       - elasticsearch-testnet
@@ -62,7 +62,7 @@ services:
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - "9201:9200"
+      - "9202:9200"
     volumes:
       - elasticsearch_testnet_data:/usr/share/elasticsearch/data
     networks:
@@ -81,14 +81,14 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-testnet:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093,PLAINTEXT_INTERNAL://kafka-testnet:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9095,PLAINTEXT_INTERNAL://kafka-testnet:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
-      - "9093:9093"
+      - "9095:9093"
     depends_on:
       - zookeeper-testnet
     networks:

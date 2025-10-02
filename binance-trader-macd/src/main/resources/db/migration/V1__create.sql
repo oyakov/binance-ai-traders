@@ -6,7 +6,7 @@
 -- DROP TABLE public.order_books;
 
 CREATE TABLE public.order_books (
-                                    id BIGINT AUTO_INCREMENT NOT NULL,
+                                    id BIGSERIAL NOT NULL,
                                     symbol VARCHAR(255) NOT NULL,
                                     last_update_id BIGINT NOT NULL,
                                     tx_time TIMESTAMP NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE public.order_books (
 -- DROP TABLE public.orders;
 
 CREATE TABLE public.orders (
-                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                               id BIGSERIAL PRIMARY KEY,
                                symbol VARCHAR(10) NOT NULL,
                                order_id BIGINT NOT NULL UNIQUE,
                                parent_order_id BIGINT,
@@ -43,5 +43,5 @@ CREATE TABLE public.orders (
                                working_time BIGINT NOT NULL,
                                display_working_time TIMESTAMP NOT NULL,
                                self_trade_prevention_mode VARCHAR(20) NOT NULL,
-                               fills CLOB NOT NULL
+                               fills TEXT NOT NULL
 );

@@ -4,13 +4,13 @@ spring:
   application:
     name: binance-trader-macd
   elasticsearch:
-    uris: http://elasticsearch:9200
+    uris: http://elasticsearch-testnet:9200
     username: elastic
     password: admin
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://postgres-testnet:5432/binance_trader_testnet
+    username: testnet_user
+    password: testnet_password
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
@@ -19,9 +19,9 @@ spring:
     baseline-on-migrate: true
     history-table: schema_version
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: kafka-testnet:29092
     properties:
-      schema.registry.url: http://schema-registry:8081
+      schema.registry.url: http://schema-registry-testnet:8081
       schema.registry.max.retries: 5
       schema.registry.retry.backoff.ms: 1000
       security.protocol: PLAINTEXT
@@ -36,18 +36,18 @@ spring:
         acks: all
         retries: 3
         max.in.flight.requests.per.connection: 1
-        schema.registry.url: http://schema-registry:8081
+        schema.registry.url: http://schema-registry-testnet:8081
         use.latest.version: true
         specific.avro.reader: true
         value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
     consumer:
-      bootstrap-servers: kafka:9092
+      bootstrap-servers: kafka-testnet:29092
       group-id: test-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
         specific.avro.reader: true
-        schema.registry.url: http://schema-registry:8081
+        schema.registry.url: http://schema-registry-testnet:8081
         auto.register.schemas: true
         use.latest.version: true
         value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy

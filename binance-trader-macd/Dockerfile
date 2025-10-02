@@ -1,4 +1,17 @@
-# Use the Liberica JDK 21 as the base image
+# Multi-stage build to handle dependencies
+FROM bellsoft/liberica-openjdk-alpine:21 AS builder
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the entire project (parent pom and all modules)
+COPY ../.. .
+
+# Build the shared model first, then the trader
+RUN ./mvnw clean install -pl binance-shared-model -DskipTests && \
+    ./mvnw clean package -pl binance-trader-macd -DskipTests
+
+# Runtime stage
 FROM bellsoft/liberica-openjdk-alpine:21
 
 # Runtime environment variables (provided via secrets or compose overrides):
@@ -10,14 +23,11 @@ FROM bellsoft/liberica-openjdk-alpine:21
 # Set the working directory
 WORKDIR /app
 
-# Copy the Maven build files
-COPY . .
-
-# Build the application with Maven
-RUN ./mvnw package
+# Copy the built JAR from the builder stage
+COPY --from=builder /app/binance-trader-macd/target/binance-trader-macd.jar app.jar
 
 # Expose the necessary ports
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/binance-trader-macd.jar"]
+CMD ["java", "-jar", "app.jar"]
