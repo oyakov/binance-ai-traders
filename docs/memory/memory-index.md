@@ -9,12 +9,21 @@ This file serves as the central index for all memory entries in the documentatio
 | MEM-001 | Data Collection Service Implementation Gap | Finding | Active | 2024-12-25 | binance-data-collection |
 | MEM-002 | MACD Trader Service Architecture | Finding | Active | 2024-12-25 | binance-trader-macd |
 | MEM-003 | Shared Model Dependencies | Finding | Active | 2024-12-25 | binance-shared-model |
+| MEM-004 | Critical Testnet Integration Gaps | Finding | Active | 2024-12-25 | binance-trader-macd,testnet-infrastructure |
+| MEM-005 | Telegram Frontend Critical Dependencies Missing | Finding | Active | 2024-12-25 | telegram-frontend-python,user-interface |
+| MEM-006 | MACD Strategy Signal Generation Failure | Finding | Active | 2024-12-25 | binance-trader-macd,strategy-performance |
+| MEM-007 | Database Compatibility Issues Blocking Integration Tests | Finding | Active | 2024-12-25 | binance-data-storage,binance-trader-macd,testing-infrastructure |
+| MEM-008 | Grid Trader Service Duplication Issue | Finding | Active | 2024-12-25 | binance-trader-grid,trading-strategies |
+| MEM-009 | Root Cause: Incomplete Service Integration Architecture | Finding | Active | 2024-12-25 | global-architecture,service-integration |
+| MEM-010 | Root Cause: Insufficient Testing Strategy | Finding | Active | 2024-12-25 | testing-strategy,quality-assurance |
+| MEM-011 | Root Cause: Configuration Management Gaps | Finding | Active | 2024-12-25 | configuration-management,deployment |
 
 ## Recent Updates
 
 | ID | Title | Type | Status | Last Updated | Trigger |
 |----|-------|------|--------|--------------|---------|
 | MEM-U001 | Memory System Implementation | Update | Active | 2024-12-25 | User Request |
+| MEM-U002 | Critical Findings Documentation | Update | Active | 2024-12-25 | User Request |
 
 ## Context Entries
 
@@ -32,9 +41,9 @@ This file serves as the central index for all memory entries in the documentatio
 
 ## Memory Statistics
 
-- **Total Active Entries**: 8
-- **Findings**: 3
-- **Updates**: 1
+- **Total Active Entries**: 16
+- **Findings**: 11
+- **Updates**: 2
 - **Context**: 2
 - **Templates**: 2
 - **Last System Update**: 2024-12-25
