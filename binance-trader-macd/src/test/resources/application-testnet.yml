@@ -1,0 +1,80 @@
+spring:
+  config:
+    import: classpath:testnet-strategies.yml
+  application:
+    name: binance-trader-macd-test
+  datasource:
+    url: jdbc:h2:mem:trader;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+      missing-topics-fatal: false
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+  elasticsearch:
+    uris: http://localhost:9200
+    username: test
+    password: test
+
+binance:
+  rest:
+    base-url: https://testnet.binance.vision
+    api-token: F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU
+    secret-api-token: N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20
+  websocket:
+    base-url: wss://stream.testnet.binance.vision/ws
+  testnet:
+    api:
+      url: https://testnet.binance.vision
+      key: F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU
+      secret: N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20
+    enabled: true
+  trader:
+    test-order-mode-enabled: true
+    stop-loss-percentage: 0.98
+    take-profit-percentage: 1.05
+    order-quantity: 0.05
+    sliding-window-size: 78
+  data:
+    kline:
+      entity-name: kline
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-storage
+      intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
+      symbols: btcusdt,ethusdt,bnbusdt,adausdt,dogeusdt,xrpusdt,dotusdt,ltcusdt,linkusdt,uniusdt
+
+trader:
+  testnet:
+    enabled: true
+    virtual-balance: 10000
+    max-position-size: 0.1
+    risk-level: MEDIUM
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: false

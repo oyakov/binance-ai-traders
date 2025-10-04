@@ -139,7 +139,7 @@ class TestnetIntegrationTest {
         when(dataFetcher.fetchHistoricalData(anyString(), anyString(), anyLong(), anyLong(), anyString()))
                 .thenReturn(createMockDataset(mockKlines));
         when(macdAnalyzer.getMinDataPointCount()).thenReturn(35);
-        when(macdAnalyzer.tryExtractSignal(any())).thenReturn(Optional.of(com.oyakov.binance_trader_macd.domain.TradeSignal.BUY));
+        // Note: macdAnalyzer.tryExtractSignal stubbing removed as it's not used in this test
 
         // Act: Start the trading instance
         tradingInstance.start();
@@ -166,9 +166,7 @@ class TestnetIntegrationTest {
         when(dataFetcher.fetchHistoricalData(anyString(), anyString(), anyLong(), anyLong(), anyString()))
                 .thenReturn(createMockDataset(mockKlines));
         when(macdAnalyzer.getMinDataPointCount()).thenReturn(35);
-        when(macdAnalyzer.tryExtractSignal(any())).thenReturn(Optional.of(com.oyakov.binance_trader_macd.domain.TradeSignal.BUY));
-        when(binanceOrderClient.placeOrder(anyString(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(createMockOrderResponse(true));
+        // Note: macdAnalyzer.tryExtractSignal and binanceOrderClient.placeOrder stubbing removed as they're not used in this test
 
         // Act: Start the trading instance
         tradingInstance.start();
@@ -193,7 +191,74 @@ class TestnetIntegrationTest {
 
     private List<KlineEvent> createMockKlines() {
         // Create 50 mock klines for MACD calculation
-        return List.of(); // Simplified for test
+        return List.of(
+            createMockKline(100.0, 1),
+            createMockKline(101.0, 2),
+            createMockKline(102.0, 3),
+            createMockKline(103.0, 4),
+            createMockKline(104.0, 5),
+            createMockKline(105.0, 6),
+            createMockKline(106.0, 7),
+            createMockKline(107.0, 8),
+            createMockKline(108.0, 9),
+            createMockKline(109.0, 10),
+            createMockKline(110.0, 11),
+            createMockKline(111.0, 12),
+            createMockKline(112.0, 13),
+            createMockKline(113.0, 14),
+            createMockKline(114.0, 15),
+            createMockKline(115.0, 16),
+            createMockKline(116.0, 17),
+            createMockKline(117.0, 18),
+            createMockKline(118.0, 19),
+            createMockKline(119.0, 20),
+            createMockKline(120.0, 21),
+            createMockKline(121.0, 22),
+            createMockKline(122.0, 23),
+            createMockKline(123.0, 24),
+            createMockKline(124.0, 25),
+            createMockKline(125.0, 26),
+            createMockKline(126.0, 27),
+            createMockKline(127.0, 28),
+            createMockKline(128.0, 29),
+            createMockKline(129.0, 30),
+            createMockKline(130.0, 31),
+            createMockKline(131.0, 32),
+            createMockKline(132.0, 33),
+            createMockKline(133.0, 34),
+            createMockKline(134.0, 35),
+            createMockKline(135.0, 36),
+            createMockKline(136.0, 37),
+            createMockKline(137.0, 38),
+            createMockKline(138.0, 39),
+            createMockKline(139.0, 40),
+            createMockKline(140.0, 41),
+            createMockKline(141.0, 42),
+            createMockKline(142.0, 43),
+            createMockKline(143.0, 44),
+            createMockKline(144.0, 45),
+            createMockKline(145.0, 46),
+            createMockKline(146.0, 47),
+            createMockKline(147.0, 48),
+            createMockKline(148.0, 49),
+            createMockKline(149.0, 50)
+        );
+    }
+
+    private KlineEvent createMockKline(double price, int index) {
+        return KlineEvent.newBuilder()
+                .setEventType("kline")
+                .setEventTime(System.currentTimeMillis())
+                .setSymbol("BTCUSDT")
+                .setInterval("1h")
+                .setOpenTime(System.currentTimeMillis() + (index * 3600000L))
+                .setCloseTime(System.currentTimeMillis() + ((index + 1) * 3600000L))
+                .setOpen(BigDecimal.valueOf(price))
+                .setHigh(BigDecimal.valueOf(price + 1.0))
+                .setLow(BigDecimal.valueOf(price - 1.0))
+                .setClose(BigDecimal.valueOf(price + 0.5))
+                .setVolume(BigDecimal.valueOf(1000.0))
+                .build();
     }
 
     private com.oyakov.binance_shared_model.backtest.BacktestDataset createMockDataset(List<KlineEvent> klines) {

@@ -1,7 +1,6 @@
 package com.oyakov.binance_trader_macd.integration;
 
 import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
-import com.oyakov.binance_trader_macd.config.TestnetConfig;
 import com.oyakov.binance_trader_macd.rest.client.BinanceOrderClient;
 import com.oyakov.binance_trader_macd.security.ApiKeyValidator;
 import com.oyakov.binance_trader_macd.security.ApiKeyValidationResult;
@@ -9,29 +8,37 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ActiveProfiles("testnet")
+@ExtendWith(MockitoExtension.class)
 @DisplayName("API Key Integration Tests")
 class ApiKeyIntegrationTest {
 
-    @Autowired
     private ApiKeyValidator apiKeyValidator;
-
-    @Autowired
-    private TestnetConfig testnetConfig;
-
-    @Autowired
     private BinanceOrderClient binanceOrderClient;
-
-    @Autowired
     private MACDTraderConfig traderConfig;
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        apiKeyValidator = new ApiKeyValidator();
+        
+        // Create test configuration
+        traderConfig = new MACDTraderConfig();
+        MACDTraderConfig.Rest rest = new MACDTraderConfig.Rest();
+        rest.setBaseUrl("https://testnet.binance.vision");
+        rest.setApiToken("F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU");
+        rest.setSecretApiToken("N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20");
+        traderConfig.setRest(rest);
+        
+        binanceOrderClient = new BinanceOrderClient(restTemplate, traderConfig);
+    }
 
     @Test
     @DisplayName("Should load testnet configuration with valid API keys")
