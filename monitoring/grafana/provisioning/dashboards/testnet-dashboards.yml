@@ -28,3 +28,12 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/analytics
+  - name: 'strategy-dashboards'
+    orgId: 1
+    folder: 'Trading Strategies'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/strategies
