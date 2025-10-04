@@ -55,24 +55,14 @@ class TestnetIntegrationTest {
                 .enabled(true)
                 .build();
 
-        tradingInstance = new TestnetTradingInstance("test-instance", strategyConfig, BigDecimal.valueOf(10000));
-        
-        // Inject mocks using reflection (since @Autowired won't work in tests)
-        try {
-            var dataFetcherField = TestnetTradingInstance.class.getDeclaredField("dataFetcher");
-            dataFetcherField.setAccessible(true);
-            dataFetcherField.set(tradingInstance, dataFetcher);
-            
-            var macdAnalyzerField = TestnetTradingInstance.class.getDeclaredField("macdAnalyzer");
-            macdAnalyzerField.setAccessible(true);
-            macdAnalyzerField.set(tradingInstance, macdAnalyzer);
-            
-            var binanceOrderClientField = TestnetTradingInstance.class.getDeclaredField("binanceOrderClient");
-            binanceOrderClientField.setAccessible(true);
-            binanceOrderClientField.set(tradingInstance, binanceOrderClient);
-        } catch (Exception e) {
-            fail("Failed to inject mocks: " + e.getMessage());
-        }
+        tradingInstance = new TestnetTradingInstance(
+                "test-instance", 
+                strategyConfig, 
+                BigDecimal.valueOf(10000),
+                dataFetcher,
+                macdAnalyzer,
+                binanceOrderClient
+        );
     }
 
     @Test

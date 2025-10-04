@@ -9,8 +9,8 @@ services:
     container_name: binance-trader-macd-testnet
     environment:
       - SPRING_PROFILES_ACTIVE=testnet
-      - TESTNET_API_KEY=${TESTNET_API_KEY}
-      - TESTNET_SECRET_KEY=${TESTNET_SECRET_KEY}
+      - TESTNET_API_KEY=F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU
+      - TESTNET_SECRET_KEY=N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20
       - BINANCE_REST_BASE_URL=https://testnet.binance.vision
       - BINANCE_API_KEY=${TESTNET_API_KEY}
       - BINANCE_API_SECRET=${TESTNET_SECRET_KEY}
@@ -136,7 +136,8 @@ services:
     ports:
       - "9091:9090"
     volumes:
-      - ./monitoring/prometheus-testnet.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/testnet-prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -158,6 +159,10 @@ services:
     volumes:
       - grafana_testnet_data:/var/lib/grafana
       - ./monitoring/grafana/datasources/prometheus-testnet.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+      - ./monitoring/grafana/provisioning/dashboards/testnet-dashboards.yml:/etc/grafana/provisioning/dashboards/testnet-dashboards.yml
+      - ./monitoring/grafana/dashboards/binance-trading:/etc/grafana/provisioning/dashboards/binance-trading
+      - ./monitoring/grafana/dashboards/system-monitoring:/etc/grafana/provisioning/dashboards/system-monitoring
+      - ./monitoring/grafana/dashboards/analytics:/etc/grafana/provisioning/dashboards/analytics
     depends_on:
       - prometheus-testnet
     networks:

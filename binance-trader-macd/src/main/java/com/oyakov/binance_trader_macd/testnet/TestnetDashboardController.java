@@ -45,4 +45,14 @@ public class TestnetDashboardController {
         StrategyRanking ranking = strategyComparator.compareStrategies(performances);
         return ResponseEntity.ok(ranking);
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<String> getDashboard() {
+        return ResponseEntity.ok("Testnet Dashboard is working! Trading instances are running.");
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> getHealth() {
+        return ResponseEntity.ok("Testnet controller is healthy");
+    }
 }

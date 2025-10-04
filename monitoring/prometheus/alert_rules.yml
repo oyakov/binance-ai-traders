@@ -1,0 +1,118 @@
+groups:
+  - name: testnet_alerts
+    rules:
+      # Service Health Alerts
+      - alert: ServiceDown
+        expr: up{job=~".*testnet.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute."
+      
+      # Trading Application Alerts
+      - alert: TradingAppDown
+        expr: up{instance=~".*binance-trader-macd.*"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Trading application is down"
+          description: "Binance trader MACD application has been down for more than 30 seconds."
+      
+      - alert: NoTradingActivity
+        expr: increase(binance_trader_signals_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No trading activity detected"
+          description: "No trading signals have been generated in the last 2 hours."
+      
+      # Database Alerts
+      - alert: DatabaseDown
+        expr: up{instance=~".*postgres.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+      
+      # Kafka Alerts
+      - alert: KafkaDown
+        expr: up{instance=~".*kafka.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka is down"
+          description: "Kafka message broker has been down for more than 1 minute."
+      
+      # Elasticsearch Alerts
+      - alert: ElasticsearchDown
+        expr: up{instance=~".*elasticsearch.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch is down"
+          description: "Elasticsearch has been down for more than 1 minute."
+      
+      # Resource Usage Alerts
+      - alert: HighMemoryUsage
+        expr: jvm_memory_used_bytes{instance=~".*binance-trader-macd.*"} / jvm_memory_max_bytes{instance=~".*binance-trader-macd.*"} > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Trading application memory usage is above 80% for more than 5 minutes."
+      
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{instance=~".*binance-trader-macd.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "Trading application CPU usage is above 80% for more than 5 minutes."
+      
+      # Trading Performance Alerts
+      - alert: HighOrderFailureRate
+        expr: rate(binance_trader_orders_total{status="FAILED"}[5m]) / rate(binance_trader_orders_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High order failure rate"
+          description: "Order failure rate is above 10% for more than 5 minutes."
+      
+      - alert: NoSuccessfulOrders
+        expr: increase(binance_trader_orders_total{status="SUCCESS"}[1h]) == 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful orders"
+          description: "No successful orders have been placed in the last 2 hours."
+      
+      # Network Connectivity Alerts
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus monitoring system has been down for more than 1 minute."
+      
+      - alert: GrafanaDown
+        expr: up{instance=~".*grafana.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana dashboard system has been down for more than 1 minute."

@@ -2,15 +2,58 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
 scrape_configs:
   - job_name: binance-macd-trader-testnet
     metrics_path: /actuator/prometheus
     scheme: http
     static_configs:
       - targets:
-          - macd-trader-testnet:8080  # Update with the hostname/IP of the testnet trader actuator endpoint
+          - binance-trader-macd-testnet:8080
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
       - target_label: environment
         replacement: testnet
+
+  - job_name: postgres-testnet
+    static_configs:
+      - targets:
+          - postgres-testnet:5432
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  - job_name: kafka-testnet
+    static_configs:
+      - targets:
+          - kafka-testnet:9092
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  - job_name: elasticsearch-testnet
+    static_configs:
+      - targets:
+          - elasticsearch-testnet:9200
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
