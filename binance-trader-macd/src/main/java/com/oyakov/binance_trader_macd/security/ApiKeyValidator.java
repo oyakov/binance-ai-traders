@@ -125,11 +125,13 @@ public class ApiKeyValidator {
         
         if (result.isValid()) {
             if (expectTestnet && !result.isTestnet()) {
-                result.getErrors().add("Expected testnet configuration but found mainnet");
-                result = new ApiKeyValidationResult(false, result.getErrors(), result.isTestnet());
+                List<String> newErrors = new ArrayList<>(result.getErrors());
+                newErrors.add("Expected testnet configuration but found mainnet");
+                result = new ApiKeyValidationResult(false, newErrors, result.isTestnet());
             } else if (!expectTestnet && result.isTestnet()) {
-                result.getErrors().add("Expected mainnet configuration but found testnet");
-                result = new ApiKeyValidationResult(false, result.getErrors(), result.isTestnet());
+                List<String> newErrors = new ArrayList<>(result.getErrors());
+                newErrors.add("Expected mainnet configuration but found testnet");
+                result = new ApiKeyValidationResult(false, newErrors, result.isTestnet());
             }
         }
         

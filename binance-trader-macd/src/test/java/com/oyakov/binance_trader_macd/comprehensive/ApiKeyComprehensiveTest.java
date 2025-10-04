@@ -2,6 +2,7 @@ package com.oyakov.binance_trader_macd.comprehensive;
 
 import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.security.ApiKeyValidationResult;
+import com.oyakov.binance_trader_macd.security.ApiKeyValidator;
 import com.oyakov.binance_trader_macd.testutil.ApiKeyTestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,10 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiKeyComprehensiveTest {
 
     private ApiKeyTestUtil apiKeyTestUtil;
+    private ApiKeyValidator apiKeyValidator;
 
     @BeforeEach
     void setUp() {
+        apiKeyValidator = new ApiKeyValidator();
         apiKeyTestUtil = new ApiKeyTestUtil();
+        // Manually inject the validator since we're not using Spring context
+        apiKeyTestUtil.setApiKeyValidator(apiKeyValidator);
     }
 
     @Test
@@ -118,8 +123,8 @@ class ApiKeyComprehensiveTest {
     void shouldValidateCustomConfigurations() {
         // Test with valid custom configuration
         MACDTraderConfig validCustomConfig = apiKeyTestUtil.createCustomConfiguration(
-                "CUSTOM_API_KEY_12345678901234567890",
-                "CUSTOM_SECRET_KEY_12345678901234567890",
+                "CUSTOMAPIKEY12345678901234567890",
+                "CUSTOMSECRETKEY12345678901234567890",
                 "https://testnet.binance.vision"
         );
         assertTrue(apiKeyTestUtil.validateEnvironmentConfiguration(validCustomConfig), 

@@ -3,9 +3,6 @@ package com.oyakov.binance_trader_macd.testutil;
 import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
 import com.oyakov.binance_trader_macd.security.ApiKeyValidationResult;
 import com.oyakov.binance_trader_macd.security.ApiKeyValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,11 +10,13 @@ import java.util.Map;
  * Utility class for API key testing across the project.
  * Provides common test scenarios and helper methods for API key validation.
  */
-@Component
 public class ApiKeyTestUtil {
 
-    @Autowired
     private ApiKeyValidator apiKeyValidator;
+
+    public void setApiKeyValidator(ApiKeyValidator apiKeyValidator) {
+        this.apiKeyValidator = apiKeyValidator;
+    }
 
     /**
      * Test scenarios for API key validation

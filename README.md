@@ -1,212 +1,139 @@
-# Binance Data Collection & Trading Microservices
+# Binance AI Traders
 
-This repository contains multiple microservices designed to handle Binance data collection, storage, and trading activities. The services communicate through Kafka, ensuring decoupled and efficient communication between them. The system also includes a Python-based Telegram bot for interaction.
+A comprehensive automated trading system for Binance cryptocurrency exchange, featuring advanced backtesting, real-time data collection, and multiple trading strategies.
 
-> **Note:** The autonomous coding assistant previously bundled in this repository now lives in its own project.
-
-## Architecture Overview
-
-The system is split into several microservices, each responsible for specific tasks:
-
-- **binance-data-collection**: A microservice that listens to Binance WebSocket streams for real-time market data and sends relevant events (e.g., Kline data) to Kafka.
-- **binance-data-storage**: A microservice that listens to the Kafka stream and persists the received market data into a database.
-- **indicator-calculator**: A microservice that calculates various trading indicators based on the collected data.
-- **grid-trader** and **macd-trader**: Trading strategies that operate based on market data and indicators.
-- **telegram-bot**: A Python-based Telegram bot for interacting with the user, receiving commands, and providing trading signals.
-
-## Services
-
-### 1. **binance-data-collection**
-- **Responsibility**: Collects Kline data from Binance WebSocket API and sends it to Kafka.
-- **Tech Stack**: Java, Spring Boot, WebSocket, Kafka, Lombok.
-
-### 2. **binance-data-storage**
-- **Responsibility**: Consumes data from Kafka and persists it in the storage (e.g., Elasticsearch, relational database).
-- **Tech Stack**: Java, Spring Boot, Kafka, Elasticsearch.
-
-### 3. **indicator-calculator**
-- **Responsibility**: Calculates technical indicators such as Moving Average Convergence Divergence (MACD), Relative Strength Index (RSI), etc.
-- **Tech Stack**: Java, Spring Boot, Kafka.
-
-### 4. **grid-trader & macd-trader**
-- **Responsibility**: Executes trading strategies based on collected market data and calculated indicators.
-- **Tech Stack**: Java, Spring Boot, Kafka, and Binance API.
-- **Backtesting Engine**: Comprehensive backtesting system for strategy validation with real Binance data.
-
-### 5. **telegram-bot**
-- **Responsibility**: A Python-based Telegram bot for sending real-time trading signals and receiving commands from the user.
-- **Tech Stack**: Python, Telebot API, Kafka.
-
-## Kafka as Event Bus
-
-All microservices are connected via **Kafka** as the event bus. Each service listens to the relevant topics and performs its task in isolation. Kafka allows loose coupling between services and facilitates scalability.
-
-## 🚀 Quick Start - Backtesting Engine
-
-Test trading strategies on historical Binance data:
+## 🚀 Quick Start
 
 ```bash
-# Run the comprehensive backtesting demo
+# Clone and build
+git clone <repository-url>
+cd binance-ai-traders
+mvn clean install
+
+# Start the system
+docker-compose -f docker-compose-testnet.yml up -d
+
+# Test the backtesting engine
 mvn test -pl binance-trader-macd -Dtest=StandaloneBacktestDemo
 ```
 
-This will demonstrate the MACD trading strategy with realistic market simulation and comprehensive performance metrics.
+📖 **[Full Quick Start Guide](docs/guides/QUICK_START.md)**
 
-📖 **[Full Backtesting Documentation](BACKTESTING_README.md)**
+## 🏗️ Architecture
 
-## How to Run the System
+The system consists of microservices communicating through Kafka:
+
+- **Data Collection** → **Data Storage** → **Indicator Calculator** → **Trading Strategies**
+- **Real-time WebSocket** data from Binance
+- **Comprehensive backtesting** engine with real historical data
+- **Multiple trading strategies** (MACD, Grid)
+- **Telegram integration** for monitoring and control
+
+## 📊 Key Features
+
+- **🧪 Advanced Backtesting**: Test strategies on real Binance historical data
+- **📈 Multiple Strategies**: MACD, Grid trading, and extensible framework
+- **⚡ Real-time Data**: Live WebSocket data collection from Binance
+- **📱 Telegram Integration**: Monitor and control via Telegram bot
+- **📊 Comprehensive Monitoring**: Grafana dashboards and metrics
+- **🔒 Testnet Ready**: Safe testing environment with Binance testnet
+
+## 🏗️ Services
+
+| Service | Purpose | Tech Stack |
+|---------|---------|------------|
+| **Data Collection** | Real-time Binance WebSocket data | Java, Spring Boot, Kafka |
+| **Data Storage** | Persist market data | Java, Spring Boot, Elasticsearch |
+| **MACD Trader** | MACD trading strategy + backtesting | Java, Spring Boot, Binance API |
+| **Grid Trader** | Grid trading strategy | Java, Spring Boot, Kafka |
+| **Telegram Bot** | User interface and notifications | Python, Telebot API |
+
+## 📚 Documentation
+
+### 🚀 Getting Started
+- **[Quick Start Guide](docs/guides/QUICK_START.md)** - Get running in 5 minutes
+- **[System Overview](docs/overview.md)** - Architecture and design
+- **[Backtesting Guide](BACKTESTING_README.md)** - Strategy validation
+
+### 🏗️ Development
+- **[Service Documentation](docs/services/README.md)** - Individual service guides
+- **[Scripts](docs/scripts/README.md)** - Automation and deployment
+- **[Infrastructure](docs/inrastructure/README.md)** - Docker and monitoring
+
+### 📊 Analysis & Reports
+- **[Test Results](docs/reports/)** - Comprehensive analysis reports
+- **[Milestone Guide](docs/guides/MILESTONE_GUIDE.md)** - Project roadmap
+- **[Testnet Guide](docs/guides/TESTNET_LAUNCH_GUIDE.md)** - Testnet deployment
+
+## 🧪 Backtesting Engine
+
+Test trading strategies on real Binance historical data:
+
+```bash
+# Run comprehensive backtesting demo
+mvn test -pl binance-trader-macd -Dtest=StandaloneBacktestDemo
+```
+
+**Features:**
+- Real Binance API data integration
+- Multiple timeframes and symbols
+- Comprehensive performance metrics
+- Risk analysis and optimization
+
+## 🚀 Getting Started
 
 ### Prerequisites
+- **Docker** and **Docker Compose**
+- **Java 17+** and **Maven 3.8+**
+- **Python 3.11+** (for Telegram bot)
+- **Binance Testnet Account**
 
-- **Docker** and **Docker Compose** installed on your machine.
-- **Java 17** or higher (for running Java-based services).
-- **Python 3.x** (for the Telegram bot).
-- **Maven** for building Java microservices.
-
-> **Maven repositories:** Java modules now resolve dependencies exclusively from Maven Central plus the Confluent repository used for Kafka serializers. Milestone and snapshot repositories from Spring have been removed, so ensure any new dependencies are available from these release repositories before adding them.
-
-### Docker Setup
-
-You can use the `docker-compose.yml` file to start all the services with the required dependencies (e.g., Kafka, Zookeeper, Elasticsearch).
-
-### docker-compose.yml
-
-```yaml
-version: '3.8'
-
-services:
-
-  # Zookeeper for Kafka
-  zookeeper:
-    image: wurstmeister/zookeeper:3.4.6
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-
-  # Kafka
-  kafka:
-    image: wurstmeister/kafka:latest
-    ports:
-      - "9093:9093"
-    environment:
-      KAFKA_ADVERTISED_LISTENER: INSIDE-KAFKA:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
-      KAFKA_LISTENER_NAME_INTERNAL: INSIDE-KAFKA
-      KAFKA_LISTENER_INTERNAL: INSIDE-KAFKA:9093
-      KAFKA_LISTENER_PORT: 9093
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_NAME_EXTERNAL: OUTSIDE-KAFKA
-      KAFKA_LISTENER_EXTERNAL: 0.0.0.0:9092
-    depends_on:
-      - zookeeper
-
-  # Elasticsearch
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.0
-    environment:
-      discovery.type: single-node
-      ELASTIC_PASSWORD: password
-    ports:
-      - "9200:9200"
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-
-  # binance-data-collection
-  binance-data-collection:
-    image: binance-data-collection:latest
-    build: ./binance-data-collection
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      BINANCE_API_KEY: "your_api_key"
-      BINANCE_API_SECRET: "your_api_secret"
-      KAFKA_BROKER: kafka:9093
-    depends_on:
-      - kafka
-
-  # binance-data-storage
-  binance-data-storage:
-    image: binance-data-storage:latest
-    build: ./binance-data-storage
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      KAFKA_BROKER: kafka:9093
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-    depends_on:
-      - kafka
-      - elasticsearch
-
-  # indicator-calculator
-  indicator-calculator:
-    image: indicator-calculator:latest
-    build: ./indicator-calculator
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      KAFKA_BROKER: kafka:9093
-    depends_on:
-      - kafka
-
-  # grid-trader
-  grid-trader:
-    image: grid-trader:latest
-    build: ./grid-trader
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      KAFKA_BROKER: kafka:9093
-    depends_on:
-      - kafka
-
-  # macd-trader
-  macd-trader:
-    image: macd-trader:latest
-    build: ./macd-trader
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      KAFKA_BROKER: kafka:9093
-    depends_on:
-      - kafka
-
-  # telegram-bot
-  telegram-bot:
-    image: telegram-bot:latest
-    build: ./telegram-bot
-    environment:
-      TELEGRAM_API_KEY: "your_telegram_api_key"
-      KAFKA_BROKER: kafka:9093
-    depends_on:
-      - kafka
-
-volumes:
-  esdata1:
-    driver: local
-```
-
-### How to Build & Run
-**Build the microservices**: Use Maven to build all the Java microservices.
-
-```
+### Quick Setup
+```bash
+# 1. Build all services
 mvn clean install
+
+# 2. Configure environment
+cp testnet.env.example testnet.env
+# Edit testnet.env with your API keys
+
+# 3. Start the system
+docker-compose -f docker-compose-testnet.yml up -d
+
+# 4. Verify installation
+./docs/scripts/health-check-test.sh
 ```
 
-**Start the services**: Navigate to the root of the repository where the docker-compose.yml file is located and run:
+### Access Points
+- **Grafana Dashboard**: http://localhost:3001
+- **Service Health**: http://localhost:8083/actuator/health
+- **Elasticsearch**: http://localhost:9200
 
-```
-docker-compose up --build
-```
+📖 **[Detailed Setup Guide](docs/guides/QUICK_START.md)**
 
-**Check the logs**: Once all services are running, you can check their logs using Docker commands:
+## 🤝 Contributing
 
-```
-docker-compose logs -f <service_name>
-```
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-**Access the services**:
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch
+3. Follow DDD principles for service design
+4. Add tests for new functionality
+5. Submit a pull request
 
-Elasticsearch: http://localhost:9200
-Kafka: Use Kafka APIs to produce/consume data.
+## 📄 License
 
-### Contributing
-Feel free to create issues or submit pull requests. If you wish to contribute, please make sure to follow the DDD principles, ensuring that services are decoupled and well-structured.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🆘 Support
+
+- **Documentation**: [docs/README.md](docs/README.md)
+- **Issues**: [GitHub Issues](https://github.com/your-org/binance-ai-traders/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/binance-ai-traders/discussions)
+
+---
+
+**Status**: Active Development  
+**Version**: 2.0  
+**Last Updated**: 2025-01-05
