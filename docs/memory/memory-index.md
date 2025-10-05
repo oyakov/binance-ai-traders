@@ -39,13 +39,23 @@ This file serves as the central index for all memory entries in the documentatio
 | MEM-T001 | Service Documentation Template | Template | Active | 2024-12-25 | Services |
 | MEM-T002 | Finding Documentation Template | Template | Active | 2024-12-25 | Findings |
 
+## Infrastructure
+
+| ID | Title | Type | Status | Last Updated | Scope |
+|----|-------|------|--------|--------------|-------|
+| MEM-I001 | Docker Compose Files and Deployment Scripts Consolidation | Infrastructure | Active | 2024-12-25 | Global |
+| MEM-I002 | Deployment Scripts Index | Infrastructure | Active | 2024-12-25 | Global |
+| MEM-I003 | Infrastructure Quick Reference | Infrastructure | Active | 2024-12-25 | Global |
+| MEM-I004 | Infrastructure Documentation Overview | Infrastructure | Active | 2024-12-25 | Global |
+
 ## Memory Statistics
 
-- **Total Active Entries**: 16
+- **Total Active Entries**: 20
 - **Findings**: 11
 - **Updates**: 2
 - **Context**: 2
 - **Templates**: 2
+- **Infrastructure**: 4
 - **Last System Update**: 2024-12-25
 
 ## Quick Reference

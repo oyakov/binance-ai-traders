@@ -14,4 +14,4 @@ RUN ./mvnw package
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/binance-data-collection.jar"]
+CMD ["java", "-jar", "binance-data-collection/target/binance-data-collection.jar"]

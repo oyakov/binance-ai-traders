@@ -1,0 +1,291 @@
+# Docker Compose Template for Binance AI Traders
+# This template provides a standardized structure for all compose files
+
+version: '3.8'
+
+# Environment-specific configuration
+# Production: Use this template as-is
+# Testnet: Add -testnet suffix to service names and use different ports
+# Test: Add -test suffix to service names and use test-specific configurations
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-${ENVIRONMENT:-production}
+    environment:
+      POSTGRES_DB: binance_${ENVIRONMENT:-production}
+      POSTGRES_USER: binance_user
+      POSTGRES_PASSWORD: binance_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_${ENVIRONMENT:-production}_data:/var/lib/postgresql/data
+      - ./binance-trader-macd/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U binance_user -d binance_${ENVIRONMENT:-production}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch-${ENVIRONMENT:-production}
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=98%
+      - cluster.routing.allocation.disk.watermark.flood_stage=99%
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+    volumes:
+      - elasticsearch_${ENVIRONMENT:-production}_data:/usr/share/elasticsearch/data
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-${ENVIRONMENT:-production}
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-${ENVIRONMENT:-production}:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_PORT:-9092},PLAINTEXT_INTERNAL://kafka-${ENVIRONMENT:-production}:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+    depends_on:
+      zookeeper-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:${KAFKA_PORT:-9092}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper-${ENVIRONMENT:-production}
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "${ZOOKEEPER_PORT:-2181}:2181"
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.4.0
+    container_name: schema-registry-${ENVIRONMENT:-production}
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-${ENVIRONMENT:-production}
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-${ENVIRONMENT:-production}:29092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: none
+    ports:
+      - "${SCHEMA_REGISTRY_PORT:-8081}:8081"
+    depends_on:
+      kafka-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Application Services
+  binance-data-collection:
+    build:
+      context: .
+      dockerfile: binance-data-collection/Dockerfile
+    container_name: binance-data-collection-${ENVIRONMENT:-production}
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENVIRONMENT:-production}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-${ENVIRONMENT:-production}:29092
+      - SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL=http://schema-registry-${ENVIRONMENT:-production}:8081
+      - SERVER_PORT=8080
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    ports:
+      - "${DATA_COLLECTION_PORT:-8080}:8080"
+    depends_on:
+      kafka-${ENVIRONMENT:-production}:
+        condition: service_healthy
+      schema-registry-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  binance-data-storage:
+    build:
+      context: .
+      dockerfile: binance-data-storage/Dockerfile
+    container_name: binance-data-storage-${ENVIRONMENT:-production}
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENVIRONMENT:-production}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-${ENVIRONMENT:-production}:29092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-${ENVIRONMENT:-production}:5432/binance_${ENVIRONMENT:-production}
+      - SPRING_DATASOURCE_USERNAME=binance_user
+      - SPRING_DATASOURCE_PASSWORD=binance_password
+      - SPRING_DATA_ELASTICSEARCH_CLUSTER_NODES=elasticsearch-${ENVIRONMENT:-production}:9200
+      - SERVER_PORT=8080
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    ports:
+      - "${DATA_STORAGE_PORT:-8081}:8080"
+    depends_on:
+      kafka-${ENVIRONMENT:-production}:
+        condition: service_healthy
+      postgres-${ENVIRONMENT:-production}:
+        condition: service_healthy
+      elasticsearch-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  binance-trader-macd:
+    build:
+      context: .
+      dockerfile: binance-trader-macd/Dockerfile
+    container_name: binance-trader-macd-${ENVIRONMENT:-production}
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENVIRONMENT:-production}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-${ENVIRONMENT:-production}:29092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-${ENVIRONMENT:-production}:5432/binance_${ENVIRONMENT:-production}
+      - SPRING_DATASOURCE_USERNAME=binance_user
+      - SPRING_DATASOURCE_PASSWORD=binance_password
+      - BINANCE_REST_BASE_URL=${BINANCE_REST_BASE_URL:-https://api.binance.com}
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_API_SECRET=${BINANCE_API_SECRET}
+      - BINANCE_TRADER_TEST_ORDER_MODE_ENABLED=${BINANCE_TRADER_TEST_ORDER_MODE_ENABLED:-false}
+      - SERVER_PORT=8080
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    ports:
+      - "${TRADER_PORT:-8082}:8080"
+    depends_on:
+      kafka-${ENVIRONMENT:-production}:
+        condition: service_healthy
+      postgres-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Monitoring Services (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-${ENVIRONMENT:-production}
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-${ENVIRONMENT:-production}
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_${ENVIRONMENT:-production}_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards/${ENVIRONMENT:-production}:ro
+    depends_on:
+      prometheus-${ENVIRONMENT:-production}:
+        condition: service_healthy
+    networks:
+      - binance-${ENVIRONMENT:-production}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# Networks
+networks:
+  binance-${ENVIRONMENT:-production}-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  postgres_${ENVIRONMENT:-production}_data:
+    driver: local
+  elasticsearch_${ENVIRONMENT:-production}_data:
+    driver: local
+  grafana_${ENVIRONMENT:-production}_data:
+    driver: local
