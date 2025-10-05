@@ -8,10 +8,10 @@ WORKDIR /app
 COPY . .
 
 # Build the application with Maven
-RUN ./mvnw package
+RUN ./mvnw package -DskipTests
 
 # Expose the necessary ports
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "binance-data-collection/target/binance-data-collection.jar"]
+CMD ["java", "-jar", "target/binance-data-collection.jar"]

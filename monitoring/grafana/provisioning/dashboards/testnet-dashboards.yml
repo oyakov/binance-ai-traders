@@ -56,3 +56,12 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/system-health
+  - name: 'kline-data-dashboards'
+    orgId: 1
+    folder: 'Kline Data Monitoring'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/kline-data

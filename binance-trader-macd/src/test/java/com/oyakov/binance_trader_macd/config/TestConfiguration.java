@@ -8,8 +8,8 @@ import org.springframework.web.client.RestTemplate;
 import org.mockito.Mockito;
 
 @TestConfiguration
-@Profile("testnet")
-public class TestnetTestConfiguration {
+@Profile("test")
+public class TestConfiguration {
 
     @Bean
     @Primary
