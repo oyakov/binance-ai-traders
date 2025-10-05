@@ -11,10 +11,13 @@ services:
       - testnet.env
     environment:
       - SPRING_PROFILES_ACTIVE=testnet
-      - BINANCE_REST_BASE_URL=${BINANCE_REST_BASE_URL}
-      - BINANCE_API_KEY=${BINANCE_API_KEY}
-      - BINANCE_API_SECRET=${BINANCE_API_SECRET}
-      - BINANCE_TRADER_TEST_ORDER_MODE_ENABLED=${BINANCE_TRADER_TEST_ORDER_MODE_ENABLED}
+      - BINANCE_REST_BASE_URL=${BINANCE_REST_BASE_URL:-https://testnet.binance.vision}
+      - BINANCE_API_KEY=${BINANCE_API_KEY:-F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU}
+      - BINANCE_API_SECRET=${BINANCE_API_SECRET:-N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20}
+      - BINANCE_TRADER_TEST_ORDER_MODE_ENABLED=${BINANCE_TRADER_TEST_ORDER_MODE_ENABLED:-true}
+      - TESTNET_API_KEY=${TESTNET_API_KEY:-F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU}
+      - TESTNET_SECRET_KEY=${TESTNET_SECRET_KEY:-N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20}
+      - TESTNET_API_URL=${TESTNET_API_URL:-https://testnet.binance.vision}
     ports:
       - "8083:8080"
     depends_on:
@@ -61,6 +64,10 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=98%
+      - cluster.routing.allocation.disk.watermark.flood_stage=99%
     ports:
       - "9202:9200"
     volumes:
@@ -95,10 +102,11 @@ services:
       - testnet-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9093"]
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9095"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
   # Zookeeper for Kafka Testnet
   zookeeper-testnet:
@@ -112,6 +120,12 @@ services:
     networks:
       - testnet-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # Schema Registry for Testnet
   schema-registry-testnet:
@@ -128,6 +142,12 @@ services:
     networks:
       - testnet-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Prometheus for Testnet Monitoring
   prometheus-testnet:
@@ -147,6 +167,12 @@ services:
     networks:
       - testnet-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # Grafana for Testnet Dashboard
   grafana-testnet:
@@ -169,6 +195,12 @@ services:
     networks:
       - testnet-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 networks:
   testnet-network:

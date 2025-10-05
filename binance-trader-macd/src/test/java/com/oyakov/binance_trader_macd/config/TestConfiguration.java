@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 
 @TestConfiguration
 @Profile("testnet")
-public class ApiKeyTestConfiguration {
+public class TestConfiguration {
 
     @Bean
     @Primary

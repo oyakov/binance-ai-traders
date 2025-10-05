@@ -37,3 +37,22 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/strategies
+  - name: 'enhanced-trading-dashboard'
+    orgId: 1
+    folder: 'Enhanced Trading'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/enhanced-trading
+
+  - name: 'system-health-fixed'
+    orgId: 1
+    folder: 'System Health'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/system-health
