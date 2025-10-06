@@ -104,7 +104,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 
 ### PowerShell Scripts
 
-#### 1. Health Monitor (`docs/scripts/health-monitor.ps1`)
+#### 1. Health Monitor (`scripts/health-monitor.ps1`)
 
 **Purpose**: Monitor service health and create metrics
 **Parameters**:
@@ -117,7 +117,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 - Color-coded output
 - Service status summary
 
-#### 2. Testnet Monitor (`docs/scripts/monitor_testnet.ps1`)
+#### 2. Testnet Monitor (`scripts/monitor_testnet.ps1`)
 
 **Purpose**: Comprehensive testnet monitoring
 **Parameters**:
@@ -130,7 +130,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 - Detailed service summaries
 - Critical issue detection
 
-#### 3. API Key Testing (`docs/scripts/test-api-keys.ps1`)
+#### 3. API Key Testing (`scripts/test-api-keys.ps1`)
 
 **Purpose**: Comprehensive API key validation
 **Parameters**:
@@ -146,7 +146,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 - Negative testing
 - Performance and security tests
 
-#### 4. Strategy Launcher (`docs/scripts/launch_strategies.ps1`)
+#### 4. Strategy Launcher (`scripts/launch_strategies.ps1`)
 
 **Purpose**: Launch multiple trading strategies
 **Parameters**:
@@ -163,7 +163,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 - Service readiness checks
 - Strategy monitoring URLs
 
-#### 5. Trading Functionality Test (`docs/scripts/test-trading-functionality.ps1`)
+#### 5. Trading Functionality Test (`scripts/test-trading-functionality.ps1`)
 
 **Purpose**: Test trading functionality
 **Features**:
@@ -171,7 +171,7 @@ This document consolidates, normalizes, and documents all Docker Compose files a
 - API endpoint testing
 - Trading operation validation
 
-#### 6. Long-term Testnet Monitor (`docs/scripts/testnet_long_term_monitor.ps1`)
+#### 6. Long-term Testnet Monitor (`scripts/testnet_long_term_monitor.ps1`)
 
 **Purpose**: Long-term testnet monitoring
 **Features**:
@@ -308,7 +308,7 @@ sleep 30
 docker-compose up -d binance-data-collection
 
 # 4. Verify deployment
-./docs/scripts/health-monitor.ps1
+./scripts/health-monitor.ps1
 ```
 
 ### 2. Testnet Deployment
@@ -321,7 +321,7 @@ export TESTNET_SECRET_KEY=your_secret
 ./docs/scripts/deploy-testnet.sh
 
 # 3. Monitor testnet
-./docs/scripts/monitor_testnet.ps1
+./scripts/monitor_testnet.ps1
 ```
 
 ### 3. Testing Deployment

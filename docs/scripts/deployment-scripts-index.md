@@ -76,20 +76,20 @@ This document provides a comprehensive index of all deployment scripts in the Bi
 
 ```bash
 # Start health monitoring
-./docs/scripts/health-monitor.ps1 -IntervalSeconds 30
+./scripts/health-monitor.ps1 -IntervalSeconds 30
 
 # Monitor testnet specifically
-./docs/scripts/monitor_testnet.ps1 -IntervalSeconds 60
+./scripts/monitor_testnet.ps1 -IntervalSeconds 60
 
 # Long-term monitoring
-./docs/scripts/testnet_long_term_monitor.ps1
+./scripts/testnet_long_term_monitor.ps1
 ```
 
 ### 2. Testing Workflow
 
 ```bash
 # Test API keys
-./docs/scripts/test-api-keys.ps1 -Verbose
+./scripts/test-api-keys.ps1 -Verbose
 
 # Test Docker setup
 ./docs/scripts/docker-test.sh
@@ -108,10 +108,10 @@ This document provides a comprehensive index of all deployment scripts in the Bi
 ./docs/scripts/deploy-testnet.sh
 
 # Launch strategies
-./docs/scripts/launch_strategies.ps1 -LaunchAll
+./scripts/launch_strategies.ps1 -LaunchAll
 
 # Monitor strategies
-./docs/scripts/monitor_strategies.ps1
+./scripts/monitor_strategies.ps1
 ```
 
 ## Script Dependencies

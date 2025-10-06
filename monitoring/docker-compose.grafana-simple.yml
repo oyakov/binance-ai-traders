@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  prometheus-testnet:
+    image: prom/prometheus:latest
+    container_name: prometheus-testnet
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./grafana/datasources/prometheus-config.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - grafana-monitoring
+
+  grafana-testnet:
+    image: grafana/grafana:latest
+    container_name: grafana-testnet
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - grafana-monitoring
+    depends_on:
+      - prometheus-testnet
+
+networks:
+  grafana-monitoring:
+    driver: bridge
+
+volumes:
+  grafana-storage:

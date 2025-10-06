@@ -111,7 +111,8 @@ docker-compose -f docker-compose-testnet.yml up -d
 
 ### 🏗️ Development
 - **[Service Documentation](docs/services/README.md)** - Individual service guides
-- **[Scripts](docs/scripts/README.md)** - Automation and deployment
+- **[PowerShell Scripts](scripts/README.md)** - Windows automation and monitoring
+- **[Bash Scripts](docs/scripts/README.md)** - Linux/macOS automation
 - **[Infrastructure](docs/infrastructure/README.md)** - Docker and monitoring
 
 ### 📊 Analysis & Reports

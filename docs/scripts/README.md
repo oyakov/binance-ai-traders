@@ -2,6 +2,8 @@
 
 This directory contains all automation scripts for the Binance AI Traders project, organized by platform and purpose.
 
+Note: PowerShell scripts have moved to the top-level `scripts/` directory. Use `scripts/README.md` for Windows usage.
+
 ## 📁 Script Organization
 
 ### PowerShell Scripts (Windows)

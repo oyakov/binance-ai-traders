@@ -72,7 +72,7 @@ docker-compose up -d postgres elasticsearch kafka schema-registry
 docker-compose up -d binance-data-collection
 
 # Monitor health
-./docs/scripts/health-monitor.ps1
+./scripts/health-monitor.ps1
 ```
 
 ### 2. Testnet Deployment
@@ -85,7 +85,7 @@ export TESTNET_SECRET_KEY=your_testnet_secret
 ./docs/scripts/deploy-testnet.sh
 
 # Monitor testnet
-./docs/scripts/monitor_testnet.ps1
+./scripts/monitor_testnet.ps1
 ```
 
 ### 3. Testing

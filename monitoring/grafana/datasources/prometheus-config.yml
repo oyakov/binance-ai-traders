@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'binance-data-collection-testnet'
+    static_configs:
+      - targets: ['binance-data-collection-testnet:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    
+  - job_name: 'binance-data-storage-testnet'
+    static_configs:
+      - targets: ['binance-data-storage-testnet:8081']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    
+  - job_name: 'kafka-testnet'
+    static_configs:
+      - targets: ['kafka-testnet:9092']
+    scrape_interval: 15s
+    
+  - job_name: 'postgres-testnet'
+    static_configs:
+      - targets: ['postgres-testnet:5432']
+    scrape_interval: 15s
+    
+  - job_name: 'elasticsearch-testnet'
+    static_configs:
+      - targets: ['elasticsearch-testnet:9200']
+    scrape_interval: 15s

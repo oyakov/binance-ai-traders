@@ -69,10 +69,10 @@ You should see detailed backtesting results including:
 ### Windows
 ```powershell
 # Launch all strategies
-.\docs\scripts\launch_strategies.ps1 -LaunchAll
+.\scripts\launch_strategies.ps1 -LaunchAll
 
 # Launch specific strategy
-.\docs\scripts\launch_strategies.ps1 -LaunchBTC
+.\scripts\launch_strategies.ps1 -LaunchBTC
 ```
 
 ### Linux/macOS

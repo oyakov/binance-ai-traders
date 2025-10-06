@@ -23,7 +23,7 @@ docker-compose down
 ./docs/scripts/deploy-testnet.sh
 
 # Monitor testnet
-./docs/scripts/monitor_testnet.ps1
+./scripts/monitor_testnet.ps1
 
 # Stop testnet
 docker-compose -f docker-compose-testnet.yml down
@@ -104,13 +104,13 @@ docker-compose logs -f service-name
 ### Monitoring
 ```bash
 # Start health monitoring
-./docs/scripts/health-monitor.ps1
+./scripts/health-monitor.ps1
 
 # Monitor testnet
-./docs/scripts/monitor_testnet.ps1
+./scripts/monitor_testnet.ps1
 
 # Test API keys
-./docs/scripts/test-api-keys.ps1
+./scripts/test-api-keys.ps1
 ```
 
 ## Troubleshooting
@@ -194,7 +194,7 @@ sleep 30
 docker-compose up -d binance-data-collection
 
 # 5. Verify deployment
-./docs/scripts/health-monitor.ps1
+./scripts/health-monitor.ps1
 ```
 
 ### 2. Testnet Setup
@@ -207,7 +207,7 @@ export TESTNET_SECRET_KEY=your_testnet_secret
 ./docs/scripts/deploy-testnet.sh
 
 # 3. Monitor testnet
-./docs/scripts/monitor_testnet.ps1
+./scripts/monitor_testnet.ps1
 ```
 
 ### 3. Testing Setup

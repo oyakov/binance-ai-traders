@@ -11,7 +11,7 @@ This document summarizes the comprehensive restructuring of documentation and sc
 - **After**: Organized structure in `docs/` directory with clear categorization
 
 ### ✅ Script Organization
-- **Before**: Scripts scattered between root directory and `scripts/` folder
+- **Before**: Scripts scattered between root directory and docs
 - **After**: All scripts consolidated in `docs/scripts/` with comprehensive documentation
 
 ### ✅ Navigation Improvement
@@ -57,9 +57,9 @@ docs/
 - **Agents**: `AGENTS.md` moved to `docs/`
 
 ### Scripts
-- **PowerShell**: All `.ps1` files moved to `docs/scripts/`
-- **Shell**: All `.sh` files moved to `docs/scripts/`
-- **API Testing**: `test-api-keys.ps1` moved to `docs/scripts/`
+- **PowerShell**: All `.ps1` files moved to top-level `scripts/`
+- **Shell**: All `.sh` files remain in `docs/scripts/`
+- **API Testing**: `test-api-keys.ps1` moved to `scripts/`
 
 ## 📚 New Documentation Created
 

@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 
 @TestConfiguration
 @Profile("test")
-public class TestConfiguration {
+public class TestConfig {
 
     @Bean
     @Primary
