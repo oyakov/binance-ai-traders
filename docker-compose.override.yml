@@ -1,0 +1,31 @@
+# Docker Compose override for optimized builds
+# This file provides build optimizations that can be used with any docker-compose file
+
+version: '3.8'
+
+services:
+  binance-data-collection-testnet:
+    build:
+      context: .
+      dockerfile: binance-data-collection/Dockerfile
+      # Enable BuildKit for faster builds
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+      # Use multi-platform build cache
+      cache_from:
+        - binance-ai-traders_binance-data-collection-testnet:latest
+      # Target specific stage for faster builds
+      target: builder
+    # Optimize container resources
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Add build optimization environment variables
+    environment:
+      - MAVEN_OPTS=-Xmx512m -XX:+UseG1GC
+      - DOCKER_BUILDKIT=1

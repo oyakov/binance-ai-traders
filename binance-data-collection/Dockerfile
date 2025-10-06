@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy the Maven build files
 COPY . .
 
-# Build the application with Maven
-RUN ./mvnw package -DskipTests
+# Debug: List files and make mvnw executable and build the application with Maven
+RUN ls -la && chmod +x mvnw && ./mvnw package -pl binance-data-collection -am -DskipTests
 
 # Expose the necessary ports
 EXPOSE 8080

@@ -1,0 +1,76 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+docs/
+*.md
+README.md
+HELP.md
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+testnet_logs/
+testnet_reports/
+
+# Data directories
+data/
+kafka-data/
+
+# Python virtual environment
+telegram-frontend-python/venv/
+telegram-frontend-python/htmlcov/
+
+# Monitoring data
+monitoring/grafana/data/
+
+# Test files
+*.test.ps1
+test-*.ps1
+simple-*.ps1
+working-*.html
+
+# Docker files (except the one we need)
+docker-compose*.yml
+Dockerfile
+
+# Scripts
+scripts/
+*.ps1
+*.sh
+
+# Other
+LICENSE
+high_level_design.drawio
+simple-dashboard.json
+system-health-dashboard.html
+working-health-dashboard.html
+
+# Maven wrapper - needed for builds
+
+# Target directories (we'll build fresh)
+*/target/
+target/
+
+# Environment files
+*.env
+testnet.env
+
+# Node modules if any
+node_modules/
+
+# Temporary files
+*.tmp
+*.temp

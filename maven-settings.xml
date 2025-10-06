@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 
+          http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  
+  <!-- Local repository location -->
+  <localRepository>${user.home}/.m2/repository</localRepository>
+  
+  <!-- Mirrors for faster downloads -->
+  <mirrors>
+    <!-- Central repository mirror -->
+    <mirror>
+      <id>central-mirror</id>
+      <name>Central Repository Mirror</name>
+      <url>https://repo1.maven.org/maven2</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+    
+    <!-- Confluent repository mirror -->
+    <mirror>
+      <id>confluent-mirror</id>
+      <name>Confluent Repository Mirror</name>
+      <url>https://packages.confluent.io/maven/</url>
+      <mirrorOf>confluent</mirrorOf>
+    </mirror>
+  </mirrors>
+  
+  <!-- Profiles for optimization -->
+  <profiles>
+    <profile>
+      <id>docker-build</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!-- Parallel build threads -->
+        <maven.compiler.fork>true</maven.compiler.fork>
+        <maven.compiler.maxmem>512m</maven.compiler.maxmem>
+        
+        <!-- Skip tests by default in Docker -->
+        <skipTests>true</skipTests>
+        <maven.test.skip>true</maven.test.skip>
+        
+        <!-- Optimize for Docker builds -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <maven.source.skip>true</maven.source.skip>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <!-- Active profiles -->
+  <activeProfiles>
+    <activeProfile>docker-build</activeProfile>
+  </activeProfiles>
+</settings>
