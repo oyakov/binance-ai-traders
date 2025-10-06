@@ -1,0 +1,133 @@
+{
+  "id": "binance-ai-traders-testnet-env",
+  "name": "Binance AI Traders - Testnet Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "testnet_url",
+      "value": "https://testnet.binance.vision",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "api_key",
+      "value": "F4vS8U6mvUXST5TVbQbnMlUL4jOpQiI1Iy8QlVqXpVNMAxplu8pamFDZLB5mpOwU",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "api_secret",
+      "value": "N26b6O6QlHmprRf40wEECqAEQjaD4ijMdIx5GRdBk0e34iTnVDRmFxZzrjgleT20",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "trading_service_port",
+      "value": "8083",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "data_collection_port",
+      "value": "8086",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "postgres_port",
+      "value": "5433",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "elasticsearch_port",
+      "value": "9202",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "kafka_port",
+      "value": "9095",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "prometheus_port",
+      "value": "9091",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "grafana_port",
+      "value": "3001",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "schema_registry_port",
+      "value": "8082",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "zookeeper_port",
+      "value": "2182",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_symbol",
+      "value": "BTCUSDT",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_interval",
+      "value": "1m",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_limit",
+      "value": "100",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_timeout",
+      "value": "30000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_retry_count",
+      "value": "3",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_wait_time",
+      "value": "5000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_assertion_timeout",
+      "value": "10000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_metrics_interval",
+      "value": "30",
+      "enabled": true,
+      "type": "default"
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

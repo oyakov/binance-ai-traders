@@ -15,6 +15,14 @@ scrape_configs:
     scrape_interval: 30s
     scrape_timeout: 10s
 
+  # Binance Data Collection Testnet
+  - job_name: 'binance-data-collection-testnet'
+    static_configs:
+      - targets: ['binance-data-collection-testnet:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:

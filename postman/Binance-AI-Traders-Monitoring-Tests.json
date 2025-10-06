@@ -1,0 +1,814 @@
+{
+  "info": {
+    "name": "Binance AI Traders - Monitoring & Metrics Validation",
+    "description": "Specialized collection for monitoring system health, metrics validation, and Grafana dashboard testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "1. Prometheus Metrics Validation",
+      "item": [
+        {
+          "name": "1.1 Check All Service Targets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/targets",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "targets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Prometheus Targets API Response', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('data');",
+                  "    pm.expect(response.data).to.have.property('activeTargets');",
+                  "});",
+                  "",
+                  "pm.test('All Critical Services are Scraped', function () {",
+                  "    const response = pm.response.json();",
+                  "    const targets = response.data.activeTargets;",
+                  "    const criticalJobs = [",
+                  "        'binance-trader-macd-testnet',",
+                  "        'prometheus'",
+                  "    ];",
+                  "    ",
+                  "    criticalJobs.forEach(job => {",
+                  "        const target = targets.find(t => t.job === job);",
+                  "        pm.expect(target, `Target ${job} not found`).to.exist;",
+                  "        pm.expect(target.health, `Target ${job} is not healthy`).to.eql('up');",
+                  "        pm.expect(target.lastScrape, `Target ${job} has no last scrape time`).to.exist;",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('No Failed Targets', function () {",
+                  "    const response = pm.response.json();",
+                  "    const targets = response.data.activeTargets;",
+                  "    const failedTargets = targets.filter(t => t.health === 'down');",
+                  "    pm.expect(failedTargets.length, `Found ${failedTargets.length} failed targets`).to.eql(0);",
+                  "});",
+                  "",
+                  "pm.test('Scrape Intervals are Reasonable', function () {",
+                  "    const response = pm.response.json();",
+                  "    const targets = response.data.activeTargets;",
+                  "    targets.forEach(target => {",
+                  "        if (target.lastScrape) {",
+                  "            const lastScrape = new Date(target.lastScrape);",
+                  "            const now = new Date();",
+                  "            const timeDiff = now - lastScrape;",
+                  "            pm.expect(timeDiff, `Target ${target.job} last scrape too old`).to.be.below(300000); // 5 minutes",
+                  "        }",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 Query System Uptime Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=up",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "up"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Prometheus Query API Response', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('Up Metrics Available', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('data');",
+                  "    pm.expect(response.data).to.have.property('result');",
+                  "    pm.expect(response.data.result).to.be.an('array');",
+                  "    pm.expect(response.data.result.length).to.be.at.least(1);",
+                  "});",
+                  "",
+                  "pm.test('Trading Service is UP', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const tradingService = results.find(r => r.metric.job === 'binance-trader-macd-testnet');",
+                  "    pm.expect(tradingService, 'Trading service not found in up metrics').to.exist;",
+                  "    pm.expect(tradingService.value[1], 'Trading service is not up').to.eql('1');",
+                  "});",
+                  "",
+                  "pm.test('Prometheus is UP', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const prometheus = results.find(r => r.metric.job === 'prometheus');",
+                  "    pm.expect(prometheus, 'Prometheus not found in up metrics').to.exist;",
+                  "    pm.expect(prometheus.value[1], 'Prometheus is not up').to.eql('1');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.3 Query JVM Memory Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=jvm_memory_used_bytes",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "jvm_memory_used_bytes"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('JVM Memory Metrics Query', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('JVM Memory Metrics Available', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('data');",
+                  "    pm.expect(response.data).to.have.property('result');",
+                  "    pm.expect(response.data.result).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Trading Service Memory Usage', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const tradingService = results.find(r => r.metric.job === 'binance-trader-macd-testnet');",
+                  "    pm.expect(tradingService, 'Trading service memory metrics not found').to.exist;",
+                  "    ",
+                  "    const memoryUsed = parseFloat(tradingService.value[1]);",
+                  "    pm.expect(memoryUsed, 'Memory usage should be positive').to.be.at.least(0);",
+                  "    pm.expect(memoryUsed, 'Memory usage should be reasonable').to.be.below(1073741824); // Less than 1GB",
+                  "});",
+                  "",
+                  "pm.test('Memory Usage by Area', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const memoryAreas = ['heap', 'nonheap'];",
+                  "    ",
+                  "    memoryAreas.forEach(area => {",
+                  "        const areaMetric = results.find(r => r.metric.area === area);",
+                  "        pm.expect(areaMetric, `Memory metrics for ${area} not found`).to.exist;",
+                  "        ",
+                  "        const memoryUsed = parseFloat(areaMetric.value[1]);",
+                  "        pm.expect(memoryUsed, `${area} memory usage should be positive`).to.be.at.least(0);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.4 Query HTTP Request Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=http_server_requests_seconds_count",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "http_server_requests_seconds_count"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('HTTP Request Metrics Query', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('HTTP Request Metrics Available', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('data');",
+                  "    pm.expect(response.data).to.have.property('result');",
+                  "    pm.expect(response.data.result).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Trading Service HTTP Requests', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const tradingService = results.find(r => r.metric.job === 'binance-trader-macd-testnet');",
+                  "    pm.expect(tradingService, 'Trading service HTTP metrics not found').to.exist;",
+                  "    ",
+                  "    const requestCount = parseFloat(tradingService.value[1]);",
+                  "    pm.expect(requestCount, 'Request count should be non-negative').to.be.at.least(0);",
+                  "});",
+                  "",
+                  "pm.test('HTTP Status Code Distribution', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    const statusCodes = ['200', '404', '500'];",
+                  "    ",
+                  "    statusCodes.forEach(code => {",
+                  "        const statusMetric = results.find(r => r.metric.status === code);",
+                  "        if (statusMetric) {",
+                  "            const count = parseFloat(statusMetric.value[1]);",
+                  "            pm.expect(count, `Status ${code} count should be non-negative`).to.be.at.least(0);",
+                  "        }",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Grafana Dashboard Validation",
+      "item": [
+        {
+          "name": "2.1 Check Grafana API Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46dGVzdG5ldF9hZG1pbg==",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}:{{grafana_port}}/api/health",
+              "host": ["{{base_url}}"],
+              "port": "{{grafana_port}}",
+              "path": ["api", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Grafana API Health', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('database');",
+                  "    pm.expect(response.database).to.eql('ok');",
+                  "});",
+                  "",
+                  "pm.test('Grafana Version Available', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('version');",
+                  "    pm.expect(response.version).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test('Response Time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Validate Data Sources",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46dGVzdG5ldF9hZG1pbg==",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}:{{grafana_port}}/api/datasources",
+              "host": ["{{base_url}}"],
+              "port": "{{grafana_port}}",
+              "path": ["api", "datasources"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Data Sources API Response', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Prometheus Data Source Exists', function () {",
+                  "    const response = pm.response.json();",
+                  "    const prometheusDS = response.find(ds => ds.type === 'prometheus');",
+                  "    pm.expect(prometheusDS, 'Prometheus data source not found').to.exist;",
+                  "    pm.expect(prometheusDS.url).to.include('prometheus');",
+                  "});",
+                  "",
+                  "pm.test('Data Source Configuration', function () {",
+                  "    const response = pm.response.json();",
+                  "    const prometheusDS = response.find(ds => ds.type === 'prometheus');",
+                  "    pm.expect(prometheusDS).to.have.property('access');",
+                  "    pm.expect(prometheusDS.access).to.eql('proxy');",
+                  "    pm.expect(prometheusDS).to.have.property('isDefault');",
+                  "    pm.expect(prometheusDS.isDefault).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 Test Data Source Connectivity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46dGVzdG5ldF9hZG1pbg==",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"queries\": [\n    {\n      \"refId\": \"A\",\n      \"expr\": \"up\",\n      \"range\": true,\n      \"start\": \"{{$timestamp}}\",\n      \"end\": \"{{$timestamp}}\"\n    }\n  ],\n  \"from\": \"{{$timestamp}}\",\n  \"to\": \"{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}:{{grafana_port}}/api/ds/query",
+              "host": ["{{base_url}}"],
+              "port": "{{grafana_port}}",
+              "path": ["api", "ds", "query"]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Set timestamp for query",
+                  "const timestamp = Math.floor(Date.now() / 1000);",
+                  "pm.environment.set('$timestamp', timestamp);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Data Source Query Response', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('results');",
+                  "});",
+                  "",
+                  "pm.test('Query Results Available', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.results;",
+                  "    pm.expect(results).to.have.property('A');",
+                  "    pm.expect(results.A).to.have.property('frames');",
+                  "    pm.expect(results.A.frames).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Up Metrics Query Success', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.results;",
+                  "    const frames = results.A.frames;",
+                  "    pm.expect(frames.length).to.be.at.least(1);",
+                  "    ",
+                  "    const frame = frames[0];",
+                  "    pm.expect(frame).to.have.property('data');",
+                  "    pm.expect(frame.data).to.have.property('values');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 List Available Dashboards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46dGVzdG5ldF9hZG1pbg==",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}:{{grafana_port}}/api/search?type=dash-db",
+              "host": ["{{base_url}}"],
+              "port": "{{grafana_port}}",
+              "path": ["api", "search"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "dash-db"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dashboards API Response', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Kline Dashboard Exists', function () {",
+                  "    const response = pm.response.json();",
+                  "    const klineDashboard = response.find(d => d.title.includes('Kline'));",
+                  "    pm.expect(klineDashboard, 'Kline dashboard not found').to.exist;",
+                  "    pm.expect(klineDashboard).to.have.property('uid');",
+                  "    pm.expect(klineDashboard).to.have.property('url');",
+                  "});",
+                  "",
+                  "pm.test('Trading Dashboard Exists', function () {",
+                  "    const response = pm.response.json();",
+                  "    const tradingDashboard = response.find(d => d.title.includes('Trading') || d.title.includes('Binance'));",
+                  "    pm.expect(tradingDashboard, 'Trading dashboard not found').to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Custom Metrics Validation",
+      "item": [
+        {
+          "name": "3.1 Check Trading Service Custom Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{trading_service_port}}/actuator/prometheus",
+              "host": ["{{base_url}}"],
+              "port": "{{trading_service_port}}",
+              "path": ["actuator", "prometheus"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Trading Service Metrics Available', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const metrics = pm.response.text;",
+                  "    pm.expect(metrics).to.include('jvm_');",
+                  "});",
+                  "",
+                  "pm.test('Custom Trading Metrics Present', function () {",
+                  "    const metrics = pm.response.text;",
+                  "    const customMetrics = [",
+                  "        'binance_trader_',",
+                  "        'trading_signals_total',",
+                  "        'trading_orders_total',",
+                  "        'trading_pnl_total'",
+                  "    ];",
+                  "    ",
+                  "    customMetrics.forEach(metric => {",
+                  "        pm.expect(metrics, `Custom metric ${metric} not found`).to.include(metric);",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('JVM Metrics Present', function () {",
+                  "    const metrics = pm.response.text;",
+                  "    const jvmMetrics = [",
+                  "        'jvm_memory_used_bytes',",
+                  "        'jvm_gc_pause_seconds',",
+                  "        'jvm_threads_live_threads'",
+                  "    ];",
+                  "    ",
+                  "    jvmMetrics.forEach(metric => {",
+                  "        pm.expect(metrics, `JVM metric ${metric} not found`).to.include(metric);",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('HTTP Metrics Present', function () {",
+                  "    const metrics = pm.response.text;",
+                  "    const httpMetrics = [",
+                  "        'http_server_requests_seconds',",
+                  "        'http_server_requests_seconds_count',",
+                  "        'http_server_requests_seconds_sum'",
+                  "    ];",
+                  "    ",
+                  "    httpMetrics.forEach(metric => {",
+                  "        pm.expect(metrics, `HTTP metric ${metric} not found`).to.include(metric);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 Validate Metrics Format",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{trading_service_port}}/actuator/prometheus",
+              "host": ["{{base_url}}"],
+              "port": "{{trading_service_port}}",
+              "path": ["actuator", "prometheus"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Metrics Format Validation', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const metrics = pm.response.text;",
+                  "    const lines = metrics.split('\\n');",
+                  "    ",
+                  "    // Check for proper Prometheus format",
+                  "    const metricLines = lines.filter(line => line.trim() && !line.startsWith('#'));",
+                  "    pm.expect(metricLines.length).to.be.at.least(10);",
+                  "    ",
+                  "    // Validate metric format",
+                  "    metricLines.forEach(line => {",
+                  "        if (line.includes(' ')) {",
+                  "            const parts = line.split(' ');",
+                  "            pm.expect(parts.length).to.be.at.least(2);",
+                  "            ",
+                  "            // Check if value is numeric",
+                  "            const value = parseFloat(parts[parts.length - 1]);",
+                  "            pm.expect(value, `Invalid metric value: ${line}`).to.not.be.NaN;",
+                  "        }",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('Metric Names are Valid', function () {",
+                  "    const metrics = pm.response.text;",
+                  "    const lines = metrics.split('\\n');",
+                  "    const metricLines = lines.filter(line => line.trim() && !line.startsWith('#'));",
+                  "    ",
+                  "    metricLines.forEach(line => {",
+                  "        if (line.includes(' ')) {",
+                  "            const metricName = line.split(' ')[0];",
+                  "            // Check for valid metric name format",
+                  "            pm.expect(metricName, `Invalid metric name: ${metricName}`).to.match(/^[a-zA-Z_:][a-zA-Z0-9_:]*$/);",
+                  "        }",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. System Performance Monitoring",
+      "item": [
+        {
+          "name": "4.1 Check System Resource Usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=process_resident_memory_bytes",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "process_resident_memory_bytes"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('System Resource Metrics Query', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('Memory Usage is Reasonable', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    ",
+                  "    results.forEach(result => {",
+                  "        const memoryUsed = parseFloat(result.value[1]);",
+                  "        pm.expect(memoryUsed, 'Memory usage should be positive').to.be.at.least(0);",
+                  "        pm.expect(memoryUsed, 'Memory usage should be reasonable (< 2GB)').to.be.below(2147483648);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Check CPU Usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=process_cpu_seconds_total",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "process_cpu_seconds_total"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('CPU Usage Metrics Query', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('CPU Usage is Reasonable', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    ",
+                  "    results.forEach(result => {",
+                  "        const cpuUsed = parseFloat(result.value[1]);",
+                  "        pm.expect(cpuUsed, 'CPU usage should be non-negative').to.be.at.least(0);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 Check Response Times",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{prometheus_port}}/api/v1/query?query=http_server_requests_seconds",
+              "host": ["{{base_url}}"],
+              "port": "{{prometheus_port}}",
+              "path": ["api", "v1", "query"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "http_server_requests_seconds"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Response Time Metrics Query', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response.status).to.eql('success');",
+                  "});",
+                  "",
+                  "pm.test('Response Times are Reasonable', function () {",
+                  "    const response = pm.response.json();",
+                  "    const results = response.data.result;",
+                  "    ",
+                  "    results.forEach(result => {",
+                  "        const responseTime = parseFloat(result.value[1]);",
+                  "        pm.expect(responseTime, 'Response time should be non-negative').to.be.at.least(0);",
+                  "        pm.expect(responseTime, 'Response time should be reasonable (< 5s)').to.be.below(5);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Global pre-request script for monitoring tests",
+          "console.log('Starting monitoring test execution at:', new Date().toISOString());",
+          "",
+          "// Set test start time",
+          "pm.environment.set('monitoring_test_start_time', Date.now());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Global test script for monitoring tests",
+          "const testEndTime = Date.now();",
+          "const testStartTime = pm.environment.get('monitoring_test_start_time');",
+          "const totalTestTime = testEndTime - testStartTime;",
+          "",
+          "console.log('Monitoring test completed in:', totalTestTime, 'ms');",
+          "",
+          "// Log test results with monitoring context",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    console.log('✅ Monitoring test passed:', pm.info.name);",
+          "} else {",
+          "    console.log('❌ Monitoring test failed:', pm.info.name, 'Status:', pm.response.code);",
+          "    ",
+          "    // Log additional context for monitoring failures",
+          "    if (pm.response.text) {",
+          "        console.log('Response body:', pm.response.text.substring(0, 500));",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "collection_version",
+      "value": "1.0.0",
+      "type": "string"
+    },
+    {
+      "key": "monitoring_timeout",
+      "value": "30000",
+      "type": "string"
+    },
+    {
+      "key": "metrics_validation_enabled",
+      "value": "true",
+      "type": "string"
+    }
+  ]
+}

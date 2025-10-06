@@ -14,4 +14,4 @@ RUN ls -la && chmod +x mvnw && ./mvnw package -pl binance-data-collection -am -D
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/binance-data-collection.jar"]
+CMD ["java", "-jar", "binance-data-collection/target/binance-data-collection.jar"]
