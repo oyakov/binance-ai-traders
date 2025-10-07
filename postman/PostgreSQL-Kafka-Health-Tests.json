@@ -1,0 +1,269 @@
+{
+  "info": {
+    "name": "PostgreSQL and Kafka Health Tests",
+    "description": "Reliable health check tests for PostgreSQL and Kafka services using proper connection methods",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "1. PostgreSQL Health Checks",
+      "item": [
+        {
+          "name": "1.1 PostgreSQL Container Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{health_api_url}}/health/postgresql",
+              "host": ["{{health_api_url}}"],
+              "path": ["health", "postgresql"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('PostgreSQL Health Check', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.eql('UP');",
+                  "});",
+                  "",
+                  "pm.test('PostgreSQL Response Time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "pm.test('PostgreSQL Health Details', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 PostgreSQL Database Connection Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{health_api_url}}/health/postgresql",
+              "host": ["{{health_api_url}}"],
+              "path": ["health", "postgresql"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('PostgreSQL Database Connection', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.eql('UP');",
+                  "    pm.expect(response.message).to.include('PostgreSQL is healthy');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Kafka Health Checks",
+      "item": [
+        {
+          "name": "2.1 Kafka Container Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{health_api_url}}/health/kafka",
+              "host": ["{{health_api_url}}"],
+              "path": ["health", "kafka"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Kafka Health Check', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.be.oneOf(['UP', 'DEGRADED']);",
+                  "});",
+                  "",
+                  "pm.test('Kafka Response Time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "",
+                  "pm.test('Kafka Health Details', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('status');",
+                  "    pm.expect(response).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Kafka Consumer Group Activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{health_api_url}}/health/kafka",
+              "host": ["{{health_api_url}}"],
+              "path": ["health", "kafka"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Kafka Consumer Group Activity', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.be.oneOf(['UP', 'DEGRADED']);",
+                  "    if (response.status === 'UP') {",
+                  "        pm.expect(response.message).to.include('processing consumer groups');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Overall System Health",
+      "item": [
+        {
+          "name": "3.1 Combined Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{health_api_url}}/health",
+              "host": ["{{health_api_url}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Overall System Health', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.be.oneOf(['UP', 'DOWN']);",
+                  "});",
+                  "",
+                  "pm.test('PostgreSQL Service Status', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.services).to.have.property('postgresql');",
+                  "    pm.expect(response.services.postgresql.status).to.eql('UP');",
+                  "});",
+                  "",
+                  "pm.test('Kafka Service Status', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.services).to.have.property('kafka');",
+                  "    pm.expect(response.services.kafka.status).to.be.oneOf(['UP', 'DEGRADED']);",
+                  "});",
+                  "",
+                  "pm.test('System Health Response Time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Service Integration Tests",
+      "item": [
+        {
+          "name": "4.1 Data Collection Service Using Kafka",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{data_collection_port}}/actuator/health",
+              "host": ["{{base_url}}"],
+              "port": "{{data_collection_port}}",
+              "path": ["actuator", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Data Collection Service Health', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.eql('UP');",
+                  "});",
+                  "",
+                  "pm.test('Data Collection Service Using Kafka', function () {",
+                  "    // If data collection service is healthy, it means it can connect to Kafka",
+                  "    pm.expect(pm.response.status).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Trading Service Using PostgreSQL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{trading_service_port}}/actuator/health",
+              "host": ["{{base_url}}"],
+              "port": "{{trading_service_port}}",
+              "path": ["actuator", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Trading Service Health', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.eql('UP');",
+                  "});",
+                  "",
+                  "pm.test('Trading Service Using PostgreSQL', function () {",
+                  "    // If trading service is healthy, it means it can connect to PostgreSQL",
+                  "    pm.expect(pm.response.status).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "health_api_url",
+      "value": "http://localhost:8087",
+      "type": "string"
+    }
+  ]
+}

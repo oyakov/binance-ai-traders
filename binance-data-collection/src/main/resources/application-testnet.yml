@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8080
 spring:
   application:
     name: binance-data-collection
@@ -53,4 +53,20 @@ binance:
       kafka-consumer-group: binance-data-collection
       intervals: 5m,15m,1h,1d,1w,1M
       symbols: btcusdt,ethusdt
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
 
