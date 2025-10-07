@@ -1,6 +1,7 @@
 package com.oyakov.binance_data_storage.service.impl;
 
 import com.oyakov.binance_data_storage.mapper.KlineMapper;
+import com.oyakov.binance_data_storage.metrics.DataStorageMetrics;
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.DataItemWrittenNotification;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineFingerprint;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
@@ -8,6 +9,7 @@ import com.oyakov.binance_data_storage.repository.elastic.KlineElasticRepository
 import com.oyakov.binance_data_storage.repository.jpa.KlinePostgresRepository;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.ObjectProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
@@ -33,17 +35,20 @@ public class KlineDataService implements KlineDataServiceApi {
     private final KlineMapper klineMapper;
     private final Optional<KlineElasticRepository> elasticRepository;
     private final Optional<KlinePostgresRepository> postgresRepository;
+    private final DataStorageMetrics metrics;
 
     public KlineDataService(List<CrudRepository<KlineItem, ?>> repositories,
                           ApplicationEventPublisher eventPublisher,
                           KlineMapper klineMapper,
                           ObjectProvider<KlineElasticRepository> elasticRepositoryProvider,
-                          ObjectProvider<KlinePostgresRepository> postgresRepositoryProvider) {
+                          ObjectProvider<KlinePostgresRepository> postgresRepositoryProvider,
+                          DataStorageMetrics metrics) {
         this.repositories = repositories;
         this.eventPublisher = eventPublisher;
         this.klineMapper = klineMapper;
         this.elasticRepository = Optional.ofNullable(elasticRepositoryProvider.getIfAvailable());
         this.postgresRepository = Optional.ofNullable(postgresRepositoryProvider.getIfAvailable());
+        this.metrics = metrics;
     }
 
     @PostConstruct
@@ -80,36 +85,73 @@ public class KlineDataService implements KlineDataServiceApi {
     @Override
     @Transactional
     public void saveKlineData(KlineEvent event) {
-        KlineItem klineItem = klineMapper.toItem(event);
-        
-        boolean persisted = false;
-
+        Timer.Sample sample = metrics.startKlineEventProcessing();
         try {
-            if (postgresRepository.isPresent()) {
-                postgresRepository.get().upsertKline(klineItem);
-                persisted = true;
-            } else {
-                log.warn("Postgres repository is unavailable; skipping persistence for {}", klineItem);
-            }
+            KlineItem klineItem = klineMapper.toItem(event);
+            
+            boolean persisted = false;
+            boolean postgresSuccess = false;
+            boolean elasticsearchSuccess = false;
 
-            if (elasticRepository.isPresent()) {
-                elasticRepository.get().save(klineItem);
-                persisted = true;
-            } else {
-                log.warn("Elasticsearch repository is unavailable; skipping persistence for {}", klineItem);
-            }
+            try {
+                if (postgresRepository.isPresent()) {
+                    Timer.Sample postgresSample = metrics.startPostgresSave();
+                    try {
+                        postgresRepository.get().upsertKline(klineItem);
+                        postgresSuccess = true;
+                        persisted = true;
+                        metrics.incrementPostgresSaves();
+                        log.debug("Successfully saved to PostgreSQL: {}", klineItem);
+                    } catch (Exception e) {
+                        metrics.incrementPostgresSaveFailures();
+                        log.error("Failed to save to PostgreSQL: {}", klineItem, e);
+                        throw e;
+                    } finally {
+                        metrics.recordPostgresSaveTime(postgresSample);
+                    }
+                } else {
+                    log.warn("Postgres repository is unavailable; skipping persistence for {}", klineItem);
+                    metrics.setPostgresConnectionStatus(false);
+                }
 
-            if (persisted) {
-                eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
-                log.info("Kline data saved successfully: {}", klineItem);
-            } else {
-                String message = "No storage repositories available for kline data persistence";
-                log.error("{}: {}", message, klineItem);
-                eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, message, null));
+                if (elasticRepository.isPresent()) {
+                    Timer.Sample elasticsearchSample = metrics.startElasticsearchSave();
+                    try {
+                        elasticRepository.get().save(klineItem);
+                        elasticsearchSuccess = true;
+                        persisted = true;
+                        metrics.incrementElasticsearchSaves();
+                        log.debug("Successfully saved to Elasticsearch: {}", klineItem);
+                    } catch (Exception e) {
+                        metrics.incrementElasticsearchSaveFailures();
+                        log.error("Failed to save to Elasticsearch: {}", klineItem, e);
+                        throw e;
+                    } finally {
+                        metrics.recordElasticsearchSaveTime(elasticsearchSample);
+                    }
+                } else {
+                    log.warn("Elasticsearch repository is unavailable; skipping persistence for {}", klineItem);
+                    metrics.setElasticsearchConnectionStatus(false);
+                }
+
+                if (persisted) {
+                    metrics.incrementKlineEventsSaved(event.getSymbol(), event.getInterval());
+                    eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
+                    log.info("Kline data saved successfully: {}", klineItem);
+                } else {
+                    String message = "No storage repositories available for kline data persistence";
+                    log.error("{}: {}", message, klineItem);
+                    metrics.incrementKlineEventsFailed(event.getSymbol(), event.getInterval(), "NoRepositories");
+                    eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, message, null));
+                }
+            } catch (Exception e) {
+                log.error("Failed to save kline data: {}", klineItem, e);
+                metrics.incrementKlineEventsFailed(event.getSymbol(), event.getInterval(), e.getClass().getSimpleName());
+                eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, e.getMessage(), e));
+                throw e;
             }
-        } catch (Exception e) {
-            log.error("Failed to save kline data: {}", klineItem, e);
-            eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, e.getMessage(), e));
+        } finally {
+            metrics.recordKlineEventProcessingTime(sample);
         }
     }
 
@@ -125,16 +167,33 @@ public class KlineDataService implements KlineDataServiceApi {
         
         try {
             elasticRepository.ifPresentOrElse(
-                    repository -> repository.deleteByFingerprint(fingerprint),
+                    repository -> {
+                        try {
+                            repository.deleteByFingerprint(fingerprint);
+                            log.debug("Successfully rolled back from Elasticsearch: {}", fingerprint);
+                        } catch (Exception e) {
+                            log.error("Failed to rollback from Elasticsearch: {}", fingerprint, e);
+                            throw e;
+                        }
+                    },
                     () -> log.warn("Elasticsearch repository unavailable during rollback for {}", fingerprint)
             );
 
             postgresRepository.ifPresentOrElse(
-                    repository -> repository.deleteByFingerprint(fingerprint),
+                    repository -> {
+                        try {
+                            repository.deleteByFingerprint(fingerprint);
+                            log.debug("Successfully rolled back from PostgreSQL: {}", fingerprint);
+                        } catch (Exception e) {
+                            log.error("Failed to rollback from PostgreSQL: {}", fingerprint, e);
+                            throw e;
+                        }
+                    },
                     () -> log.warn("Postgres repository unavailable during rollback for {}", fingerprint)
             );
 
             if (elasticRepository.isPresent() || postgresRepository.isPresent()) {
+                metrics.incrementKlineEventsCompensated();
                 log.info("Successfully rolled back kline data with fingerprint: {}", fingerprint);
             } else {
                 log.warn("No repositories available to rollback kline data for fingerprint: {}", fingerprint);

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyakov.binance_data_collection.domain.kline.KlineStream;
 import com.oyakov.binance_data_collection.domain.kline.KlineStreamCache;
 import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
+import com.oyakov.binance_data_collection.metrics.DataCollectionMetrics;
 import com.oyakov.binance_data_collection.model.binance.BinanceWebsocketEventData;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
+import io.micrometer.core.instrument.Timer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +28,7 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
     private final KafkaProducerService kafkaProducerService;
     private final KlineStreamCache klineStreamCache;
     private final ConversionService conversionService;
+    private final DataCollectionMetrics metrics;
 
     @Override
     protected void handleTextMessage(WebSocketSession session, @NonNull TextMessage message) {
@@ -36,29 +39,41 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
     }
 
     private void handleKlineUpdate(KlineStream klineStream, TextMessage message) {
-        String payload = message.getPayload();
-        log.debug("Received message: {} for session {}", payload, klineStream.session().getId());
-        BinanceWebsocketEventData eventData;
+        Timer.Sample sample = metrics.startKlineEventProcessing();
         try {
-            eventData = MAPPER.readValue(payload, BinanceWebsocketEventData.class);
-        } catch (JsonProcessingException e) {
-            log.error("Error decoding binance kline event data", e);
-            throw new RuntimeException(e);
-        }
+            String payload = message.getPayload();
+            log.debug("Received message: {} for session {}", payload, klineStream.session().getId());
+            BinanceWebsocketEventData eventData;
+            try {
+                eventData = MAPPER.readValue(payload, BinanceWebsocketEventData.class);
+            } catch (JsonProcessingException e) {
+                log.error("Error decoding binance kline event data", e);
+                throw new RuntimeException(e);
+            }
 
-        log.debug("Parsed message: {}", eventData);
-        long newOpenTime = eventData.getKline().getOpenTime();
-        long newCloseTime = eventData.getKline().getCloseTime();
+            log.debug("Parsed message: {}", eventData);
+            long newOpenTime = eventData.getKline().getOpenTime();
+            long newCloseTime = eventData.getKline().getCloseTime();
 
-        if (newOpenTime != klineStream.lastOpenTime() || newCloseTime != klineStream.lastCloseTime()) {
-            log.debug("New kline received");
-            KlineStream updatedKlineStream = klineStream.withTimestamps(newOpenTime, newCloseTime);
-            klineStreamCache.putStreamSource(updatedKlineStream);
+            if (newOpenTime != klineStream.lastOpenTime() || newCloseTime != klineStream.lastCloseTime()) {
+                log.debug("New kline received");
+                KlineStream updatedKlineStream = klineStream.withTimestamps(newOpenTime, newCloseTime);
+                klineStreamCache.putStreamSource(updatedKlineStream);
 
-            KlineEvent klineEvent = conversionService.convert(eventData, KlineEvent.class);
-            kafkaProducerService.sendKlineEvent(klineEvent);
-        } else {
-            log.debug("Kline update received with already existing timestamp {}", eventData);
+                KlineEvent klineEvent = conversionService.convert(eventData, KlineEvent.class);
+                
+                // Record metrics for the received kline event
+                metrics.incrementKlineEventsReceived(
+                    klineEvent.getSymbol(), 
+                    klineEvent.getInterval()
+                );
+                
+                kafkaProducerService.sendKlineEvent(klineEvent);
+            } else {
+                log.debug("Kline update received with already existing timestamp {}", eventData);
+            }
+        } finally {
+            metrics.recordKlineEventProcessingTime(sample);
         }
     }
 

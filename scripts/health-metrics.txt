@@ -1,0 +1,8 @@
+postgres_container_up{environment="testnet"} 1
+postgres_ready{environment="testnet"} 1
+kafka_container_up{environment="testnet"} 1
+kafka_active{environment="testnet"} 1
+elasticsearch_container_up{environment="testnet"} 1
+elasticsearch_healthy{environment="testnet"} 1
+trading_service_up{environment="testnet"} 1
+data_collection_service_up{environment="testnet"} 1

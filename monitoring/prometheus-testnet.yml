@@ -28,21 +28,9 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # PostgreSQL Testnet
-  - job_name: 'postgres-testnet'
-    static_configs:
-      - targets: ['postgres-testnet:5432']
-    scrape_interval: 60s
-
-  # Elasticsearch Testnet
-  - job_name: 'elasticsearch-testnet'
-    static_configs:
-      - targets: ['elasticsearch-testnet:9200']
-    metrics_path: '/_prometheus/metrics'
-    scrape_interval: 60s
-
-  # Kafka Testnet
-  - job_name: 'kafka-testnet'
-    static_configs:
-      - targets: ['kafka-testnet:9093']
-    scrape_interval: 60s
+  # Note: PostgreSQL, Elasticsearch, and Kafka don't expose Prometheus metrics by default
+  # These services are monitored through application health checks instead
+  # If you need metrics for these services, consider adding Prometheus exporters:
+  # - postgres_exporter for PostgreSQL
+  # - elasticsearch_exporter for Elasticsearch  
+  # - kafka_exporter for Kafka

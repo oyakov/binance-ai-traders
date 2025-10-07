@@ -3,9 +3,11 @@ package com.oyakov.binance_data_collection.domain.kline;
 import com.oyakov.binance_data_collection.URLFormatter;
 import com.oyakov.binance_data_collection.config.BinanceDataCollectionConfig;
 import com.oyakov.binance_data_collection.kafka.producer.KafkaProducerService;
+import com.oyakov.binance_data_collection.metrics.DataCollectionMetrics;
 import com.oyakov.binance_data_collection.rest.client.binance.BinanceRestKlineClient;
 import com.oyakov.binance_data_collection.websocket.handler.BinanceTextMessageHandler;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
+import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -32,6 +34,7 @@ public class KlineStreamManagerBinance {
     private final BinanceRestKlineClient restKlineClient;
     private final URLFormatter urlFormatter;
     private final KafkaProducerService kafkaProducerService;
+    private final DataCollectionMetrics metrics;
 
     @PostConstruct
     public void init() {
@@ -74,23 +77,50 @@ public class KlineStreamManagerBinance {
                         .collect(Collectors.toSet());
         Set<String> closedSessions = klineStreamCache.closeStreamSources(toClose);
         log.info("Closed sessions: {}", closedSessions);
+        
+        // Update metrics for closed sessions
+        closedSessions.forEach(session -> {
+            metrics.incrementWebsocketConnectionsClosed();
+            metrics.decrementActiveKlineStreams();
+        });
 
         log.info("Opening new sessions...");
         List<CompletableFuture<Void>> futures = klineStreams.stream()
                 .filter(streamSource -> !activeFingerprints.contains(streamSource.fingerprint()))
                 .map(streamSource -> {
                     log.info("New stream source to be added {}", streamSource);
-                    List<KlineEvent> warmupKlines = restKlineClient.fetchWarmupKlines(streamSource,
-                            config.getData().getKline().getWarmupKlineCount());
-                    kafkaProducerService.sendKlineEvents(config.getData().getKline().getKafkaTopic(), warmupKlines);
+                    
+                    // Fetch warmup klines with metrics
+                    Timer.Sample restApiSample = metrics.startRestApiCall();
+                    try {
+                        List<KlineEvent> warmupKlines = restKlineClient.fetchWarmupKlines(streamSource,
+                                config.getData().getKline().getWarmupKlineCount());
+                        metrics.recordRestApiCallTime(restApiSample);
+                        metrics.incrementRestApiCallsTotal();
+                        
+                        kafkaProducerService.sendKlineEvents(config.getData().getKline().getKafkaTopic(), warmupKlines);
+                    } catch (Exception e) {
+                        metrics.recordRestApiCallTime(restApiSample);
+                        metrics.incrementRestApiCallsFailed();
+                        log.error("Failed to fetch warmup klines for {}", streamSource, e);
+                    }
+                    
                     URI uri = urlFormatter.formatWebsocketKlineURLTemplate(streamSource);
                     log.info("Connecting to Websocket URI {}", uri);
+                    
+                    Timer.Sample connectionSample = metrics.startWebsocketConnection();
                     return client.execute(textMessageHandler, headers, uri)
                             .thenAccept(session -> {
+                        metrics.recordWebsocketConnectionTime(connectionSample);
+                        metrics.incrementWebsocketConnectionsEstablished();
+                        metrics.incrementActiveKlineStreams();
+                        
                         log.info("Connected: session {} is open for {} at {} with headers: {}",
                                 session.getId(), streamSource, LocalDateTime.now(), headers);
                         klineStreamCache.putStreamSource(streamSource.withSession(session));
                     }).exceptionally(throwable -> {
+                        metrics.recordWebsocketConnectionTime(connectionSample);
+                        metrics.incrementWebsocketConnectionsFailed();
                         log.error("Failed to connect to Binance WebSocket {}", streamSource, throwable);
                         return null;
                     });
@@ -99,5 +129,8 @@ public class KlineStreamManagerBinance {
 
         // Wait for all to complete
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).orTimeout(15, TimeUnit.SECONDS).join();
+        
+        // Update total active streams count
+        metrics.setActiveKlineStreams(klineStreams.size());
     }
 }
