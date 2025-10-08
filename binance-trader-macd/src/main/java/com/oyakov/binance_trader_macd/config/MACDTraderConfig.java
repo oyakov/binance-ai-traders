@@ -34,6 +34,7 @@ public class MACDTraderConfig {
     @lombok.Data
     public static class Data {
         private Kline kline = new Kline();
+        private Storage storage = new Storage();
 
         @lombok.Data
         public static class Kline {
@@ -42,6 +43,11 @@ public class MACDTraderConfig {
             private Integer warmupKlineCount = 50;
             private List<String> intervals = List.of("15m");
             private List<String> symbols = List.of("btcusdt");
+        }
+
+        @lombok.Data
+        public static class Storage {
+            private String baseUrl = "http://binance-data-storage-testnet:8081";
         }
     }
 

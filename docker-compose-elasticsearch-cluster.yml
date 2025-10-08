@@ -1,0 +1,133 @@
+# Elasticsearch Cluster Configuration for Production
+# This file provides a multi-node Elasticsearch cluster setup for production readiness
+
+version: '3.8'
+
+services:
+  # Elasticsearch Master Node
+  elasticsearch-master:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch-master
+    environment:
+      - node.name=elasticsearch-master
+      - cluster.name=binance-traders-cluster
+      - node.roles=master
+      - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - cluster.initial_master_nodes=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-master-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elasticsearch-cluster
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Elasticsearch Data Node 1
+  elasticsearch-data1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch-data1
+    environment:
+      - node.name=elasticsearch-data1
+      - cluster.name=binance-traders-cluster
+      - node.roles=data,ingest
+      - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - cluster.initial_master_nodes=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data1-data:/usr/share/elasticsearch/data
+    networks:
+      - elasticsearch-cluster
+    depends_on:
+      - elasticsearch-master
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Elasticsearch Data Node 2
+  elasticsearch-data2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch-data2
+    environment:
+      - node.name=elasticsearch-data2
+      - cluster.name=binance-traders-cluster
+      - node.roles=data,ingest
+      - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - cluster.initial_master_nodes=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data2-data:/usr/share/elasticsearch/data
+    networks:
+      - elasticsearch-cluster
+    depends_on:
+      - elasticsearch-master
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Kibana for Elasticsearch Management
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-master:9200
+      - xpack.security.enabled=false
+    ports:
+      - "5601:5601"
+    networks:
+      - elasticsearch-cluster
+    depends_on:
+      - elasticsearch-master
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  elasticsearch-master-data:
+    driver: local
+  elasticsearch-data1-data:
+    driver: local
+  elasticsearch-data2-data:
+    driver: local
+
+networks:
+  elasticsearch-cluster:
+    driver: bridge

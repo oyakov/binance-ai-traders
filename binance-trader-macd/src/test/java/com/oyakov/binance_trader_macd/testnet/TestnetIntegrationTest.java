@@ -1,6 +1,7 @@
 package com.oyakov.binance_trader_macd.testnet;
 
 import com.oyakov.binance_trader_macd.backtest.BinanceHistoricalDataFetcher;
+import com.oyakov.binance_trader_macd.backtest.SharedDataFetcher;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.rest.client.BinanceOrderClient;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
@@ -26,6 +27,9 @@ class TestnetIntegrationTest {
 
     @Mock
     private BinanceHistoricalDataFetcher dataFetcher;
+    
+    @Mock
+    private SharedDataFetcher sharedDataFetcher;
     
     @Mock
     private MACDSignalAnalyzer macdAnalyzer;
@@ -60,6 +64,7 @@ class TestnetIntegrationTest {
                 strategyConfig, 
                 BigDecimal.valueOf(10000),
                 dataFetcher,
+                sharedDataFetcher,
                 macdAnalyzer,
                 binanceOrderClient
         );

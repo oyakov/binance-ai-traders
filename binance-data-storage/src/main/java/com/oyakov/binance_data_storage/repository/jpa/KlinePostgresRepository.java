@@ -2,6 +2,7 @@ package com.oyakov.binance_data_storage.repository.jpa;
 
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineFingerprint;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -39,6 +41,15 @@ public interface KlinePostgresRepository extends JpaRepository<KlineItem, Long> 
                      @Param("low") double low,
                      @Param("close") double close,
                      @Param("volume") double volume);
+
+    // Query methods for data access
+    List<KlineItem> findByFingerprintSymbolAndFingerprintIntervalOrderByFingerprintOpenTimeDesc(String symbol, String interval, Pageable pageable);
+    
+    List<KlineItem> findByFingerprintSymbolAndFingerprintIntervalAndFingerprintOpenTimeBetween(String symbol, String interval, long startTime, long endTime);
+    
+    Optional<KlineItem> findTopByFingerprintSymbolAndFingerprintIntervalOrderByFingerprintOpenTimeDesc(String symbol, String interval);
+    
+    long countByFingerprintSymbolAndFingerprintInterval(String symbol, String interval);
 
     default void upsertKline(KlineItem klineItem) {
         KlineFingerprint f = klineItem.getFingerprint();

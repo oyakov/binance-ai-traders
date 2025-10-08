@@ -1,6 +1,7 @@
 package com.oyakov.binance_trader_macd.testnet;
 
 import com.oyakov.binance_trader_macd.backtest.BinanceHistoricalDataFetcher;
+import com.oyakov.binance_trader_macd.backtest.SharedDataFetcher;
 import com.oyakov.binance_trader_macd.domain.OrderSide;
 import com.oyakov.binance_trader_macd.domain.OrderType;
 import com.oyakov.binance_trader_macd.domain.TimeInForce;
@@ -37,17 +38,19 @@ public class TestnetTradingInstance {
     private volatile Future<?> executionFuture;
     
     private final BinanceHistoricalDataFetcher dataFetcher;
+    private final SharedDataFetcher sharedDataFetcher;
     private final MACDSignalAnalyzer macdAnalyzer;
     private final BinanceOrderClient binanceOrderClient;
 
     public TestnetTradingInstance(String instanceId, StrategyConfig strategyConfig, BigDecimal startingBalance,
-                                  BinanceHistoricalDataFetcher dataFetcher, MACDSignalAnalyzer macdAnalyzer, 
-                                  BinanceOrderClient binanceOrderClient) {
+                                  BinanceHistoricalDataFetcher dataFetcher, SharedDataFetcher sharedDataFetcher,
+                                  MACDSignalAnalyzer macdAnalyzer, BinanceOrderClient binanceOrderClient) {
         this.instanceId = instanceId != null ? instanceId : UUID.randomUUID().toString();
         this.strategyConfig = strategyConfig;
         this.performanceTracker = new TestnetPerformanceTracker(this.instanceId, strategyConfig, startingBalance);
         this.executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "testnet-instance-" + this.instanceId));
         this.dataFetcher = dataFetcher;
+        this.sharedDataFetcher = sharedDataFetcher;
         this.macdAnalyzer = macdAnalyzer;
         this.binanceOrderClient = binanceOrderClient;
     }
@@ -120,11 +123,30 @@ public class TestnetTradingInstance {
     
     private List<KlineEvent> fetchMarketData() {
         try {
-            // Calculate time range for last 100 klines
+            // First try to get data from shared database (preferred)
+            if (sharedDataFetcher != null) {
+                log.debug("Fetching market data from shared database for instance {}", instanceId);
+                var dataset = sharedDataFetcher.fetchRecentKlines(
+                    strategyConfig.getSymbol().toUpperCase(),
+                    strategyConfig.getTimeframe(),
+                    100, // Get last 100 klines
+                    "testnet-" + instanceId
+                );
+                
+                if (!dataset.getKlines().isEmpty()) {
+                    log.debug("Retrieved {} klines from shared database for instance {}", 
+                        dataset.getKlines().size(), instanceId);
+                    return dataset.getKlines();
+                } else {
+                    log.warn("No data available in shared database, falling back to direct API for instance {}", instanceId);
+                }
+            }
+            
+            // Fallback to direct Binance API if shared data is not available
+            log.debug("Fetching market data from Binance API for instance {}", instanceId);
             long endTime = Instant.now().toEpochMilli();
             long startTime = endTime - (100 * getIntervalMilliseconds());
             
-            // Fetch historical data (this will be real-time data from Binance)
             var dataset = dataFetcher.fetchHistoricalData(
                 strategyConfig.getSymbol().toUpperCase(),
                 strategyConfig.getTimeframe(),
