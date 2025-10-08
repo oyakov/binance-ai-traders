@@ -67,7 +67,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 0,
         "y": 0
@@ -94,11 +94,11 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "up{job=\"binance-macd-trader-testnet\"}",
+          "expr": "max(up{job=\"binance-trader-macd\"} or vector(0))",
           "refId": "A"
         }
       ],
-      "title": "Trading Service Health",
+      "title": "MACD Trader Health",
       "type": "stat"
     },
     {
@@ -124,7 +124,7 @@
                   "index": 0,
                   "text": "UP"
                 }
-              ],
+              },
               "type": "value"
             }
           ],
@@ -146,7 +146,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 6,
         "y": 0
@@ -173,11 +173,11 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "1",
+          "expr": "max(up{job=\"binance-data-collection\"} or vector(0))",
           "refId": "A"
         }
       ],
-      "title": "PostgreSQL Health",
+      "title": "Data Collection Health",
       "type": "stat"
     },
     {
@@ -225,7 +225,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 12,
         "y": 0
@@ -252,7 +252,165 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "1",
+          "expr": "max(up{job=\"binance-data-storage\"} or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "Data Storage Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#c62828",
+                  "index": 1,
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "#2e7d32",
+                  "index": 0,
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1D0CF0138F184889"
+          },
+          "expr": "max(up{job=\"telegram-frontend\"} or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "Telegram Frontend Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#c62828",
+                  "index": 1,
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "#2e7d32",
+                  "index": 0,
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 6
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1D0CF0138F184889"
+          },
+          "expr": "max(up{job=\"kafka\"} or vector(0))",
           "refId": "A"
         }
       ],
@@ -304,12 +462,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
-        "x": 18,
-        "y": 0
+        "x": 6,
+        "y": 6
       },
-      "id": 4,
+      "id": 6,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -331,7 +489,86 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "1",
+          "expr": "max(up{job=\"postgres\"} or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "PostgreSQL Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#c62828",
+                  "index": 1,
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "#2e7d32",
+                  "index": 0,
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 6
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1D0CF0138F184889"
+          },
+          "expr": "max(up{job=\"elasticsearch\"} or vector(0))",
           "refId": "A"
         }
       ],
@@ -383,12 +620,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
-        "x": 0,
-        "y": 8
+        "x": 18,
+        "y": 6
       },
-      "id": 5,
+      "id": 8,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -410,90 +647,11 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "up{job=\"prometheus\"}",
+          "expr": "max(up{job=\"prometheus\"} or vector(0))",
           "refId": "A"
         }
       ],
       "title": "Prometheus Health",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "P1D0CF0138F184889"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "#c62828",
-                  "index": 1,
-                  "text": "DOWN"
-                },
-                "1": {
-                  "color": "#2e7d32",
-                  "index": 0,
-                  "text": "UP"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 8
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1D0CF0138F184889"
-          },
-          "expr": "1",
-          "refId": "A"
-        }
-      ],
-      "title": "Grafana Health",
       "type": "stat"
     },
     {
@@ -544,7 +702,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1
               }
             ]
           },
@@ -555,10 +713,10 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 8
+        "x": 0,
+        "y": 12
       },
-      "id": 7,
+      "id": 9,
       "options": {
         "legend": {
           "calcs": [],
@@ -576,12 +734,96 @@
             "type": "prometheus",
             "uid": "P1D0CF0138F184889"
           },
-          "expr": "up{job=\"binance-macd-trader-testnet\"}",
-          "legendFormat": "Trading Service",
+          "expr": "up{job=~\"binance-trader-macd|binance-data-collection|binance-data-storage|telegram-frontend\"}",
+          "legendFormat": "{{job}}",
           "refId": "A"
         }
       ],
       "title": "Service Health Timeline",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Price (USDT)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1D0CF0138F184889"
+          },
+          "expr": "binance_asset_price{symbol=~\"BTCUSDT|ETHUSDT|ADAUSDT\"}",
+          "legendFormat": "{{symbol}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Asset Prices (USDT)",
       "type": "timeseries"
     }
   ],
@@ -603,7 +845,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "System Health - Fixed",
+  "title": "System Health Overview",
   "uid": "system-health-fixed",
   "version": 1,
   "weekStart": ""
