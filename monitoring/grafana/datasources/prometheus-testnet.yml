@@ -25,4 +25,5 @@ datasources:
       connMaxLifetime: 14400
       postgresVersion: 1500
       timescaledb: false
+      database: binance_trader_testnet
     editable: true

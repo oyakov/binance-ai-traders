@@ -41,7 +41,7 @@
         }
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 0,
         "y": 0
@@ -78,7 +78,7 @@
         }
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 6,
         "y": 0
@@ -129,7 +129,7 @@
         }
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 12,
         "y": 0
@@ -180,7 +180,7 @@
         }
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 6,
         "x": 18,
         "y": 0
@@ -200,7 +200,7 @@
             "type": "postgres",
             "uid": "postgres-testnet"
           },
-          "rawSql": "SELECT display_time as time, close as close_price, high as high_price, low as low_price, open as open_price FROM kline WHERE symbol = 'BTCUSDT' AND interval = '5m' ORDER BY display_time ASC",
+          "rawSql": "SELECT display_time as time, close as close_price FROM kline WHERE symbol = 'BTCUSDT' AND interval = '5m' ORDER BY display_time ASC",
           "refId": "A",
           "format": "time_series",
           "rawQuery": true
@@ -254,68 +254,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "close_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "high_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "blue"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "low_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "open_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "tooltip": {
@@ -330,13 +269,16 @@
             "min",
             "max"
           ]
+        },
+        "zoom": {
+          "mode": "fit"
         }
       },
       "gridPos": {
-        "h": 12,
+        "h": 14,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 6
       }
     },
     {
@@ -353,7 +295,7 @@
             "type": "postgres",
             "uid": "postgres-testnet"
           },
-          "rawSql": "SELECT display_time as time, close as close_price, high as high_price, low as low_price, open as open_price FROM kline WHERE symbol = 'ETHUSDT' AND interval = '5m' ORDER BY display_time ASC",
+          "rawSql": "SELECT display_time as time, close as close_price FROM kline WHERE symbol = 'ETHUSDT' AND interval = '5m' ORDER BY display_time ASC",
           "refId": "A",
           "format": "time_series",
           "rawQuery": true
@@ -407,68 +349,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "close_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "high_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "blue"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "low_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "open_price"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "tooltip": {
@@ -483,13 +364,16 @@
             "min",
             "max"
           ]
+        },
+        "zoom": {
+          "mode": "fit"
         }
       },
       "gridPos": {
-        "h": 12,
+        "h": 14,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 6
       }
     },
     {
@@ -800,6 +684,21 @@
   "templating": {
     "list": []
   },
-  "timepicker": {},
-  "weekStart": ""
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "weekStart": "",
+  "graphTooltip": 1,
+  "timezone": "browser"
 }
