@@ -46,8 +46,9 @@ working-*.html
 docker-compose*.yml
 Dockerfile
 
-# Scripts
+# Scripts (except health metrics server)
 scripts/
+!scripts/health-metrics-server-docker.py
 *.ps1
 *.sh
 

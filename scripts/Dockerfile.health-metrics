@@ -1,0 +1,19 @@
+FROM python:3.11-alpine
+
+# Install required packages
+RUN apk add --no-cache curl
+
+# Set working directory
+WORKDIR /app
+
+# Copy the health metrics server script
+COPY scripts/health-metrics-server-docker.py /app/health-metrics-server.py
+
+# Make the script executable
+RUN chmod +x /app/health-metrics-server.py
+
+# Expose port
+EXPOSE 8092
+
+# Run the health metrics server
+CMD ["python", "/app/health-metrics-server.py"]

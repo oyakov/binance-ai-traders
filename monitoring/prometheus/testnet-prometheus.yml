@@ -47,11 +47,11 @@ scrape_configs:
       - target_label: environment
         replacement: testnet
 
-  # Python Health Metrics Server (All Components)
+  # Health Metrics Server (All Components)
   - job_name: health-metrics-server
     static_configs:
       - targets:
-          - host.docker.internal:8092
+          - health-metrics-server-testnet:8092
     metrics_path: /metrics
     scrape_interval: 30s
     scrape_timeout: 10s

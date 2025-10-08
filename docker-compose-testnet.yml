@@ -232,7 +232,32 @@ services:
       retries: 3
       start_period: 60s
 
-  # Health Metrics Exporter for Testnet
+  # Health Metrics Server for Testnet
+  health-metrics-server:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.health-metrics
+    container_name: health-metrics-server-testnet
+    ports:
+      - "8092:8092"
+    networks:
+      - testnet-network
+    restart: unless-stopped
+    depends_on:
+      - postgres-testnet
+      - kafka-testnet
+      - elasticsearch-testnet
+      - binance-trader-macd-testnet
+      - binance-data-collection-testnet
+      - binance-data-storage-testnet
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Health Metrics Exporter for Testnet (Legacy)
   health-metrics-exporter:
     image: nginx:alpine
     container_name: health-metrics-exporter
