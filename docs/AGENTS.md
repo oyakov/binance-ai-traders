@@ -128,15 +128,17 @@ telegram-frontend-python
 ### Python Services
 - **Framework**: FastAPI, aiogram
 - **Build Tool**: Poetry
-- **Database**: SQLAlchemy with PostgreSQL
+- **Database**: SQLAlchemy with PostgreSQL, Redis for caching
 - **Testing**: pytest, pytest-asyncio
 - **Code Quality**: ruff, mypy, black
+- **Dependencies**: asyncpg, elasticsearch, pydantic-settings (required additions)
 
 ### Infrastructure
 - **Containerization**: Docker with multi-stage builds
-- **Orchestration**: Docker Compose for local development
-- **Monitoring**: Prometheus + Grafana
+- **Orchestration**: Docker Compose for local development (dev, testnet, production environments)
+- **Monitoring**: Prometheus + Grafana with pre-configured dashboards
 - **Logging**: Structured logging with correlation IDs
+- **Automation**: 74 PowerShell scripts for build, test, and deployment automation
 
 ## 📚 Documentation Standards
 
@@ -151,7 +153,9 @@ telegram-frontend-python
 - **docs/services/**: Service-specific documentation
 - **docs/guides/**: Implementation and deployment guides
 - **docs/reports/**: Analysis and test results
-- **docs/memory/**: LLM memory and knowledge management
+- **docs/memory/**: LLM memory and knowledge management (27 active entries)
+- **docs/infrastructure/**: Infrastructure and monitoring documentation
+- **docs/clients/**: Client integration documentation
 
 ## 🚨 Critical Issues & Blockers
 
@@ -195,15 +199,19 @@ telegram-frontend-python
 - Tests executed and their outcomes
 - Documentation updates
 - Follow-up tasks or deployment notes
-- Reference to related issues or memory entries
+- Reference to related issues or memory entries (MEM-XXX format)
+- Memory system updates if architectural changes are made
 
 ## 🆘 Getting Help
 
 ### Documentation Resources
 - **System Overview**: [docs/overview.md](overview.md)
 - **Service Documentation**: [docs/services/](services/)
-- **Memory System**: [docs/memory/memory-index.md](memory/memory-index.md)
+- **Memory System**: [docs/memory/memory-index.md](memory/memory-index.md) (27 active entries)
 - **Milestone Guide**: [docs/guides/MILESTONE_GUIDE.md](guides/MILESTONE_GUIDE.md)
+- **Comprehensive Memory Context**: [docs/memory/context/](memory/context/) (MEM-C003 through MEM-C008)
+- **Infrastructure Guide**: [docs/infrastructure/](infrastructure/)
+- **Monitoring Guide**: [MONITORING_GUIDE.md](../MONITORING_GUIDE.md)
 
 ### Key Contacts
 - **Technical Lead**: Development team
@@ -212,6 +220,7 @@ telegram-frontend-python
 
 ---
 
-**Last Updated**: 2025-01-05  
-**Version**: 2.0 (Agent Context)  
-**Status**: M0 Complete, M1 In Progress
+**Last Updated**: 2025-01-08  
+**Version**: 3.0 (Enhanced Agent Context with Memory Integration)  
+**Status**: M0 Complete, M1 In Progress  
+**Memory System**: 27 active entries with comprehensive project documentation
