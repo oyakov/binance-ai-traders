@@ -86,3 +86,17 @@ Thumbs.db
 # Other files
 *.swp
 *.swo
+
+# Python coverage and test artifacts
+.coverage
+htmlcov/
+**/coverage*/
+
+# Project logs and artifacts
+*.log
+**/*.log
+telegram-frontend-python/src/logs/
+
+# Python cache
+**/__pycache__/
+**/*.py[cod]
