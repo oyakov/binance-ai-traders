@@ -16,14 +16,6 @@
       <url>https://repo1.maven.org/maven2</url>
       <mirrorOf>central</mirrorOf>
     </mirror>
-    
-    <!-- Confluent repository mirror -->
-    <mirror>
-      <id>confluent-mirror</id>
-      <name>Confluent Repository Mirror</name>
-      <url>https://packages.confluent.io/maven/</url>
-      <mirrorOf>confluent</mirrorOf>
-    </mirror>
   </mirrors>
   
   <!-- Profiles for optimization -->
@@ -45,7 +37,40 @@
         <!-- Optimize for Docker builds -->
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <maven.source.skip>true</maven.source.skip>
+        
+        <!-- Maven dependency resolution -->
+        <maven.wagon.http.retryHandler.count>3</maven.wagon.http.retryHandler.count>
+        <maven.wagon.http.retryHandler.requestSentEnabled>true</maven.wagon.http.retryHandler.requestSentEnabled>
       </properties>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <name>Maven Central Repository</name>
+          <url>https://repo1.maven.org/maven2</url>
+          <layout>default</layout>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>confluent</id>
+          <name>Confluent Repository</name>
+          <url>https://packages.confluent.io/maven/</url>
+          <layout>default</layout>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>spring-milestones</id>
+          <name>Spring Milestones</name>
+          <url>https://repo.spring.io/milestone</url>
+          <layout>default</layout>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
     </profile>
   </profiles>
   

@@ -49,6 +49,60 @@ public class DataStorageMetrics {
 
     @PostConstruct
     public void init() {
+        // Initialize counters
+        klineEventsReceived = Counter.builder("binance_data_storage_kline_events_received_total")
+                .description("Total number of kline events received from Kafka")
+                .register(meterRegistry);
+        
+        klineEventsSaved = Counter.builder("binance_data_storage_kline_events_saved_total")
+                .description("Total number of kline events successfully saved to storage")
+                .register(meterRegistry);
+        
+        klineEventsFailed = Counter.builder("binance_data_storage_kline_events_failed_total")
+                .description("Total number of kline events that failed to save")
+                .register(meterRegistry);
+        
+        klineEventsCompensated = Counter.builder("binance_data_storage_kline_events_compensated_total")
+                .description("Total number of kline events compensated/rolled back")
+                .register(meterRegistry);
+        
+        postgresSaves = Counter.builder("binance_data_storage_postgres_saves_total")
+                .description("Total number of successful PostgreSQL saves")
+                .register(meterRegistry);
+        
+        postgresSaveFailures = Counter.builder("binance_data_storage_postgres_save_failures_total")
+                .description("Total number of PostgreSQL save failures")
+                .register(meterRegistry);
+        
+        elasticsearchSaves = Counter.builder("binance_data_storage_elasticsearch_saves_total")
+                .description("Total number of successful Elasticsearch saves")
+                .register(meterRegistry);
+        
+        elasticsearchSaveFailures = Counter.builder("binance_data_storage_elasticsearch_save_failures_total")
+                .description("Total number of Elasticsearch save failures")
+                .register(meterRegistry);
+        
+        kafkaConsumerErrors = Counter.builder("binance_data_storage_kafka_consumer_errors_total")
+                .description("Total number of Kafka consumer errors")
+                .register(meterRegistry);
+        
+        // Initialize timers
+        klineEventProcessingTime = Timer.builder("binance_data_storage_kline_event_processing_duration_seconds")
+                .description("Time taken to process a kline event")
+                .register(meterRegistry);
+        
+        postgresSaveTime = Timer.builder("binance_data_storage_postgres_save_duration_seconds")
+                .description("Time taken to save kline event to PostgreSQL")
+                .register(meterRegistry);
+        
+        elasticsearchSaveTime = Timer.builder("binance_data_storage_elasticsearch_save_duration_seconds")
+                .description("Time taken to save kline event to Elasticsearch")
+                .register(meterRegistry);
+        
+        kafkaConsumerProcessingTime = Timer.builder("binance_data_storage_kafka_consumer_processing_duration_seconds")
+                .description("Time taken to process a Kafka message")
+                .register(meterRegistry);
+        
         // Register gauges
         Gauge.builder("binance_data_storage_active_kafka_consumers", activeKafkaConsumers, AtomicInteger::get)
                 .description("Number of active Kafka consumers")

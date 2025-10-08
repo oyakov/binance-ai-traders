@@ -1,6 +1,7 @@
 package com.oyakov.binance_data_storage.service.impl;
 
 import com.oyakov.binance_data_storage.mapper.KlineMapper;
+import com.oyakov.binance_data_storage.metrics.DataStorageMetrics;
 import com.oyakov.binance_data_storage.model.klines.binance.notifications.DataItemWrittenNotification;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineFingerprint;
 import com.oyakov.binance_data_storage.model.klines.binance.storage.KlineItem;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ActiveProfiles;
+
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -64,7 +67,8 @@ public class KlineDataServiceTest {
                 eventPublisher,
                 klineMapper,
                 elasticRepositoryProvider,
-                postgresRepositoryProvider
+                postgresRepositoryProvider,
+                mock(DataStorageMetrics.class)
         );
     }
 
@@ -266,7 +270,8 @@ public class KlineDataServiceTest {
                 eventPublisher,
                 klineMapper,
                 elasticRepositoryProvider,
-                postgresRepositoryProvider
+                postgresRepositoryProvider,
+                mock(DataStorageMetrics.class)
         );
 
         KlineEvent incomingCommand = KlineEvent.newBuilder()

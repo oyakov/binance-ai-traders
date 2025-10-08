@@ -204,6 +204,33 @@ services:
       retries: 3
       start_period: 60s
 
+  # Binance Data Storage Testnet Service
+  binance-data-storage-testnet:
+    build: 
+      context: .
+      dockerfile: binance-data-storage/Dockerfile
+    container_name: binance-data-storage-testnet
+    env_file:
+      - testnet.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testnet
+    ports:
+      - "8087:8081"
+    depends_on:
+      - postgres-testnet
+      - elasticsearch-testnet
+      - kafka-testnet
+      - schema-registry-testnet
+    networks:
+      - testnet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Health Metrics Exporter for Testnet
   health-metrics-exporter:
     image: nginx:alpine

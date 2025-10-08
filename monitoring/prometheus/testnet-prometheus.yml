@@ -35,6 +35,18 @@ scrape_configs:
       - target_label: environment
         replacement: testnet
 
+  - job_name: binance-data-storage-testnet
+    metrics_path: /actuator/prometheus
+    scheme: http
+    static_configs:
+      - targets:
+          - binance-data-storage-testnet:8081
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
   # Python Health Metrics Server (All Components)
   - job_name: health-metrics-server
     static_configs:

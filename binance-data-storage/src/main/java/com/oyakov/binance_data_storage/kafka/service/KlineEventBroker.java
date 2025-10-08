@@ -30,12 +30,13 @@ public class KlineEventBroker {
     }
 
     @EventListener
-    public void handleKlineWrittenEvent(DataItemWrittenNotification<KlineEvent> event) {
+    public void handleKlineWrittenEvent(DataItemWrittenNotification<KlineItem> event) {
         log.info("Processing kline written event: {}", event);
         if (event.getErrorMessage() != null) {
             log.debug("Compensating kline data for event: {}", event);
-            klineDataServiceApi.compensateKlineData(event);
+            klineDataServiceApi.compensateKlineDataItem(event);
         }
-        kafkaProducerService.sendCommand("binance-notification", event.getDataItem());
+        // Note: KlineItem events are internal storage events and don't need to be published
+        // Only KlineEvent events from the collection service are published as business events
     }
 }

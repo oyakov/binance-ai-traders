@@ -11,4 +11,6 @@ public interface KlineDataServiceApi {
     public void saveKlineData(KlineEvent kline);
 
     public void compensateKlineData(DataItemWrittenNotification<KlineEvent> kline);
+
+    public void compensateKlineDataItem(DataItemWrittenNotification<KlineItem> kline);
 }

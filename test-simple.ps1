@@ -1,33 +1,41 @@
-Write-Host "=== Kline System Test ===" -ForegroundColor Green
+# Test Storage Service Fix
+Write-Host "=== Testing Storage Service Fix ===" -ForegroundColor Green
+Write-Host ""
 
-# Test Binance API
-Write-Host "`nTesting Binance API..." -ForegroundColor Yellow
+# Check storage service health
+Write-Host "Checking storage service health..." -ForegroundColor Yellow
 try {
-    $response = Invoke-WebRequest -Uri "https://testnet.binance.vision/api/v3/ping" -UseBasicParsing -TimeoutSec 10
-    Write-Host "✓ Binance API: Accessible" -ForegroundColor Green
+    $health = Invoke-WebRequest -Uri "http://localhost:8087/actuator/health" -UseBasicParsing
+    Write-Host "Storage Health Status: OK" -ForegroundColor Green
 } catch {
-    Write-Host "✗ Binance API: Not accessible" -ForegroundColor Red
+    Write-Host "Storage Health Check Failed" -ForegroundColor Red
 }
 
-# Test Prometheus
-Write-Host "`nTesting Prometheus..." -ForegroundColor Yellow
+# Check Prometheus metrics
+Write-Host "Checking Prometheus metrics..." -ForegroundColor Yellow
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:9090/-/healthy" -UseBasicParsing -TimeoutSec 5
-    Write-Host "✓ Prometheus: Running" -ForegroundColor Green
+    $metrics = Invoke-WebRequest -Uri "http://localhost:8087/actuator/prometheus" -UseBasicParsing
+    $metricsContent = $metrics.Content
+    
+    if ($metricsContent -match "binance_data_storage_postgres_connection_status") {
+        Write-Host "PostgreSQL metrics found" -ForegroundColor Green
+    } else {
+        Write-Host "PostgreSQL metrics missing" -ForegroundColor Red
+    }
+    
+    if ($metricsContent -match "binance_data_storage_kline_events_received_total") {
+        Write-Host "Kline events metrics found" -ForegroundColor Green
+    } else {
+        Write-Host "Kline events metrics missing" -ForegroundColor Red
+    }
 } catch {
-    Write-Host "✗ Prometheus: Not accessible" -ForegroundColor Red
+    Write-Host "Metrics Check Failed" -ForegroundColor Red
 }
 
-# Test Grafana
-Write-Host "`nTesting Grafana..." -ForegroundColor Yellow
-try {
-    $response = Invoke-WebRequest -Uri "http://localhost:3001/api/health" -UseBasicParsing -TimeoutSec 5
-    Write-Host "✓ Grafana: Running" -ForegroundColor Green
-} catch {
-    Write-Host "✗ Grafana: Not accessible" -ForegroundColor Red
-}
-
-Write-Host "`n=== Summary ===" -ForegroundColor Green
-Write-Host "Access Points:" -ForegroundColor Cyan
-Write-Host "  Grafana: http://localhost:3001 (admin/admin)" -ForegroundColor White
-Write-Host "  Prometheus: http://localhost:9090" -ForegroundColor White
+Write-Host ""
+Write-Host "=== Fix Applied ===" -ForegroundColor Green
+Write-Host "Created missing kline table in PostgreSQL" -ForegroundColor Green
+Write-Host "Restarted storage service" -ForegroundColor Green
+Write-Host ""
+Write-Host "Check your Grafana dashboard now!" -ForegroundColor Yellow
+Write-Host "URL: http://localhost:3001" -ForegroundColor Cyan

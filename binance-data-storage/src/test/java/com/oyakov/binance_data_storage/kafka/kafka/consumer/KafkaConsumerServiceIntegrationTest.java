@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.mockito.Mockito.verify;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = KafkaConsumerService.class, properties = {
+@SpringBootTest(classes = {KafkaConsumerService.class, com.oyakov.binance_data_storage.config.TestConfig.class}, properties = {
         "spring.kafka.listener.auto-startup=false",
         "binance.data.kline.kafka-topic=binance-kline",
         "binance.data.kline.kafka-consumer-group=test-group"

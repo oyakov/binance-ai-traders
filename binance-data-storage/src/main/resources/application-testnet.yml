@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: binance-data-storage
+  elasticsearch:
+    uris: http://elasticsearch-testnet:9200
+    username: elastic
+    password: admin
+  datasource:
+    url: jdbc:postgresql://postgres-testnet:5432/binance_trader_testnet
+    username: testnet_user
+    password: testnet_password
+    driver-class-name: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: kafka-testnet:29092
+    properties:
+      schema.registry.url: http://schema-registry-testnet:8081
+      schema.registry.max.retries: 5
+      schema.registry.retry.backoff.ms: 1000
+      security.protocol: PLAINTEXT
+      auto.register.schemas: true
+      use.latest.version: true
+      specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      bootstrap-servers: kafka-testnet:29092
+      group-id: binance-data-storage-testnet
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      auto-offset-reset: earliest
+
+binance:
+  data:
+    kline:
+      entity-name: kline
+      kafka-topic: binance-kline
+      kafka-consumer-group: binance-data-storage-testnet
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

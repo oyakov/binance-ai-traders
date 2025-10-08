@@ -101,9 +101,11 @@ public class KlineDataService implements KlineDataServiceApi {
                         postgresSuccess = true;
                         persisted = true;
                         metrics.incrementPostgresSaves();
+                        metrics.setPostgresConnectionStatus(true);
                         log.debug("Successfully saved to PostgreSQL: {}", klineItem);
                     } catch (Exception e) {
                         metrics.incrementPostgresSaveFailures();
+                        metrics.setPostgresConnectionStatus(false);
                         log.error("Failed to save to PostgreSQL: {}", klineItem, e);
                         throw e;
                     } finally {
@@ -121,9 +123,11 @@ public class KlineDataService implements KlineDataServiceApi {
                         elasticsearchSuccess = true;
                         persisted = true;
                         metrics.incrementElasticsearchSaves();
+                        metrics.setElasticsearchConnectionStatus(true);
                         log.debug("Successfully saved to Elasticsearch: {}", klineItem);
                     } catch (Exception e) {
                         metrics.incrementElasticsearchSaveFailures();
+                        metrics.setElasticsearchConnectionStatus(false);
                         log.error("Failed to save to Elasticsearch: {}", klineItem, e);
                         throw e;
                     } finally {
@@ -190,6 +194,52 @@ public class KlineDataService implements KlineDataServiceApi {
                         }
                     },
                     () -> log.warn("Postgres repository unavailable during rollback for {}", fingerprint)
+            );
+
+            if (elasticRepository.isPresent() || postgresRepository.isPresent()) {
+                metrics.incrementKlineEventsCompensated();
+                log.info("Successfully rolled back kline data with fingerprint: {}", fingerprint);
+            } else {
+                log.warn("No repositories available to rollback kline data for fingerprint: {}", fingerprint);
+            }
+        } catch (Exception e) {
+            log.error("Failed to rollback kline data with fingerprint: {}", fingerprint, e);
+            throw e; // Re-throw to trigger transaction rollback
+        }
+    }
+
+    @Transactional
+    public void compensateKlineDataItem(DataItemWrittenNotification<KlineItem> event) {
+        if (event.getDataItem() == null) {
+            log.warn("Cannot compensate null kline data");
+            return;
+        }
+
+        KlineFingerprint fingerprint = event.getDataItem().getFingerprint();
+        
+        try {
+            elasticRepository.ifPresentOrElse(
+                    repository -> {
+                        try {
+                            repository.deleteByFingerprint(fingerprint);
+                            log.debug("Successfully rolled back Elasticsearch data with fingerprint: {}", fingerprint);
+                        } catch (Exception e) {
+                            log.error("Failed to rollback Elasticsearch data with fingerprint: {}", fingerprint, e);
+                        }
+                    },
+                    () -> log.debug("Elasticsearch repository not available for rollback")
+            );
+
+            postgresRepository.ifPresentOrElse(
+                    repository -> {
+                        try {
+                            repository.deleteByFingerprint(fingerprint);
+                            log.debug("Successfully rolled back PostgreSQL data with fingerprint: {}", fingerprint);
+                        } catch (Exception e) {
+                            log.error("Failed to rollback PostgreSQL data with fingerprint: {}", fingerprint, e);
+                        }
+                    },
+                    () -> log.debug("PostgreSQL repository not available for rollback")
             );
 
             if (elasticRepository.isPresent() || postgresRepository.isPresent()) {

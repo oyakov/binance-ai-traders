@@ -19,4 +19,41 @@
         <module>binance-trader-grid</module>
         <module>binance-trader-macd</module>
     </modules>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>1.10.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>confluent</id>
+            <name>Confluent Repository</name>
+            <url>https://packages.confluent.io/maven/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
