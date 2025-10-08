@@ -40,6 +40,9 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
 
     private void handleKlineUpdate(KlineStream klineStream, TextMessage message) {
         Timer.Sample sample = metrics.startKlineEventProcessing();
+        String symbol = "unknown";
+        String interval = "unknown";
+        boolean success = false;
         try {
             String payload = message.getPayload();
             log.debug("Received message: {} for session {}", payload, klineStream.session().getId());
@@ -61,19 +64,25 @@ public class BinanceTextMessageHandler extends TextWebSocketHandler {
                 klineStreamCache.putStreamSource(updatedKlineStream);
 
                 KlineEvent klineEvent = conversionService.convert(eventData, KlineEvent.class);
-                
+                if (klineEvent == null) {
+                    symbol = klineStream.fingerprint().symbol();
+                    interval = klineStream.fingerprint().interval();
+                    log.error("Conversion service returned null KlineEvent for payload: {}", payload);
+                    return;
+                }
+                symbol = klineEvent.getSymbol();
+                interval = klineEvent.getInterval();
+
                 // Record metrics for the received kline event
-                metrics.incrementKlineEventsReceived(
-                    klineEvent.getSymbol(), 
-                    klineEvent.getInterval()
-                );
-                
+                metrics.incrementKlineEventsReceived(symbol, interval);
+
                 kafkaProducerService.sendKlineEvent(klineEvent);
+                success = true;
             } else {
                 log.debug("Kline update received with already existing timestamp {}", eventData);
             }
         } finally {
-            metrics.recordKlineEventProcessingTime(sample);
+            metrics.recordKlineEventProcessingTime(sample, symbol, interval, success ? "success" : "failure");
         }
     }
 

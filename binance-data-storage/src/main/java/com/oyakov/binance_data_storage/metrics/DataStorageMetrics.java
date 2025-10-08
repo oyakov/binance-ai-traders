@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Metrics for Binance Data Storage Service
@@ -22,6 +25,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DataStorageMetrics {
 
     private final MeterRegistry meterRegistry;
+
+    private final Map<String, Counter> taggedCounters = new ConcurrentHashMap<>();
+    private final Map<String, Timer> taggedTimers = new ConcurrentHashMap<>();
     
     // Counters for events
     private Counter klineEventsReceived;
@@ -130,50 +136,102 @@ public class DataStorageMetrics {
         klineEventsReceived.increment();
         lastKlineEventTimestamp.set(System.currentTimeMillis());
     }
-    
+
     public void incrementKlineEventsReceived(String symbol, String interval) {
-        klineEventsReceived.increment();
-        lastKlineEventTimestamp.set(System.currentTimeMillis());
+        incrementKlineEventsReceived();
+        counterWithTags("binance_data_storage_kline_events_received_total",
+                "Total number of kline events received from Kafka",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval))
+                .increment();
     }
-    
+
     public void incrementKlineEventsSaved() {
         klineEventsSaved.increment();
         lastSuccessfulSaveTimestamp.set(System.currentTimeMillis());
     }
-    
+
     public void incrementKlineEventsSaved(String symbol, String interval) {
-        klineEventsSaved.increment();
-        lastSuccessfulSaveTimestamp.set(System.currentTimeMillis());
+        incrementKlineEventsSaved();
+        counterWithTags("binance_data_storage_kline_events_saved_total",
+                "Total number of kline events successfully saved to storage",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval))
+                .increment();
     }
-    
+
     public void incrementKlineEventsFailed() {
         klineEventsFailed.increment();
     }
-    
+
     public void incrementKlineEventsFailed(String symbol, String interval, String error) {
-        klineEventsFailed.increment();
+        incrementKlineEventsFailed();
+        counterWithTags("binance_data_storage_kline_events_failed_total",
+                "Total number of kline events that failed to save",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "error", sanitize(error))
+                .increment();
     }
-    
+
     public void incrementKlineEventsCompensated() {
         klineEventsCompensated.increment();
     }
-    
+
     public void incrementPostgresSaves() {
         postgresSaves.increment();
     }
-    
+
+    public void incrementPostgresSaves(String symbol, String interval) {
+        incrementPostgresSaves();
+        counterWithTags("binance_data_storage_postgres_saves_total",
+                "Total number of successful PostgreSQL saves",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval))
+                .increment();
+    }
+
     public void incrementPostgresSaveFailures() {
         postgresSaveFailures.increment();
     }
-    
+
+    public void incrementPostgresSaveFailures(String symbol, String interval, String reason) {
+        incrementPostgresSaveFailures();
+        counterWithTags("binance_data_storage_postgres_save_failures_total",
+                "Total number of PostgreSQL save failures",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "reason", sanitize(reason))
+                .increment();
+    }
+
     public void incrementElasticsearchSaves() {
         elasticsearchSaves.increment();
     }
-    
+
+    public void incrementElasticsearchSaves(String symbol, String interval) {
+        incrementElasticsearchSaves();
+        counterWithTags("binance_data_storage_elasticsearch_saves_total",
+                "Total number of successful Elasticsearch saves",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval))
+                .increment();
+    }
+
     public void incrementElasticsearchSaveFailures() {
         elasticsearchSaveFailures.increment();
     }
-    
+
+    public void incrementElasticsearchSaveFailures(String symbol, String interval, String reason) {
+        incrementElasticsearchSaveFailures();
+        counterWithTags("binance_data_storage_elasticsearch_save_failures_total",
+                "Total number of Elasticsearch save failures",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "reason", sanitize(reason))
+                .increment();
+    }
+
     public void incrementKafkaConsumerErrors() {
         kafkaConsumerErrors.increment();
     }
@@ -202,30 +260,98 @@ public class DataStorageMetrics {
     }
     
     public void recordKlineEventProcessingTime(Timer.Sample sample) {
-        sample.stop(klineEventProcessingTime);
+        recordKlineEventProcessingTime(sample, "unknown", "unknown", "unknown");
     }
-    
+
+    public void recordKlineEventProcessingTime(Timer.Sample sample, String symbol, String interval, String status) {
+        long duration = sample.stop(klineEventProcessingTime);
+        timerWithTags("binance_data_storage_kline_event_processing_duration_seconds",
+                "Time taken to process a kline event",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "status", sanitize(status))
+                .record(duration, TimeUnit.NANOSECONDS);
+    }
+
     public Timer.Sample startPostgresSave() {
         return Timer.start(meterRegistry);
     }
-    
+
     public void recordPostgresSaveTime(Timer.Sample sample) {
-        sample.stop(postgresSaveTime);
+        recordPostgresSaveTime(sample, "unknown", "unknown", "unknown");
     }
-    
+
+    public void recordPostgresSaveTime(Timer.Sample sample, String symbol, String interval, String status) {
+        long duration = sample.stop(postgresSaveTime);
+        timerWithTags("binance_data_storage_postgres_save_duration_seconds",
+                "Time taken to save kline event to PostgreSQL",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "status", sanitize(status))
+                .record(duration, TimeUnit.NANOSECONDS);
+    }
+
     public Timer.Sample startElasticsearchSave() {
         return Timer.start(meterRegistry);
     }
-    
+
     public void recordElasticsearchSaveTime(Timer.Sample sample) {
-        sample.stop(elasticsearchSaveTime);
+        recordElasticsearchSaveTime(sample, "unknown", "unknown", "unknown");
     }
-    
+
+    public void recordElasticsearchSaveTime(Timer.Sample sample, String symbol, String interval, String status) {
+        long duration = sample.stop(elasticsearchSaveTime);
+        timerWithTags("binance_data_storage_elasticsearch_save_duration_seconds",
+                "Time taken to save kline event to Elasticsearch",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "status", sanitize(status))
+                .record(duration, TimeUnit.NANOSECONDS);
+    }
+
     public Timer.Sample startKafkaConsumerProcessing() {
         return Timer.start(meterRegistry);
     }
-    
+
     public void recordKafkaConsumerProcessingTime(Timer.Sample sample) {
-        sample.stop(kafkaConsumerProcessingTime);
+        recordKafkaConsumerProcessingTime(sample, "unknown", "unknown", "unknown");
+    }
+
+    public void recordKafkaConsumerProcessingTime(Timer.Sample sample, String symbol, String interval, String status) {
+        long duration = sample.stop(kafkaConsumerProcessingTime);
+        timerWithTags("binance_data_storage_kafka_consumer_processing_duration_seconds",
+                "Time taken to process a Kafka message",
+                "symbol", sanitize(symbol),
+                "interval", sanitize(interval),
+                "status", sanitize(status))
+                .record(duration, TimeUnit.NANOSECONDS);
+    }
+
+    private Counter counterWithTags(String name, String description, String... tags) {
+        String key = buildKey(name, tags);
+        return taggedCounters.computeIfAbsent(key, k -> Counter.builder(name)
+                .description(description)
+                .tags(tags)
+                .register(meterRegistry));
+    }
+
+    private Timer timerWithTags(String name, String description, String... tags) {
+        String key = buildKey(name, tags);
+        return taggedTimers.computeIfAbsent(key, k -> Timer.builder(name)
+                .description(description)
+                .tags(tags)
+                .register(meterRegistry));
+    }
+
+    private String sanitize(String value) {
+        return value == null || value.isBlank() ? "unknown" : value;
+    }
+
+    private String buildKey(String name, String... tags) {
+        StringBuilder builder = new StringBuilder(name);
+        for (String tag : tags) {
+            builder.append('|').append(tag == null ? "" : tag);
+        }
+        return builder.toString();
     }
 }

@@ -53,29 +53,29 @@ This directory contains comprehensive Grafana dashboards for monitoring kline da
 These dashboards expect the following Prometheus metrics to be available:
 
 ### Data Collection Metrics
-- `kline_records_total` - Total kline records processed
-- `kline_errors_total` - Total errors encountered
-- `kline_processing_duration_seconds` - Processing time histogram
-- `kline_websocket_connected` - WebSocket connection status
-- `kline_active_streams` - Number of active streams
-- `kline_messages_received_total` - Total messages received
-- `kline_messages_processed_total` - Total messages processed
-- `kline_processing_queue_size` - Current queue size
+- `binance_data_collection_kline_events_received_total{symbol,interval}` - Total kline events received from WebSocket streams
+- `binance_data_collection_kline_events_sent_kafka_total{symbol,interval}` - Successful kline events published to Kafka
+- `binance_data_collection_kline_events_failed_kafka_total{symbol,interval,error}` - Failed Kafka publish attempts with error classification
+- `binance_data_collection_kafka_send_duration_seconds_{sum,count}{symbol,interval,status}` - Kafka publish latency histogram data
+- `binance_data_collection_websocket_connections_{established,failed,closed}_total{symbol,interval}` - WebSocket lifecycle counters
+- `binance_data_collection_rest_api_calls_{total,failed}_total{symbol,interval,operation,reason}` - REST warmup call success/failure metrics
+- `binance_data_collection_active_websocket_connections` - Current count of active WebSocket sessions
+- `binance_data_collection_active_kline_streams` - Active kline stream subscriptions
 
 ### Storage Metrics
-- `kline_records_stored_total` - Total records stored in PostgreSQL
-- `kline_elasticsearch_indexed_total` - Total records indexed in Elasticsearch
-- `kline_storage_errors_total` - Total storage errors
-- `kline_postgres_errors_total` - PostgreSQL-specific errors
-- `kline_elasticsearch_errors_total` - Elasticsearch-specific errors
-- `kline_validation_errors_total` - Data validation errors
+- `binance_data_storage_kline_events_saved_total{symbol,interval}` - Persisted kline events across repositories
+- `binance_data_storage_kline_events_failed_total{symbol,interval,error}` - Storage failures by symbol and interval
+- `binance_data_storage_postgres_save_duration_seconds_{sum,count}{symbol,interval,status}` - PostgreSQL write latency histogram data
+- `binance_data_storage_elasticsearch_save_duration_seconds_{sum,count}{symbol,interval,status}` - Elasticsearch write latency histogram data
+- `binance_data_storage_postgres_{saves,save_failures}_total{symbol,interval,reason}` - PostgreSQL success/failure counters
+- `binance_data_storage_elasticsearch_{saves,save_failures}_total{symbol,interval,reason}` - Elasticsearch success/failure counters
+- `binance_data_storage_postgres_connection_status` - PostgreSQL connection health (1=up)
+- `binance_data_storage_elasticsearch_connection_status` - Elasticsearch connection health (1=up)
+- `binance_data_storage_active_kafka_consumers` - Current Kafka consumer count
+- `binance_data_storage_kafka_consumer_processing_duration_seconds_{sum,count}{symbol,interval,status}` - Kafka consumer processing latency
 
 ### Price Data Metrics
-- `kline_price_open{symbol, interval}` - Open prices
-- `kline_price_high{symbol, interval}` - High prices
-- `kline_price_low{symbol, interval}` - Low prices
-- `kline_price_close{symbol, interval}` - Close prices
-- `kline_volume{symbol, interval}` - Trading volumes
+- Price charts leverage persisted data; refer to analytics dashboards for OHLC and volume metrics derived from storage outputs.
 
 ### System Metrics
 - `up{job}` - Service availability

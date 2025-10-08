@@ -75,14 +75,13 @@ public class KlineStreamManagerBinance {
                 activeFingerprints.stream()
                         .filter(fingerprint -> !updatedFingerprints.contains(fingerprint))
                         .collect(Collectors.toSet());
-        Set<String> closedSessions = klineStreamCache.closeStreamSources(toClose);
-        log.info("Closed sessions: {}", closedSessions);
-        
-        // Update metrics for closed sessions
-        closedSessions.forEach(session -> {
-            metrics.incrementWebsocketConnectionsClosed();
+        toClose.forEach(key -> {
+            metrics.incrementWebsocketConnectionsClosed(key.symbol(), key.interval());
             metrics.decrementActiveKlineStreams();
         });
+
+        Set<String> closedSessions = klineStreamCache.closeStreamSources(toClose);
+        log.info("Closed sessions: {}", closedSessions);
 
         log.info("Opening new sessions...");
         List<CompletableFuture<Void>> futures = klineStreams.stream()
@@ -91,36 +90,42 @@ public class KlineStreamManagerBinance {
                     log.info("New stream source to be added {}", streamSource);
                     
                     // Fetch warmup klines with metrics
+                    String symbol = streamSource.fingerprint().symbol();
+                    String interval = streamSource.fingerprint().interval();
+                    String operation = "warmup";
+                    metrics.incrementRestApiCallsTotal(symbol, interval, operation);
                     Timer.Sample restApiSample = metrics.startRestApiCall();
+                    boolean restSuccess = false;
                     try {
                         List<KlineEvent> warmupKlines = restKlineClient.fetchWarmupKlines(streamSource,
                                 config.getData().getKline().getWarmupKlineCount());
-                        metrics.recordRestApiCallTime(restApiSample);
-                        metrics.incrementRestApiCallsTotal();
+                        restSuccess = true;
                         
                         kafkaProducerService.sendKlineEvents(config.getData().getKline().getKafkaTopic(), warmupKlines);
                     } catch (Exception e) {
-                        metrics.recordRestApiCallTime(restApiSample);
-                        metrics.incrementRestApiCallsFailed();
+                        metrics.incrementRestApiCallsFailed(symbol, interval, operation, e.getClass().getSimpleName());
                         log.error("Failed to fetch warmup klines for {}", streamSource, e);
+                    } finally {
+                        metrics.recordRestApiCallTime(restApiSample, symbol, interval, operation, restSuccess ? "success" : "failure");
                     }
-                    
+
                     URI uri = urlFormatter.formatWebsocketKlineURLTemplate(streamSource);
                     log.info("Connecting to Websocket URI {}", uri);
-                    
+
                     Timer.Sample connectionSample = metrics.startWebsocketConnection();
                     return client.execute(textMessageHandler, headers, uri)
                             .thenAccept(session -> {
-                        metrics.recordWebsocketConnectionTime(connectionSample);
-                        metrics.incrementWebsocketConnectionsEstablished();
+                        metrics.recordWebsocketConnectionTime(connectionSample, symbol, interval, "success");
+                        metrics.incrementWebsocketConnectionsEstablished(symbol, interval);
                         metrics.incrementActiveKlineStreams();
-                        
+
                         log.info("Connected: session {} is open for {} at {} with headers: {}",
                                 session.getId(), streamSource, LocalDateTime.now(), headers);
                         klineStreamCache.putStreamSource(streamSource.withSession(session));
                     }).exceptionally(throwable -> {
-                        metrics.recordWebsocketConnectionTime(connectionSample);
-                        metrics.incrementWebsocketConnectionsFailed();
+                        metrics.recordWebsocketConnectionTime(connectionSample, symbol, interval, "failure");
+                        metrics.incrementWebsocketConnectionsFailed(symbol, interval,
+                                throwable != null ? throwable.getClass().getSimpleName() : "unknown");
                         log.error("Failed to connect to Binance WebSocket {}", streamSource, throwable);
                         return null;
                     });
