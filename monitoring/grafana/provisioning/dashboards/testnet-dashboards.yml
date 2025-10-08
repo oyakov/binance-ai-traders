@@ -1,7 +1,7 @@
-apiVersion: 1
+﻿apiVersion: 1
 
 providers:
-  - name: 'testnet-dashboards'
+  - name: 'binance-trading-dashboards'
     orgId: 1
     folder: 'Binance Trading'
     type: file
@@ -10,15 +10,17 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/binance-trading
+
   - name: 'system-monitoring-dashboards'
     orgId: 1
-    folder: 'System Health'
+    folder: 'System Monitoring'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/system-monitoring
+
   - name: 'analytics-dashboards'
     orgId: 1
     folder: 'Analytics & Insights'
@@ -28,6 +30,7 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/analytics
+
   - name: 'strategy-dashboards'
     orgId: 1
     folder: 'Trading Strategies'
@@ -37,7 +40,8 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/strategies
-  - name: 'enhanced-trading-dashboard'
+
+  - name: 'enhanced-trading-dashboards'
     orgId: 1
     folder: 'Enhanced Trading'
     type: file
@@ -47,15 +51,6 @@ providers:
     options:
       path: /etc/grafana/provisioning/dashboards/enhanced-trading
 
-  - name: 'system-health-fixed'
-    orgId: 1
-    folder: 'System Health'
-    type: file
-    disableDeletion: false
-    updateIntervalSeconds: 10
-    allowUiUpdates: true
-    options:
-      path: /etc/grafana/provisioning/dashboards/system-health
   - name: 'kline-data-dashboards'
     orgId: 1
     folder: 'Kline Data Monitoring'
@@ -65,3 +60,13 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/kline-data
+
+  - name: 'system-health-dashboards'
+    orgId: 1
+    folder: 'System Health'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/system-health
