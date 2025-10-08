@@ -14,24 +14,38 @@
 ### Core Services Status
 | Service | Purpose | Tech Stack | Implementation Status | Critical Notes |
 |---------|---------|------------|----------------------|----------------|
-| **binance-data-collection** | Real-time Binance WebSocket data | Java 17, Spring Boot, Kafka | 🔴 **Skeleton** | Missing WebSocket/REST implementation |
-| **binance-data-storage** | Persist market data | Java 17, Spring Boot, PostgreSQL, Elasticsearch | 🟢 **Substantial** | Well-implemented with dual persistence |
-| **binance-trader-macd** | MACD trading strategy + backtesting | Java 17, Spring Boot, Binance API | 🟡 **Partial** | Backtesting complete, strategy logic incomplete |
-| **binance-trader-grid** | Grid trading strategy | Java 17, Spring Boot, Kafka | 🔴 **Duplicate** | Duplicates storage service, needs implementation |
-| **binance-shared-model** | Avro schemas for communication | Java 17, Avro | 🟢 **Complete** | Basic but functional |
-| **telegram-frontend-python** | User interface and notifications | Python 3.11, FastAPI, aiogram | 🔴 **Scaffolding** | Extensive scaffolding, not runnable |
+| **binance-data-collection** | Real-time Binance WebSocket data | Java 21, Spring Boot, Kafka | 🔴 **Skeleton** | Missing WebSocket/REST implementation |
+| **binance-data-storage** | Persist market data | Java 21, Spring Boot, PostgreSQL, Elasticsearch | 🟢 **Complete** | Well-implemented with dual persistence |
+| **binance-trader-macd** | MACD trading strategy + backtesting | Java 21, Spring Boot, Binance API | 🟡 **Partial** | ✅ Backtesting complete (2,400+ scenarios), ❌ strategy logic incomplete |
+| **binance-trader-grid** | Grid trading strategy | Java 21, Spring Boot, Kafka | 🔴 **Duplicate** | Duplicates storage service, needs implementation |
+| **binance-shared-model** | Avro schemas for communication | Java 21, Avro | 🟢 **Complete** | Basic but functional |
+| **telegram-frontend-python** | User interface and notifications | Python 3.11, FastAPI, aiogram | 🔴 **Scaffolding** | Extensive scaffolding, missing dependencies, not runnable |
 
 ### Infrastructure Components
-- **Kafka**: Message streaming and event distribution
-- **PostgreSQL**: Relational data storage
-- **Elasticsearch**: Search and analytics
-- **Docker Compose**: Local development environment
-- **Grafana**: Monitoring dashboards
-- **Prometheus**: Metrics collection
+- **Kafka**: Apache Kafka 3.8.0 with KRaft mode (message streaming and event distribution)
+- **PostgreSQL**: Latest version (relational data storage)
+- **Elasticsearch**: 8.5.0 (search and analytics)
+- **Docker Compose**: Multi-environment orchestration (dev, testnet, production)
+- **Grafana**: Pre-configured monitoring dashboards with comprehensive metrics
+- **Prometheus**: Metrics collection and alerting
+- **Schema Registry**: Confluent Schema Registry 7.5.1 (Avro schema management)
 
 ## 🧠 Memory System & Context
 
-### Active Findings (Critical Issues)
+### Comprehensive Memory Documentation
+The project maintains an extensive memory system with **27 active entries** covering all aspects of the system:
+
+#### Context Entries (System Architecture)
+- **MEM-C001**: Project Architecture Overview
+- **MEM-C002**: Service Dependencies Map
+- **MEM-C003**: Project Structure Comprehensive Overview *(NEW)*
+- **MEM-C004**: Microservices Detailed Analysis *(NEW)*
+- **MEM-C005**: Infrastructure and Monitoring Overview *(NEW)*
+- **MEM-C006**: Backtesting Engine Comprehensive Overview *(NEW)*
+- **MEM-C007**: Telegram Frontend Architecture Overview *(NEW)*
+- **MEM-C008**: Project Features and Capabilities Summary *(NEW)*
+
+#### Active Findings (Critical Issues)
 - **MEM-001**: Data Collection Service Implementation Gap
 - **MEM-004**: Critical Testnet Integration Gaps
 - **MEM-005**: Telegram Frontend Critical Dependencies Missing
@@ -39,25 +53,33 @@
 - **MEM-007**: Database Compatibility Issues Blocking Integration Tests
 - **MEM-008**: Grid Trader Service Duplication Issue
 
-### Root Causes Identified
+#### Root Causes Identified
 - **MEM-009**: Incomplete Service Integration Architecture
 - **MEM-010**: Insufficient Testing Strategy
 - **MEM-011**: Configuration Management Gaps
 
+### Key Insights from Memory Analysis
+- **✅ Strengths**: Advanced backtesting engine (2,400+ scenarios), robust infrastructure, comprehensive monitoring
+- **❌ Critical Gaps**: Missing WebSocket implementation, incomplete trading strategies, non-runnable Telegram bot
+- **🎯 Current Focus**: M1 testnet deployment with priority on data collection and strategy completion
+
 ## 🚀 Development Workflow
 
 ### Code Conventions
-- **Java Services**: Use Java 17, Spring Boot, Maven
+- **Java Services**: Use Java 21, Spring Boot 3.3.9, Maven (updated from Java 17)
 - **Python Services**: Use Python 3.11, Poetry for dependency management
 - **Type Safety**: Enforce type hints with `typing` or `pydantic` models
 - **Documentation**: Write docstrings for public functions/classes with usage examples
 - **Architecture**: Follow DDD principles, avoid circular imports using `binance-shared-model`
+- **Memory Integration**: Reference relevant memory entries (MEM-XXX) in code comments and PRs
 
 ### Testing Strategy
 - **Unit Tests**: Run with `pytest` (Python) or Maven Surefire (Java)
 - **Integration Tests**: Use `docker compose` for service integration checks
+- **Backtesting**: Comprehensive strategy validation (2,400+ scenarios already tested)
 - **Code Quality**: Validate with `ruff` (Python) and `mypy` (Python)
 - **Coverage**: Maintain comprehensive test coverage, document any gaps
+- **Postman Collections**: Use existing API test collections in `postman/` directory
 
 ### Service Dependencies
 ```
@@ -72,12 +94,18 @@ telegram-frontend-python
 
 ## 📋 Current Priorities
 
-### Immediate Actions Required
-1. **Complete Data Collection Service**: Implement WebSocket consumers and Kafka publishers
-2. **Fix MACD Trader Strategy Logic**: Complete signal generation and order placement
-3. **Implement Grid Trader**: Replace duplicate code with actual strategy implementation
-4. **Fix Telegram Bot Dependencies**: Resolve missing imports and make bot runnable
-5. **Testnet Integration**: Complete M1 testnet deployment infrastructure
+### Immediate Actions Required (M1 Priority)
+1. **Complete Data Collection Service**: Implement WebSocket consumers and Kafka publishers (MEM-001)
+2. **Fix MACD Trader Strategy Logic**: Complete signal generation and order placement (MEM-006)
+3. **Implement Grid Trader**: Replace duplicate code with actual strategy implementation (MEM-008)
+4. **Fix Telegram Bot Dependencies**: Resolve missing imports and make bot runnable (MEM-005)
+5. **Testnet Integration**: Complete M1 testnet deployment infrastructure (MEM-004)
+
+### Implementation Guidelines
+- **Reference Memory Entries**: Always check relevant memory entries before starting work
+- **Follow Existing Patterns**: Use data-storage service as reference for well-implemented patterns
+- **Leverage Backtesting**: Use the completed backtesting engine as foundation for strategy development
+- **Monitor Integration**: Ensure all services expose proper health checks and metrics
 
 ### Development Guidelines
 - **Service Isolation**: Each service should be independently deployable
@@ -89,11 +117,13 @@ telegram-frontend-python
 ## 🔧 Technical Standards
 
 ### Java Services
-- **Framework**: Spring Boot 3.x
+- **Framework**: Spring Boot 3.3.9
 - **Build Tool**: Maven
 - **Database**: JPA with PostgreSQL, Elasticsearch for analytics
-- **Messaging**: Kafka with Avro serialization
+- **Messaging**: Kafka with Avro serialization via Confluent Schema Registry
 - **Testing**: JUnit 5, Mockito, TestContainers
+- **Monitoring**: Micrometer with Prometheus metrics
+- **Migration**: Flyway for database schema management
 
 ### Python Services
 - **Framework**: FastAPI, aiogram

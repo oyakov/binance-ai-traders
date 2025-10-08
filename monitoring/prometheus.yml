@@ -3,8 +3,12 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+  - "/etc/prometheus/alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
 
 scrape_configs:
   # Prometheus itself
@@ -12,26 +16,83 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Data Collection Service
+  # Mainnet Services
   - job_name: 'binance-data-collection'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['binance-data-collection:8080']
     scrape_interval: 5s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
 
-  # Data Storage Service
   - job_name: 'binance-data-storage'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['binance-data-storage:8080']
     scrape_interval: 5s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
 
-  # MACD Trader Service
   - job_name: 'binance-trader-macd'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['binance-trader-macd:8080']
     scrape_interval: 5s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
+
+  # Testnet Services
+  - job_name: 'binance-trader-macd-testnet'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['binance-trader-macd-testnet:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  - job_name: 'binance-data-collection-testnet'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['binance-data-collection-testnet:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  - job_name: 'binance-data-storage-testnet'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['binance-data-storage-testnet:8081']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
+
+  # Health Metrics Server (Testnet)
+  - job_name: 'health-metrics-server'
+    static_configs:
+      - targets: ['health-metrics-server-testnet:8092']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: environment
+        replacement: testnet
 
   # Python Frontend Service
   - job_name: 'telegram-frontend'
@@ -39,22 +100,32 @@ scrape_configs:
     static_configs:
       - targets: ['telegram-frontend:8000']
     scrape_interval: 5s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
 
-  # Kafka
+  # Infrastructure Services
   - job_name: 'kafka'
     static_configs:
       - targets: ['kafka:9092']
     scrape_interval: 10s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
 
-  # PostgreSQL
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres:5432']
     scrape_interval: 10s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet
 
-  # Elasticsearch
   - job_name: 'elasticsearch'
     metrics_path: '/_prometheus/metrics'
     static_configs:
       - targets: ['elasticsearch:9200']
     scrape_interval: 10s
+    relabel_configs:
+      - target_label: environment
+        replacement: mainnet

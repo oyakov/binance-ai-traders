@@ -6,7 +6,7 @@ services:
     container_name: prometheus-testnet
     restart: unless-stopped
     volumes:
-      - ./prometheus/testnet-prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
     networks:

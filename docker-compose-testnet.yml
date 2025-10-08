@@ -157,7 +157,7 @@ services:
     ports:
       - "9091:9090"
     volumes:
-      - ./monitoring/prometheus/testnet-prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -293,7 +293,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=testnet_admin
     volumes:
       - grafana_testnet_data:/var/lib/grafana
-      - ./monitoring/grafana/datasources/prometheus-testnet.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+      - ./monitoring/grafana/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
       - ./monitoring/grafana/provisioning/dashboards/testnet-dashboards.yml:/etc/grafana/provisioning/dashboards/testnet-dashboards.yml
       - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     depends_on:
