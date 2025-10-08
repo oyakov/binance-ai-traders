@@ -86,30 +86,31 @@ public class KlineDataService implements KlineDataServiceApi {
     @Transactional
     public void saveKlineData(KlineEvent event) {
         Timer.Sample sample = metrics.startKlineEventProcessing();
+        String symbol = event.getSymbol();
+        String interval = event.getInterval();
+        boolean success = false;
         try {
             KlineItem klineItem = klineMapper.toItem(event);
-            
-            boolean persisted = false;
-            boolean postgresSuccess = false;
-            boolean elasticsearchSuccess = false;
 
+            boolean persisted = false;
             try {
                 if (postgresRepository.isPresent()) {
                     Timer.Sample postgresSample = metrics.startPostgresSave();
+                    boolean localPostgresSuccess = false;
                     try {
                         postgresRepository.get().upsertKline(klineItem);
-                        postgresSuccess = true;
                         persisted = true;
-                        metrics.incrementPostgresSaves();
+                        localPostgresSuccess = true;
+                        metrics.incrementPostgresSaves(symbol, interval);
                         metrics.setPostgresConnectionStatus(true);
                         log.debug("Successfully saved to PostgreSQL: {}", klineItem);
                     } catch (Exception e) {
-                        metrics.incrementPostgresSaveFailures();
+                        metrics.incrementPostgresSaveFailures(symbol, interval, e.getClass().getSimpleName());
                         metrics.setPostgresConnectionStatus(false);
                         log.error("Failed to save to PostgreSQL: {}", klineItem, e);
                         throw e;
                     } finally {
-                        metrics.recordPostgresSaveTime(postgresSample);
+                        metrics.recordPostgresSaveTime(postgresSample, symbol, interval, localPostgresSuccess ? "success" : "failure");
                     }
                 } else {
                     log.warn("Postgres repository is unavailable; skipping persistence for {}", klineItem);
@@ -118,20 +119,21 @@ public class KlineDataService implements KlineDataServiceApi {
 
                 if (elasticRepository.isPresent()) {
                     Timer.Sample elasticsearchSample = metrics.startElasticsearchSave();
+                    boolean localElasticSuccess = false;
                     try {
                         elasticRepository.get().save(klineItem);
-                        elasticsearchSuccess = true;
                         persisted = true;
-                        metrics.incrementElasticsearchSaves();
+                        localElasticSuccess = true;
+                        metrics.incrementElasticsearchSaves(symbol, interval);
                         metrics.setElasticsearchConnectionStatus(true);
                         log.debug("Successfully saved to Elasticsearch: {}", klineItem);
                     } catch (Exception e) {
-                        metrics.incrementElasticsearchSaveFailures();
+                        metrics.incrementElasticsearchSaveFailures(symbol, interval, e.getClass().getSimpleName());
                         metrics.setElasticsearchConnectionStatus(false);
                         log.error("Failed to save to Elasticsearch: {}", klineItem, e);
                         throw e;
                     } finally {
-                        metrics.recordElasticsearchSaveTime(elasticsearchSample);
+                        metrics.recordElasticsearchSaveTime(elasticsearchSample, symbol, interval, localElasticSuccess ? "success" : "failure");
                     }
                 } else {
                     log.warn("Elasticsearch repository is unavailable; skipping persistence for {}", klineItem);
@@ -139,23 +141,24 @@ public class KlineDataService implements KlineDataServiceApi {
                 }
 
                 if (persisted) {
-                    metrics.incrementKlineEventsSaved(event.getSymbol(), event.getInterval());
+                    metrics.incrementKlineEventsSaved(symbol, interval);
                     eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
                     log.info("Kline data saved successfully: {}", klineItem);
+                    success = true;
                 } else {
                     String message = "No storage repositories available for kline data persistence";
                     log.error("{}: {}", message, klineItem);
-                    metrics.incrementKlineEventsFailed(event.getSymbol(), event.getInterval(), "NoRepositories");
+                    metrics.incrementKlineEventsFailed(symbol, interval, "NoRepositories");
                     eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, message, null));
                 }
             } catch (Exception e) {
                 log.error("Failed to save kline data: {}", klineItem, e);
-                metrics.incrementKlineEventsFailed(event.getSymbol(), event.getInterval(), e.getClass().getSimpleName());
+                metrics.incrementKlineEventsFailed(symbol, interval, e.getClass().getSimpleName());
                 eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, e.getMessage(), e));
                 throw e;
             }
         } finally {
-            metrics.recordKlineEventProcessingTime(sample);
+            metrics.recordKlineEventProcessingTime(sample, symbol, interval, success ? "success" : "failure");
         }
     }
 

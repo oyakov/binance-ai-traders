@@ -29,7 +29,8 @@ public class KafkaProducerService {
         try {
             CompletableFuture<SendResult<String, KlineEvent>> future = kafkaTemplate.send(topic, event.getSymbol(), event);
             future.whenComplete((result, throwable) -> {
-                metrics.recordKafkaSendTime(sample);
+                String status = throwable == null ? "success" : "failure";
+                metrics.recordKafkaSendTime(sample, event.getSymbol(), event.getInterval(), status);
                 if (throwable != null) {
                     log.error("Failed to send kline event to Kafka", throwable);
                     metrics.incrementKlineEventsFailedToSend(event.getSymbol(), event.getInterval(), throwable.getClass().getSimpleName());
@@ -39,7 +40,7 @@ public class KafkaProducerService {
                 }
             });
         } catch (Exception e) {
-            metrics.recordKafkaSendTime(sample);
+            metrics.recordKafkaSendTime(sample, event.getSymbol(), event.getInterval(), "failure");
             log.error("Failed to send kline event to Kafka", e);
             metrics.incrementKlineEventsFailedToSend(event.getSymbol(), event.getInterval(), e.getClass().getSimpleName());
             throw e;
