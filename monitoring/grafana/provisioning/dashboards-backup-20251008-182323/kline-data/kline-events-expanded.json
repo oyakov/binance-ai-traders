@@ -1,0 +1,458 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "index": 0,
+                  "text": "Postgres - Disconnected"
+                },
+                "1": {
+                  "index": 1,
+                  "text": "Postgres - Connected"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "binance_data_storage_postgres_connection_status",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Postgres Connection",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "index": 0,
+                  "text": "Elasticsearch - Disconnected"
+                },
+                "1": {
+                  "index": 1,
+                  "text": "Elasticsearch - Connected"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "binance_data_storage_elasticsearch_connection_status",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Elasticsearch Connection",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_kline_events_received_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} received",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_kline_events_sent_kafka_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} sent",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_storage_kline_events_saved_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} saved",
+          "refId": "C"
+        }
+      ],
+      "title": "Pipeline Throughput",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_kline_events_failed_kafka_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} kafka fails",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_storage_kline_events_failed_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} storage fails",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_rest_api_calls_failed_total{symbol=~\"$symbol\",interval=~\"$interval\",operation=\"warmup\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} warmup rest fails",
+          "refId": "C"
+        }
+      ],
+      "title": "Failure Signals",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(binance_data_collection_kafka_send_duration_seconds_sum{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval])) / sum(rate(binance_data_collection_kafka_send_duration_seconds_count{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} kafka send avg",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(binance_data_storage_postgres_save_duration_seconds_sum{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval])) / sum(rate(binance_data_storage_postgres_save_duration_seconds_count{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} postgres save avg",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(binance_data_storage_elasticsearch_save_duration_seconds_sum{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval])) / sum(rate(binance_data_storage_elasticsearch_save_duration_seconds_count{symbol=~\"$symbol\",interval=~\"$interval\",status=\"success\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} elastic save avg",
+          "refId": "C"
+        }
+      ],
+      "title": "Latency Averages (seconds)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1D0CF0138F184889"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_rest_api_calls_total{symbol=~\"$symbol\",interval=~\"$interval\",operation=\"warmup\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} warmup rest",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_websocket_connections_established_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} ws established",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (symbol, interval) (increase(binance_data_collection_websocket_connections_failed_total{symbol=~\"$symbol\",interval=~\"$interval\"}[$__rate_interval]))",
+          "legendFormat": "{{symbol}} {{interval}} ws failed",
+          "refId": "C"
+        }
+      ],
+      "title": "Ingress Control",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "style": "dark",
+  "tags": [
+    "kline",
+    "metrics",
+    "binance"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            ".*"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P1D0CF0138F184889"
+        },
+        "definition": "label_values(binance_data_collection_kline_events_received_total, symbol)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Symbol",
+        "multi": true,
+        "name": "symbol",
+        "options": [],
+        "query": "label_values(binance_data_collection_kline_events_received_total, symbol)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            ".*"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P1D0CF0138F184889"
+        },
+        "definition": "label_values(binance_data_collection_kline_events_received_total, interval)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Interval",
+        "multi": true,
+        "name": "interval",
+        "options": [],
+        "query": "label_values(binance_data_collection_kline_events_received_total, interval)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Kline Events Expanded",
+  "uid": "kline-events-expanded",
+  "version": 1,
+  "id": null,
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "weekStart": ""
+}

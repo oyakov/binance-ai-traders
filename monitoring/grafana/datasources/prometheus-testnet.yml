@@ -1,17 +1,28 @@
 apiVersion: 1
 
 datasources:
-  - name: Prometheus Testnet
+  - name: prometheus
     type: prometheus
     access: proxy
     url: http://prometheus-testnet:9090
+    uid: prometheus
     isDefault: true
     editable: true
+    
+  - name: postgres-testnet
+    type: postgres
+    access: proxy
+    url: postgres-testnet:5432
+    uid: postgres-testnet
+    database: binance_trader_testnet
+    user: testnet_user
+    secureJsonData:
+      password: testnet_password
     jsonData:
-      httpMethod: POST
-      manageAlerts: true
-      prometheusType: Prometheus
-      prometheusVersion: 2.40.0
-      cacheLevel: 'High'
-      disableRecordingRules: false
-      incrementalQueryOverlapWindow: 10m
+      sslmode: disable
+      maxOpenConns: 0
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    editable: true

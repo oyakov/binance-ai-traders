@@ -295,10 +295,7 @@ services:
       - grafana_testnet_data:/var/lib/grafana
       - ./monitoring/grafana/datasources/prometheus-testnet.yml:/etc/grafana/provisioning/datasources/prometheus.yml
       - ./monitoring/grafana/provisioning/dashboards/testnet-dashboards.yml:/etc/grafana/provisioning/dashboards/testnet-dashboards.yml
-      - ./monitoring/grafana/dashboards/binance-trading:/etc/grafana/provisioning/dashboards/binance-trading
-      - ./monitoring/grafana/dashboards/system-monitoring:/etc/grafana/provisioning/dashboards/system-monitoring
-      - ./monitoring/grafana/dashboards/analytics:/etc/grafana/provisioning/dashboards/analytics
-      - ./monitoring/grafana/dashboards/strategies:/etc/grafana/provisioning/dashboards/strategies
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     depends_on:
       - prometheus-testnet
     networks:

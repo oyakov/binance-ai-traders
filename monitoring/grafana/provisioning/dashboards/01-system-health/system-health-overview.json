@@ -1,0 +1,231 @@
+{
+  "id": null,
+  "timezone": "browser",
+  "version": 1,
+  "style": "dark",
+  "title": "System Health Overview",
+  "graphTooltip": 0,
+  "liveNow": false,
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "steps": [
+              {
+                "value": null,
+                "color": "red"
+              },
+              {
+                "value": 1,
+                "color": "green"
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=~\".*testnet.*\"}"
+        }
+      ],
+      "type": "stat",
+      "title": "Service Status Overview",
+      "gridPos": {
+        "y": 0,
+        "w": 6,
+        "x": 0,
+        "h": 8
+      }
+    },
+    {
+      "id": 2,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"binance-macd-trader-testnet\"}"
+        }
+      ],
+      "type": "stat",
+      "title": "Trading Service Health",
+      "gridPos": {
+        "y": 0,
+        "w": 6,
+        "x": 6,
+        "h": 8
+      }
+    },
+    {
+      "id": 3,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"binance-data-collection-testnet\"}"
+        }
+      ],
+      "type": "stat",
+      "title": "Data Collection Health",
+      "gridPos": {
+        "y": 0,
+        "w": 6,
+        "x": 12,
+        "h": 8
+      }
+    },
+    {
+      "id": 4,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"binance-data-storage-testnet\"}"
+        }
+      ],
+      "type": "stat",
+      "title": "Data Storage Health",
+      "gridPos": {
+        "y": 0,
+        "w": 6,
+        "x": 18,
+        "h": 8
+      }
+    },
+    {
+      "id": 5,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=~\"prometheus|elasticsearch|kafka|postgres.*\"}"
+        }
+      ],
+      "type": "stat",
+      "title": "Infrastructure Health",
+      "gridPos": {
+        "y": 8,
+        "w": 6,
+        "x": 0,
+        "h": 8
+      }
+    }
+  ],
+  "refresh": "30s",
+  "uid": "system-health-overview",
+  "timepicker": {},
+  "tags": [
+    "system",
+    "health",
+    "infrastructure"
+  ],
+  "fiscalYearStartMonth": 0,
+  "schemaVersion": 36,
+  "weekStart": "",
+  "editable": true,
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "to": "now",
+    "from": "now-1h"
+  }
+}
