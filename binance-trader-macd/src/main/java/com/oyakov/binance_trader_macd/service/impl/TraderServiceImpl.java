@@ -2,6 +2,9 @@ package com.oyakov.binance_trader_macd.service.impl;
 
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import com.oyakov.binance_trader_macd.config.MACDTraderConfig;
+import com.oyakov.binance_trader_macd.domain.MACDIndicator;
+import com.oyakov.binance_trader_macd.service.MACDCalculationService;
+import com.oyakov.binance_trader_macd.service.api.MacdStorageClient;
 import com.oyakov.binance_trader_macd.domain.OrderState;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.domain.OrderSide;
@@ -32,6 +35,8 @@ public class TraderServiceImpl implements KlineEventListener {
 
     private final MACDSignalAnalyzer macdSignalAnalyzer;
     private final OrderServiceApi orderService;
+    private final MACDCalculationService macdCalculationService;
+    private final MacdStorageClient macdStorageClient;
     private final MACDTraderConfig traderConfig;
     private final MeterRegistry meterRegistry;
 
@@ -112,6 +117,25 @@ public class TraderServiceImpl implements KlineEventListener {
         String symbol = klineEvent.getSymbol();
         BigDecimal currentPrice = klineEvent.getClose();
         log.info("Kline update [symbol %s, price %s]".formatted(symbol, currentPrice));
+
+        // Compute latest MACD for this symbol/interval and persist to storage for traceability
+        try {
+            MACDIndicator indicator = macdCalculationService.calculateMACD(symbol, klineEvent.getInterval());
+            if (indicator != null && indicator.isValid()) {
+                macdStorageClient.upsertMacd(
+                        indicator.getSymbol(),
+                        indicator.getInterval(),
+                        indicator.getTimestamp(),
+                        null,
+                        null,
+                        indicator.getMacdLine() != null ? indicator.getMacdLine().doubleValue() : null,
+                        indicator.getSignalLine() != null ? indicator.getSignalLine().doubleValue() : null,
+                        indicator.getHistogram() != null ? indicator.getHistogram().doubleValue() : null
+                );
+            }
+        } catch (Exception e) {
+            log.warn("MACD upsert on kline update failed for {} {}", symbol, klineEvent.getInterval(), e);
+        }
         orderService.getActiveOrder(symbol).ifPresentOrElse(
                 orderItem -> {
                     log.info("Active order %s is present".formatted(orderItem.getOrderId()));

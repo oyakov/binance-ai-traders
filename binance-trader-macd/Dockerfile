@@ -1,33 +1,22 @@
-# Multi-stage build to handle dependencies
-FROM bellsoft/liberica-openjdk-alpine:21 AS builder
+# syntax=docker/dockerfile:1.6
 
-# Set the working directory
+FROM maven:3.9.9-eclipse-temurin-21 AS deps
+WORKDIR /workspace
+COPY maven-settings.xml /root/.m2/settings.xml
+RUN sed -i 's|http://localhost:8081|http://host.docker.internal:8081|g' /root/.m2/settings.xml || true
+COPY pom.xml ./
+COPY binance-shared-model/pom.xml binance-shared-model/
+COPY binance-data-collection/pom.xml binance-data-collection/
+COPY binance-data-storage/pom.xml binance-data-storage/
+COPY binance-trader-macd/pom.xml binance-trader-macd/
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests dependency:go-offline || true
+
+FROM deps AS build
+COPY . .
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests -Dmaven.test.skip=true -pl binance-trader-macd -am package
+
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-
-# Copy the entire project (parent pom and all modules)
-COPY ../.. .
-
-# Build the shared model first, then the trader
-RUN ./mvnw clean install -pl binance-shared-model -DskipTests && \
-    ./mvnw clean package -pl binance-trader-macd -DskipTests
-
-# Runtime stage
-FROM bellsoft/liberica-openjdk-alpine:21
-
-# Runtime environment variables (provided via secrets or compose overrides):
-#   BINANCE_API_KEY - Binance API key forwarded to the REST client header.
-#   BINANCE_API_SECRET - Binance API secret used for HMAC signatures.
-#   BINANCE_REST_BASE_URL - Optional override for the Binance REST endpoint.
-#   BINANCE_TRADER_TEST_ORDER_MODE_ENABLED - Switch to enable `/api/v3/order/test` dry runs.
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the built JAR from the builder stage
-COPY --from=builder /app/binance-trader-macd/target/binance-trader-macd.jar app.jar
-
-# Expose the necessary ports
+COPY --from=build /workspace/binance-trader-macd/target/binance-trader-macd.jar app.jar
 EXPOSE 8080
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]

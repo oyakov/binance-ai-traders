@@ -1,0 +1,17 @@
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8081/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  nexus-data:
+
+

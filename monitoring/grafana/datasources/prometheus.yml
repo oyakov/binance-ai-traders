@@ -4,12 +4,21 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
-    isDefault: true
-    editable: true
-  - name: Prometheus Testnet
-    type: prometheus
-    access: proxy
+    uid: prometheus-testnet
     url: http://prometheus-testnet:9090
-    isDefault: false
-    editable: true
+    isDefault: true
+    editable: false
+    
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    uid: postgres-testnet
+    url: postgres-testnet:5432
+    database: binance_data
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1500
+    editable: false

@@ -1,48 +1,22 @@
-# Use the Liberica JDK 21 as the base image
-FROM bellsoft/liberica-openjdk-alpine:21
+# syntax=docker/dockerfile:1.6
 
-# Install curl for debugging network issues
-RUN apk add --no-cache curl
+FROM maven:3.9.9-eclipse-temurin-21 AS deps
+WORKDIR /workspace
+COPY maven-settings.xml /root/.m2/settings.xml
+RUN sed -i 's|http://localhost:8081|http://host.docker.internal:8081|g' /root/.m2/settings.xml || true
+COPY pom.xml ./
+COPY binance-shared-model/pom.xml binance-shared-model/
+COPY binance-data-collection/pom.xml binance-data-collection/
+COPY binance-data-storage/pom.xml binance-data-storage/
+COPY binance-trader-macd/pom.xml binance-trader-macd/
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests dependency:go-offline || true
 
-# Set the working directory
+FROM deps AS build
+COPY . .
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests -Dmaven.test.skip=true -pl binance-data-storage -am package
+
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-
-# Copy the parent POM and Maven wrapper
-COPY ../pom.xml .
-COPY ../mvnw .
-COPY ../mvnw.cmd .
-COPY ../.mvn .mvn
-COPY ../maven-settings.xml .
-
-# Copy all modules
-COPY ../binance-shared-model ./binance-shared-model
-COPY ../binance-data-collection ./binance-data-collection
-COPY ../binance-data-storage ./binance-data-storage
-COPY ../binance-trader-grid ./binance-trader-grid
-COPY ../binance-trader-macd ./binance-trader-macd
-
-# Test network connectivity first
-RUN echo "Testing network connectivity..." && \
-    curl -I https://repo1.maven.org/maven2/ && \
-    curl -I https://packages.confluent.io/maven/ && \
-    echo "Network connectivity test completed"
-
-# Pre-download common dependencies to avoid timeout issues
-RUN chmod +x ./mvnw && \
-    echo "Pre-downloading common dependencies..." && \
-    ./mvnw dependency:resolve -s maven-settings.xml -U || echo "Pre-download failed, continuing with build..."
-
-# Make mvnw executable and build the shared model first, then the data storage
-# Add retry mechanism for network issues
-RUN echo "Building shared model..." && \
-    (./mvnw clean install -pl binance-shared-model -DskipTests -s maven-settings.xml -U || \
-     (echo "First attempt failed, retrying..." && sleep 5 && ./mvnw clean install -pl binance-shared-model -DskipTests -s maven-settings.xml -U)) && \
-    echo "Building data storage..." && \
-    (./mvnw clean package -pl binance-data-storage -DskipTests -s maven-settings.xml -U || \
-     (echo "First attempt failed, retrying..." && sleep 5 && ./mvnw clean package -pl binance-data-storage -DskipTests -s maven-settings.xml -U))
-
-# Expose the necessary ports
+COPY --from=build /workspace/binance-data-storage/target/binance-data-storage.jar app.jar
 EXPOSE 8080
-
-# Run the application
-CMD ["java", "-jar", "binance-data-storage/target/binance-data-storage.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]

@@ -3,8 +3,23 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
-    uid: PROMETHEUS
+    url: http://prometheus-testnet:9090
+    uid: prometheus-testnet
     isDefault: true
+    editable: false
     jsonData:
       timeInterval: 15s
+      
+  - name: PostgreSQL
+    type: grafana-postgresql-datasource
+    access: proxy
+    uid: postgres-testnet
+    url: postgres-testnet:5432
+    database: binance_data
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1500
+    editable: false

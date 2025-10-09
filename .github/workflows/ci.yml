@@ -20,12 +20,20 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
       - name: Build shared model
         working-directory: binance-shared-model
         run: ./mvnw -B -ntp clean install
 
       - name: Run service test suites
-        run: ./mvnw -B -ntp -am -pl binance-data-collection,binance-data-storage,binance-trader-grid,binance-trader-macd clean test
+        run: ./mvnw -B -ntp -T 1C -am -pl binance-data-collection,binance-data-storage,binance-trader-grid,binance-trader-macd -DskipTests=false clean test
 
       - name: Set up Python
         uses: actions/setup-python@v5

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface MacdPostgresRepository extends JpaRepository<MacdItem, Long> {
 
@@ -50,6 +52,11 @@ public interface MacdPostgresRepository extends JpaRepository<MacdItem, Long> {
             @Param("buy") Double buy,
             @Param("sell") Double sell
     );
+
+    @Query(value = "SELECT * FROM macd WHERE symbol = :symbol AND \"interval\" = :interval ORDER BY \"timestamp\" DESC LIMIT :limit", nativeQuery = true)
+    List<com.oyakov.binance_data_storage.model.macd.MacdItem> findRecentMacd(@Param("symbol") String symbol,
+                                                                             @Param("interval") String interval,
+                                                                             @Param("limit") int limit);
 }
 
 

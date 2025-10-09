@@ -1,0 +1,119 @@
+{
+  "id": null,
+  "uid": "macd-overlay",
+  "title": "MACD Overlay (Price vs MACD)",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["macd", "trader", "overlay"],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "symbol",
+        "label": "Symbol",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "Prometheus"
+        },
+        "query": "label_values(binance_trader_macd_histogram, symbol)",
+        "refresh": 2,
+        "hide": 0,
+        "current": {"text": "BTCUSDT", "value": "BTCUSDT"}
+      },
+      {
+        "type": "query",
+        "name": "interval",
+        "label": "Interval",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "Prometheus"
+        },
+        "query": "label_values(binance_trader_macd_histogram{symbol=\"$symbol\"}, interval)",
+        "refresh": 2,
+        "hide": 0,
+        "current": {"text": "1h", "value": "1h"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Price (left) and MACD/Signal/Histogram (right)",
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 12},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "price"},
+            "properties": [
+              {"id": "custom.axisPlacement", "value": "left"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "#7EB26D"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "macd"},
+            "properties": [
+              {"id": "custom.axisPlacement", "value": "right"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "#E24D42"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "signal"},
+            "properties": [
+              {"id": "custom.axisPlacement", "value": "right"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "#1F78C1"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "histogram"},
+            "properties": [
+              {"id": "custom.axisPlacement", "value": "right"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "#F2CC0C"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"},
+        "yAxes": [
+          {"label": "Price", "show": true},
+          {"label": "MACD", "show": true}
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "binance_trader_macd_price{symbol=\"$symbol\",interval=\"$interval\"}",
+          "legendFormat": "price"
+        },
+        {
+          "refId": "B",
+          "expr": "binance_trader_macd_line{symbol=\"$symbol\",interval=\"$interval\"}",
+          "legendFormat": "macd"
+        },
+        {
+          "refId": "C",
+          "expr": "binance_trader_macd_signal{symbol=\"$symbol\",interval=\"$interval\"}",
+          "legendFormat": "signal"
+        },
+        {
+          "refId": "D",
+          "expr": "binance_trader_macd_histogram{symbol=\"$symbol\",interval=\"$interval\"}",
+          "legendFormat": "histogram"
+        }
+      ]
+    }
+  ]
+}
+
+

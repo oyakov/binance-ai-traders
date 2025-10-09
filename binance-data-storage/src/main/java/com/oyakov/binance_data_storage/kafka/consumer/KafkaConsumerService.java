@@ -1,6 +1,5 @@
 package com.oyakov.binance_data_storage.kafka.consumer;
 
-import com.oyakov.binance_data_storage.mapper.KlineMapper;
 import com.oyakov.binance_data_storage.metrics.DataStorageMetrics;
 import com.oyakov.binance_data_storage.service.api.KlineDataServiceApi;
 import com.oyakov.binance_shared_model.avro.KlineEvent;

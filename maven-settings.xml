@@ -9,7 +9,14 @@
   
   <!-- Mirrors for faster downloads -->
   <mirrors>
-    <!-- Central repository mirror -->
+    <!-- Route all repos through local Nexus group to leverage caching -->
+    <mirror>
+      <id>nexus</id>
+      <name>Local Nexus Group</name>
+      <url>http://localhost:8081/repository/maven-public/</url>
+      <mirrorOf>*,!confluent</mirrorOf>
+    </mirror>
+    <!-- Central repository mirror (fallback/illustrative; nexus overrides via mirrorOf=*) -->
     <mirror>
       <id>central-mirror</id>
       <name>Central Repository Mirror</name>
@@ -45,16 +52,16 @@
       <repositories>
         <repository>
           <id>central</id>
-          <name>Maven Central Repository</name>
-          <url>https://repo1.maven.org/maven2</url>
+          <name>Maven Central via Nexus</name>
+          <url>http://localhost:8081/repository/maven-public/</url>
           <layout>default</layout>
           <snapshots>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
         <repository>
           <id>confluent</id>
-          <name>Confluent Repository</name>
+          <name>Confluent Repository (direct; add proxy in Nexus later)</name>
           <url>https://packages.confluent.io/maven/</url>
           <layout>default</layout>
           <snapshots>
@@ -71,6 +78,17 @@
           </snapshots>
         </repository>
       </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <name>Maven Central Plugins via Nexus</name>
+          <url>http://localhost:8081/repository/maven-public/</url>
+          <layout>default</layout>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
     </profile>
   </profiles>
   
