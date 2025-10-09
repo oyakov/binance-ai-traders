@@ -7,7 +7,7 @@ Your project has a complete monitoring stack with Prometheus and Grafana already
 
 ### Option 1: Use the Convenience Script
 ```powershell
-.\open-monitoring.ps1
+.\scripts\monitoring\open-monitoring.ps1
 ```
 
 ### Option 2: Manual Access
