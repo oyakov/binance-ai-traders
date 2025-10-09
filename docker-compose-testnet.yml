@@ -291,7 +291,6 @@ services:
       - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=testnet_admin
-      - GF_INSTALL_PLUGINS=grafana-postgresql-datasource
     volumes:
       - grafana_testnet_data:/var/lib/grafana
       - ./monitoring/grafana/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml

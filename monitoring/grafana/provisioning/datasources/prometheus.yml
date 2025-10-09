@@ -11,15 +11,16 @@ datasources:
       timeInterval: 15s
       
   - name: PostgreSQL
-    type: grafana-postgresql-datasource
+    type: postgres
     access: proxy
     uid: postgres-testnet
     url: postgres-testnet:5432
-    database: binance_data
-    user: postgres
+    database: binance_trader_testnet
+    user: testnet_user
     secureJsonData:
-      password: postgres
+      password: testnet_password
     jsonData:
       sslmode: disable
       postgresVersion: 1500
+      timescaledb: false
     editable: false

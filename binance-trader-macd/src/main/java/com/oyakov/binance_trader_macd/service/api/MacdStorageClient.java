@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -45,18 +46,17 @@ public class MacdStorageClient {
                            Double histogram) {
         String url = config.getData().getStorage().getBaseUrl() + "/api/v1/macd";
         LocalDateTime displayTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
-        Map<String, Object> body = Map.of(
-                "symbol", symbol,
-                "interval", interval,
-                "timestamp", timestamp,
-                "display_time", displayTime,
-                "collection_time", LocalDateTime.now(ZoneOffset.UTC),
-                "ema_fast", emaFast,
-                "ema_slow", emaSlow,
-                "macd", macd,
-                "signal", signal,
-                "histogram", histogram
-        );
+        Map<String, Object> body = new HashMap<>();
+        body.put("symbol", symbol);
+        body.put("interval", interval);
+        body.put("timestamp", timestamp);
+        body.put("display_time", displayTime);
+        body.put("collection_time", LocalDateTime.now(ZoneOffset.UTC));
+        body.put("ema_fast", emaFast);
+        body.put("ema_slow", emaSlow);
+        body.put("macd", macd);
+        body.put("signal", signal);
+        body.put("histogram", histogram);
         try {
             ResponseEntity<Void> resp = restTemplate.postForEntity(url, body, Void.class);
             if (!resp.getStatusCode().is2xxSuccessful()) {
