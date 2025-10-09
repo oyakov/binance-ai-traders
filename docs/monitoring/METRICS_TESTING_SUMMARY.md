@@ -92,7 +92,7 @@ This document summarizes the metrics configuration and testing setup for the Bin
 - Tests all endpoints (health, metrics, prometheus, info)
 - Validates specific metrics are available
 - Includes retry logic and error handling
-- **Usage**: `.\test-collection-storage-metrics.ps1 -StartServices -TestMetrics`
+- **Usage**: `\.\test-collection-storage-metrics.ps1 -StartServices -TestMetrics`
 
 ## Configuration Status
 
@@ -107,7 +107,7 @@ This document summarizes the metrics configuration and testing setup for the Bin
 ### 🔧 Ready for Testing:
 - [ ] Start Docker Desktop
 - [ ] Run services: `docker-compose -f docker-compose-testnet.yml up -d binance-data-collection-testnet binance-data-storage-testnet`
-- [ ] Test endpoints with: `.\test-collection-storage-metrics.ps1 -TestMetrics`
+- [ ] Test endpoints with: `\.\test-collection-storage-metrics.ps1 -TestMetrics`
 
 ## Expected Behavior
 

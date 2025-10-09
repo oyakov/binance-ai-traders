@@ -44,8 +44,8 @@
 | **Milestone Guide** | `docs/guides/MILESTONE_GUIDE.md` | ✅ Complete | Project roadmap and milestones | 2025-01-05 |
 | **Testnet Guide** | `docs/guides/TESTNET_LAUNCH_GUIDE.md` | ✅ Complete | Testnet deployment guide | 2025-01-05 |
 | **Test Reports** | `docs/reports/` | ✅ Complete | 16+ analysis and test reports | 2025-01-05 |
-| **Metrics Testing Summary** | `METRICS_TESTING_SUMMARY.md` | ✅ Complete | Metrics endpoints and test scripts | 2025-10-09 |
-| **Grafana Dashboard Setup** | `GRAFANA_DASHBOARD_SETUP.md` | ✅ Complete | Grafana/Prometheus setup and queries | 2025-10-09 |
+| **Metrics Testing Summary** | `docs/monitoring/METRICS_TESTING_SUMMARY.md` | ✅ Complete | Metrics endpoints and test scripts | 2025-10-09 |
+| **Grafana Dashboard Setup** | `docs/monitoring/GRAFANA_DASHBOARD_SETUP.md` | ✅ Complete | Grafana/Prometheus setup and queries | 2025-10-09 |
 
 ## 🔄 Document Consolidation
 

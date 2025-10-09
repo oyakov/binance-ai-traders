@@ -27,11 +27,11 @@ Detailed documentation for each microservice:
 - [Where-is-what Index](WHERE_IS_WHAT.md) — Jump table for modules, compose, monitoring, scripts
 
 ### 📄 Root-Level References
-- [Core Features Summary](../CORE_FEATURES_SUMMARY.md)
-- [Project Rules](../PROJECT_RULES.md)
-- [System Recommendations](../SYSTEM_RECOMMENDATIONS.md)
-- [Docker Build Optimization](../DOCKER_BUILD_OPTIMIZATION.md)
-- [YAML Consolidation Summary](../YAML_CONSOLIDATION_SUMMARY.md)
+- [Core Features Summary](CORE_FEATURES_SUMMARY.md)
+- [Project Rules](PROJECT_RULES.md)
+- [System Recommendations](SYSTEM_RECOMMENDATIONS.md)
+- [Docker Build Optimization](DOCKER_BUILD_OPTIMIZATION.md)
+- [YAML Consolidation Summary](YAML_CONSOLIDATION_SUMMARY.md)
 
 ### 📊 [Reports](reports/)
 Analysis reports and test results:
@@ -51,8 +51,8 @@ Automation and deployment scripts:
 - [Infrastructure Quick Reference](infrastructure/quick-reference.md)
 
 ### 📡 Monitoring & Metrics
-- [Metrics Testing Summary](../METRICS_TESTING_SUMMARY.md)
-- [Grafana Dashboard Setup](../GRAFANA_DASHBOARD_SETUP.md)
+- [Metrics Testing Summary](monitoring/METRICS_TESTING_SUMMARY.md)
+- [Grafana Dashboard Setup](monitoring/GRAFANA_DASHBOARD_SETUP.md)
 
 ### 📚 [Libraries](libs/)
 - [Shared Model](libs/binance-shared-model.md)
