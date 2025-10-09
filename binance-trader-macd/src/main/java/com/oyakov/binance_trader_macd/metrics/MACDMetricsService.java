@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +26,7 @@ public class MACDMetricsService {
 
     private final MACDCalculationService macdCalculationService;
     private final MeterRegistry meterRegistry;
+    private final com.oyakov.binance_trader_macd.service.api.MacdStorageClient macdStorageClient;
     
     // Cache for latest MACD indicators
     private final Map<String, AtomicReference<MACDIndicator>> indicatorCache = new ConcurrentHashMap<>();
@@ -171,6 +171,21 @@ public class MACDMetricsService {
             
             MACDIndicator indicator = macdCalculationService.calculateMACD(symbol, interval);
             indicatorCache.get(key).set(indicator);
+            if (indicator == null) {
+                return;
+            }
+            if (indicator.isValid()) {
+                macdStorageClient.upsertMacd(
+                        indicator.getSymbol(),
+                        indicator.getInterval(),
+                        indicator.getTimestamp(),
+                        null,
+                        null,
+                        indicator.getMacdLine() != null ? indicator.getMacdLine().doubleValue() : null,
+                        indicator.getSignalLine() != null ? indicator.getSignalLine().doubleValue() : null,
+                        indicator.getHistogram() != null ? indicator.getHistogram().doubleValue() : null
+                );
+            }
             
             sample.stop(macdCalculationTimer);
             

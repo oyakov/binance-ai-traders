@@ -26,6 +26,13 @@ Detailed documentation for each microservice:
 ### 🗺️ Quick Navigation
 - [Where-is-what Index](WHERE_IS_WHAT.md) — Jump table for modules, compose, monitoring, scripts
 
+### 📄 Root-Level References
+- [Core Features Summary](../CORE_FEATURES_SUMMARY.md)
+- [Project Rules](../PROJECT_RULES.md)
+- [System Recommendations](../SYSTEM_RECOMMENDATIONS.md)
+- [Docker Build Optimization](../DOCKER_BUILD_OPTIMIZATION.md)
+- [YAML Consolidation Summary](../YAML_CONSOLIDATION_SUMMARY.md)
+
 ### 📊 [Reports](reports/)
 Analysis reports and test results:
 - [Backtesting Evaluation](reports/BACKTESTING_EVALUATION_REPORT.md)
@@ -41,12 +48,20 @@ Automation and deployment scripts:
 ### 🏛️ [Infrastructure](infrastructure/)
 - [Docker Compose](infrastructure/docker-compose.md)
 - [Monitoring Setup](infrastructure/monitoring-grafana-testnet.md)
+- [Infrastructure Quick Reference](infrastructure/quick-reference.md)
+
+### 📡 Monitoring & Metrics
+- [Metrics Testing Summary](../METRICS_TESTING_SUMMARY.md)
+- [Grafana Dashboard Setup](../GRAFANA_DASHBOARD_SETUP.md)
 
 ### 📚 [Libraries](libs/)
 - [Shared Model](libs/binance-shared-model.md)
 
 ### 🔌 [Client Integrations](clients/)
 - [Telegram Frontend](clients/telegram-frontend-python.md)
+
+### 🧪 Postman
+- [Postman Collections](../postman/README.md)
 
 ### 🧠 [Memory System](memory/)
 LLM memory and knowledge management system.

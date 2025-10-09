@@ -45,6 +45,8 @@ Quick navigation guide to the most important parts of the repository. Use this a
 - Grafana dashboards/provisioning: `monitoring/grafana/`
 - Quick open: `scripts/monitoring/open-monitoring.ps1`
 - Simple/Comprehensive setup: `scripts/monitoring/setup-dashboard-simple.ps1`, `scripts/monitoring/setup-comprehensive-dashboard.ps1`
+- Metrics testing summary: `METRICS_TESTING_SUMMARY.md`
+- Grafana dashboard setup guide: `GRAFANA_DASHBOARD_SETUP.md`
 
 ## Scripts (PowerShell)
 - Smoke tests: `scripts/tests/quick-test.ps1`, `scripts/tests/test-simple.ps1` (working), `scripts/tests/test-basic.ps1` (has syntax errors)
