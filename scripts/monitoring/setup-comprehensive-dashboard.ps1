@@ -83,5 +83,5 @@ Write-Host ""
 Write-Host "=== Next Steps ===" -ForegroundColor Green
 Write-Host "1. Open the dashboard in your browser" -ForegroundColor Yellow
 Write-Host "2. If you see 'No data', the services might not be actively processing data" -ForegroundColor Yellow
-Write-Host "3. To generate test data, run: .\generate-test-metrics.ps1" -ForegroundColor Yellow
+Write-Host "3. To generate test data, run: .\scripts\generate-test-metrics.ps1" -ForegroundColor Yellow
 Write-Host "4. Check Prometheus directly at: http://localhost:9091" -ForegroundColor Yellow

@@ -23,6 +23,9 @@ Detailed documentation for each microservice:
 - [Grid Trader](services/binance-trader-grid.md)
 - [Indicator Calculator](services/indicator-calculator.md)
 
+### 🗺️ Quick Navigation
+- [Where-is-what Index](WHERE_IS_WHAT.md) — Jump table for modules, compose, monitoring, scripts
+
 ### 📊 [Reports](reports/)
 Analysis reports and test results:
 - [Backtesting Evaluation](reports/BACKTESTING_EVALUATION_REPORT.md)

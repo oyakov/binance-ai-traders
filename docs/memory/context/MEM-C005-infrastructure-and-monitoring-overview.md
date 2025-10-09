@@ -179,15 +179,15 @@ grafana: 3001
 ```powershell
 # Quick Start
 .\quick-rebuild.bat
-.\quick-test.ps1
+.\scripts\tests\quick-test.ps1
 
 # Monitoring
-.\open-monitoring.ps1
-.\check-metrics.ps1
+.\scripts\monitoring\open-monitoring.ps1
+.\scripts\metrics\check-metrics.ps1
 
 # Dashboard Setup
-.\setup-comprehensive-dashboard.ps1
-.\setup-dashboard-simple.ps1
+.\scripts\monitoring\setup-comprehensive-dashboard.ps1
+.\scripts\monitoring\setup-dashboard-simple.ps1
 ```
 
 ### Docker Build Optimization

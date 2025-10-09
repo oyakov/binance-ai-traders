@@ -105,6 +105,7 @@ docker-compose -f docker-compose-testnet.yml up -d
 
 ### 🚀 Getting Started
 - **[Quick Start Guide](docs/guides/QUICK_START.md)** - Get running in 5 minutes
+- **[Where-is-what Index](docs/WHERE_IS_WHAT.md)** - Quick navigation across files
 - **[System Overview](docs/overview.md)** - Architecture and design
 - **[Agent Context](docs/AGENTS.md)** - Comprehensive agent guidance
 - **[Backtesting Guide](binance-trader-macd/BACKTESTING_ENGINE.md)** - Strategy validation
