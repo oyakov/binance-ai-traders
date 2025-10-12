@@ -2,7 +2,7 @@
 
 ## Project Progression Roadmap
 
-This guide outlines the strategic progression from backtesting validation to production deployment, ensuring systematic validation and risk management at each stage.
+This guide outlines the strategic progression from backtesting validation to production deployment, ensuring systematic validation and risk management at each stage. It now incorporates the growth roadmap defined in *Crypto Trading System: Strategies for Growth and Roadmap to Production* so that our execution plan reflects the small-account growth objectives, planned multi-exchange expansion, and the UX/agent integration vision captured in that briefing.
 
 ---
 
@@ -42,7 +42,7 @@ Deploy the trading bot on Binance Testnet for extensive validation with multiple
 
 ### Timeline: 2-4 weeks
 
-### Phase 1: Testnet Infrastructure Setup (Week 1)
+### Phase 1: Testnet Infrastructure Setup & Service Completion (Week 1)
 
 #### 1.1 Binance Testnet Integration
 ```java
@@ -67,12 +67,16 @@ public class TestnetConfig {
 - **Data Collection**: Comprehensive logging and metrics
 
 #### 1.3 Testnet Account Setup
+- Build out the missing WebSocket collectors in **binance-data-collection** so real-time klines reach Kafka
+- Harden the **MACD trader** for live signal execution (order placement, stop-loss handling)
+- Replace the duplicated scaffolding in **binance-trader-grid** with a working grid strategy focused on sideways-market profitability
+- Finish the **Telegram frontend** dependencies so the UI can surface testnet strategy health in real time
 - Create Binance Testnet accounts
 - Configure API keys and permissions
 - Set up testnet wallet with virtual funds
 - Validate API connectivity and trading permissions
 
-### Phase 2: Multi-Strategy Deployment (Week 2)
+### Phase 2: Multi-Strategy Deployment & Strategy Diversity (Week 2)
 
 #### 2.1 Strategy Configurations
 ```yaml
@@ -106,13 +110,14 @@ strategies:
 - Real-time performance comparison
 - Automated strategy switching based on performance
 
-#### 2.3 Monitoring Dashboard
+#### 2.3 Monitoring Dashboard & Agent Insights
 - Real-time P&L tracking per instance
 - Strategy performance comparison
 - Risk metrics monitoring
 - Alert system for anomalies
+- Integrate the Mechanicus/agent UI so testnet operators receive AI-authored recommendations on parameter tuning and capital allocation
 
-### Phase 3: Extended Validation (Week 3-4)
+### Phase 3: Extended Validation & Readiness Gate (Week 3-4)
 
 #### 3.1 Long-term Testing
 - **Duration**: 2-4 weeks continuous operation
@@ -149,9 +154,9 @@ public class TestnetPerformanceAnalyzer {
 ### M1 Deliverables
 - Testnet deployment infrastructure
 - Multi-instance management system
-- Performance monitoring dashboard
-- Strategy comparison framework
-- Testnet validation report
+- Performance monitoring dashboard with AI recommendations
+- Strategy comparison framework covering MACD, grid, and swing configurations
+- Testnet validation report including Mechanicus/agent UX feedback
 
 ---
 
@@ -191,6 +196,7 @@ public class ProductionConfig {
 - Alert systems for critical events
 - Backup and recovery procedures
 - Compliance and reporting
+- Publish AI-generated daily runbooks summarizing production activity for operators
 
 ### Phase 2: Minimal Budget Deployment (Week 2)
 
@@ -218,6 +224,7 @@ public class ProductionStrategySelector {
 - Monitor performance for 1 week
 - Gradually increase position sizes if profitable
 - Maintain strict risk controls
+- Capture lessons learned for future exchange connectors and strategy additions
 
 ### Phase 3: Performance Validation (Ongoing)
 
@@ -250,9 +257,9 @@ public class ProfitabilityValidator {
 ### M2 Deliverables
 - Production deployment infrastructure
 - Mainnet trading system
-- Performance monitoring and alerting
-- Risk management validation
-- Production profitability report
+- Performance monitoring and alerting enriched with AI/Mechanicus insights
+- Risk management validation including drawdown guardrails and kill-switch controls
+- Production profitability report with recommendations for scaling to additional exchanges
 
 ---
 
@@ -263,12 +270,14 @@ public class ProfitabilityValidator {
 - **Strategy Performance**: >50% of strategies profitable
 - **Risk Management**: <5% maximum drawdown
 - **Consistency**: <20% performance variance
+- **Service Readiness**: Data collection, MACD live trading, grid trader, and Telegram UI all operational without manual intervention
 
 ### M2 (Production) Metrics
 - **Profitability**: >10% monthly returns
 - **Risk-Adjusted Returns**: Sharpe ratio >1.0
 - **Drawdown**: <10% maximum drawdown
 - **Consistency**: <15% monthly variance
+- **AI Effectiveness**: Operators accept or act on >70% of AI recommendations without rework
 
 ---
 
@@ -289,17 +298,19 @@ public class ProfitabilityValidator {
 
 ## 🚀 Next Steps After M2
 
-### M3 - Scaled Production (Future)
+### M3 - Multi-Exchange & Scaled Production (Future)
 - Increase capital allocation based on M2 success
-- Deploy multiple strategies simultaneously
-- Implement advanced risk management
-- Add more sophisticated trading strategies
+- Deploy multiple strategies simultaneously across Binance plus at least one additional exchange connector (e.g., Coinbase or Kraken)
+- Implement advanced risk management, including exchange failover rules
+- Add more sophisticated trading strategies (swing trading, arbitrage modules) and spot-only risk guardrails
+- Expand automated reporting for compliance and tax readiness
 
-### M4 - Institutional Deployment (Future)
-- Scale to larger capital amounts
-- Implement institutional-grade risk management
-- Add compliance and reporting features
-- Consider regulatory requirements
+### M4 - Institutional Deployment & Advanced Automation (Future)
+- Scale to larger capital amounts with SLA-backed infrastructure
+- Implement institutional-grade risk management (portfolio-level drawdown kill-switch, advanced order types)
+- Add comprehensive compliance and reporting features
+- Consider regulatory requirements and conduct external security audits
+- Extend UI/UX with high-fidelity dashboards and PSD-based design system for agentic developer onboarding
 
 ---
 
@@ -311,6 +322,8 @@ public class ProfitabilityValidator {
 - [ ] Create strategy configuration system
 - [ ] Build monitoring dashboard
 - [ ] Deploy testnet infrastructure
+- [ ] Deliver MACD live execution, grid trader, and Telegram UI to parity with backtesting insights
+- [ ] Validate Mechanicus/agent integration for operational recommendations
 
 ### M2 Preparation
 - [ ] Set up Binance Mainnet accounts
@@ -318,6 +331,8 @@ public class ProfitabilityValidator {
 - [ ] Create risk management systems
 - [ ] Build production monitoring
 - [ ] Prepare compliance documentation
+- [ ] Define roadmap for first additional exchange connector and spot-only capital controls
+- [ ] Publish UX/design templates for operator workflows
 
 ---
 
