@@ -118,6 +118,9 @@ docker-compose -f docker-compose-testnet.yml up -d
 
 ### 📊 Analysis & Reports
 - **[Test Results](docs/reports/)** - Comprehensive analysis reports
+- **[Monitoring Reports](docs/reports/monitoring/README.md)** - Grafana consolidation, dashboard progress, observability rollouts
+- **[Status Updates](docs/reports/status/README.md)** - Point-in-time improvements and system evaluations
+- **[Incident Reviews](docs/reports/incidents/README.md)** - Root-cause analyses and remediation tracking
 - **[Milestone Guide](docs/guides/MILESTONE_GUIDE.md)** - Project roadmap
 - **[Testnet Guide](docs/guides/TESTNET_LAUNCH_GUIDE.md)** - Testnet deployment
 - **[Memory System](docs/memory/memory-index.md)** - LLM knowledge management
