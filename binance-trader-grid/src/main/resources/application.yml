@@ -10,3 +10,7 @@ spring:
     username: postgres
     password: dGhpcyBpcyBhIGZha2Ugc2VjcmV0
     driver-class-name: org.postgresql.Driver
+
+grid:
+  api:
+    enabled: false
