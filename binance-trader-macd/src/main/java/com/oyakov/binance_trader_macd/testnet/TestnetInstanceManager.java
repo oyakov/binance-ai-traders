@@ -4,6 +4,8 @@ import com.oyakov.binance_trader_macd.backtest.BinanceHistoricalDataFetcher;
 import com.oyakov.binance_trader_macd.backtest.SharedDataFetcher;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.rest.client.BinanceOrderClient;
+import com.oyakov.binance_trader_macd.service.api.MacdStorageClient;
+import com.oyakov.binance_trader_macd.service.api.ObservabilityStorageClient;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,8 @@ public class TestnetInstanceManager {
     private final SharedDataFetcher sharedDataFetcher;
     private final MACDSignalAnalyzer macdAnalyzer;
     private final BinanceOrderClient binanceOrderClient;
+    private final MacdStorageClient macdStorageClient;
+    private final ObservabilityStorageClient observabilityClient;
     private final Map<String, TestnetTradingInstance> instances = new ConcurrentHashMap<>();
 
     @PostConstruct
@@ -47,7 +51,8 @@ public class TestnetInstanceManager {
         instances.computeIfAbsent(instanceId, id -> {
             BigDecimal balance = testnetProperties.getVirtualBalance();
             TestnetTradingInstance instance = new TestnetTradingInstance(id, config, balance, 
-                dataFetcher, sharedDataFetcher, macdAnalyzer, binanceOrderClient);
+                dataFetcher, sharedDataFetcher, macdAnalyzer, binanceOrderClient, 
+                macdStorageClient, observabilityClient);
             instance.start();
             performanceMonitor.registerInstance(instance);
             return instance;

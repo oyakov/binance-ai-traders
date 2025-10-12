@@ -26,16 +26,5 @@ testnet:
       stop-loss-percent: 3.0
       take-profit-percent: 6.0
       enabled: true
-    balanced-ada:
-      name: "Balanced ADA Strategy"
-      symbol: ADAUSDT
-      timeframe: 1d
-      macd-params:
-        fast-period: 7
-        slow-period: 14
-        signal-period: 7
-      risk-level: MEDIUM
-      position-size: 0.02
-      stop-loss-percent: 2.5
-      take-profit-percent: 5.0
-      enabled: true
+    # Note: balanced-ada strategy disabled due to insufficient historical data
+    # Needs 21 daily klines but only 9 available. Will re-enable after data backfill.

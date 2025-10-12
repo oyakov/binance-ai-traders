@@ -9,20 +9,21 @@ import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.rest.client.BinanceOrderClient;
 import com.oyakov.binance_trader_macd.rest.dto.BinanceOrderResponse;
+import com.oyakov.binance_trader_macd.service.api.MacdStorageClient;
+import com.oyakov.binance_trader_macd.service.api.ObservabilityStorageClient;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class TestnetTradingInstance {
@@ -41,10 +42,17 @@ public class TestnetTradingInstance {
     private final SharedDataFetcher sharedDataFetcher;
     private final MACDSignalAnalyzer macdAnalyzer;
     private final BinanceOrderClient binanceOrderClient;
+    private final MacdStorageClient macdStorageClient;
+    private final ObservabilityStorageClient observabilityClient;
+    
+    // Portfolio snapshot interval (every 5 minutes)
+    private final AtomicInteger iterationCount = new AtomicInteger(0);
+    private static final int SNAPSHOT_INTERVAL = 5;
 
     public TestnetTradingInstance(String instanceId, StrategyConfig strategyConfig, BigDecimal startingBalance,
                                   BinanceHistoricalDataFetcher dataFetcher, SharedDataFetcher sharedDataFetcher,
-                                  MACDSignalAnalyzer macdAnalyzer, BinanceOrderClient binanceOrderClient) {
+                                  MACDSignalAnalyzer macdAnalyzer, BinanceOrderClient binanceOrderClient,
+                                  MacdStorageClient macdStorageClient, ObservabilityStorageClient observabilityClient) {
         this.instanceId = instanceId != null ? instanceId : UUID.randomUUID().toString();
         this.strategyConfig = strategyConfig;
         this.performanceTracker = new TestnetPerformanceTracker(this.instanceId, strategyConfig, startingBalance);
@@ -53,6 +61,8 @@ public class TestnetTradingInstance {
         this.sharedDataFetcher = sharedDataFetcher;
         this.macdAnalyzer = macdAnalyzer;
         this.binanceOrderClient = binanceOrderClient;
+        this.macdStorageClient = macdStorageClient;
+        this.observabilityClient = observabilityClient;
     }
 
     public void start() {
@@ -88,8 +98,17 @@ public class TestnetTradingInstance {
         try {
             while (running.get()) {
                 try {
+                    Instant analysisTime = Instant.now();
+                    int currentIteration = iterationCount.incrementAndGet();
+                    
                     // 1. Fetch real-time market data
                     List<KlineEvent> klines = fetchMarketData();
+                    
+                    if (klines.isEmpty()) {
+                        log.warn("No kline data available for instance {}", instanceId);
+                        Thread.sleep(60_000L);
+                        continue;
+                    }
                     
                     if (klines.size() < macdAnalyzer.getMinDataPointCount()) {
                         log.warn("Insufficient data for MACD calculation: {} (need {})", 
@@ -98,15 +117,36 @@ public class TestnetTradingInstance {
                         continue;
                     }
                     
-                    // 2. Generate MACD signals
-                    TradeSignal signal = macdAnalyzer.tryExtractSignal(klines).orElse(null);
+                    // 2. Calculate MACD values
+                    MACDCalculationHelper.MACDValues macdValues = MACDCalculationHelper.calculateMACD(klines);
                     
-                    // 3. Execute trades based on signal
-                    if (signal != null && isTradeAllowed(signal)) {
-                        executeTrade(signal);
+                    if (macdValues == null) {
+                        log.warn("Failed to calculate MACD for instance {}", instanceId);
+                        Thread.sleep(60_000L);
+                        continue;
                     }
                     
-                    // 4. Wait before next iteration (check every minute)
+                    // 3. Persist MACD to database for historical reference
+                    KlineEvent latestKline = klines.get(klines.size() - 1);
+                    persistMACDData(latestKline, macdValues);
+                    
+                    // 4. Generate trade signals
+                    TradeSignal signal = macdAnalyzer.tryExtractSignal(klines).orElse(null);
+                    
+                    // 5. Record strategy analysis event (every iteration)
+                    recordStrategyAnalysis(analysisTime, klines, macdValues, signal);
+                    
+                    // 6. Handle trading decision
+                    if (signal != null) {
+                        handleTradingDecision(signal, macdValues);
+                    }
+                    
+                    // 7. Record portfolio snapshot (every 5 minutes)
+                    if (currentIteration % SNAPSHOT_INTERVAL == 0) {
+                        recordPortfolioSnapshot(analysisTime, macdValues.getCurrentPrice());
+                    }
+                    
+                    // 8. Wait before next iteration (check every minute)
                     Thread.sleep(60_000L);
                     
                 } catch (Exception e) {
@@ -118,6 +158,148 @@ public class TestnetTradingInstance {
             Thread.currentThread().interrupt();
         } finally {
             log.debug("Lifecycle thread for instance {} finished at {}", instanceId, Instant.now());
+        }
+    }
+    
+    private void persistMACDData(KlineEvent latestKline, MACDCalculationHelper.MACDValues macdValues) {
+        try {
+            macdStorageClient.upsertMacd(
+                strategyConfig.getSymbol(),
+                strategyConfig.getTimeframe(),
+                latestKline.getCloseTime(),
+                macdValues.getEmaFast() != null ? macdValues.getEmaFast().doubleValue() : null,
+                macdValues.getEmaSlow() != null ? macdValues.getEmaSlow().doubleValue() : null,
+                macdValues.getMacdLine() != null ? macdValues.getMacdLine().doubleValue() : null,
+                macdValues.getSignalLine() != null ? macdValues.getSignalLine().doubleValue() : null,
+                macdValues.getHistogram() != null ? macdValues.getHistogram().doubleValue() : null
+            );
+            log.debug("Persisted MACD data for {} {}", instanceId, strategyConfig.getSymbol());
+        } catch (Exception e) {
+            log.error("Failed to persist MACD data for {}: {}", instanceId, e.getMessage());
+        }
+    }
+    
+    private void recordStrategyAnalysis(Instant analysisTime, List<KlineEvent> klines,
+                                       MACDCalculationHelper.MACDValues macdValues, TradeSignal signal) {
+        try {
+            KlineEvent latestKline = klines.get(klines.size() - 1);
+            String signalDetected = signal != null ? signal.name() : null;
+            String signalReason = signal != null ? 
+                "Signal detected: " + signal.name() + " with histogram=" + macdValues.getHistogram() :
+                "No signal - histogram=" + macdValues.getHistogram();
+            
+            observabilityClient.recordStrategyAnalysis(
+                instanceId,
+                strategyConfig.getName(),
+                strategyConfig.getSymbol(),
+                strategyConfig.getTimeframe(),
+                analysisTime,
+                latestKline.getCloseTime(),
+                Instant.ofEpochMilli(latestKline.getCloseTime()),
+                macdValues.getCurrentPrice(),
+                klines.size(),
+                macdValues.getMacdLine(),
+                macdValues.getSignalLine(),
+                macdValues.getHistogram(),
+                macdValues.getSignalStrength(),
+                signalDetected,
+                signalReason
+            );
+        } catch (Exception e) {
+            log.error("Failed to record strategy analysis for {}: {}", instanceId, e.getMessage());
+        }
+    }
+    
+    private void handleTradingDecision(TradeSignal signal, MACDCalculationHelper.MACDValues macdValues) {
+        Instant decisionTime = Instant.now();
+        boolean tradeAllowed = isTradeAllowed(signal);
+        boolean hasActivePosition = performanceTracker.hasActivePosition();
+        boolean positionSizeOk = performanceTracker.getCurrentPositionSize().compareTo(strategyConfig.getPositionSize()) <= 0;
+        boolean dailyLossLimitOk = performanceTracker.getDailyPnL().compareTo(strategyConfig.getMaxDailyLoss()) >= 0;
+        
+        String decisionReason;
+        String blockedReason = null;
+        boolean tradeExecuted = false;
+        String orderId = null;
+        BigDecimal executedPrice = null;
+        BigDecimal executedQuantity = null;
+        
+        if (tradeAllowed) {
+            decisionReason = "Trade allowed - all checks passed";
+            // Execute the trade
+            BinanceOrderResponse response = executeTrade(signal);
+            if (response != null && response.isSuccess()) {
+                tradeExecuted = true;
+                orderId = response.getOrderId() != null ? response.getOrderId().toString() : null;
+                executedPrice = response.getPrice();
+                executedQuantity = response.getExecutedQty();
+            }
+        } else {
+            if (hasActivePosition) {
+                blockedReason = "Active position exists";
+            } else if (!positionSizeOk) {
+                blockedReason = "Position size limit exceeded";
+            } else if (!dailyLossLimitOk) {
+                blockedReason = "Daily loss limit reached";
+            } else {
+                blockedReason = "Other risk check failed";
+            }
+            decisionReason = "Trade blocked: " + blockedReason;
+        }
+        
+        // Record decision log
+        try {
+            observabilityClient.recordDecisionLog(
+                instanceId,
+                strategyConfig.getName(),
+                strategyConfig.getSymbol(),
+                decisionTime,
+                signal.name(),
+                macdValues.getSignalStrength(),
+                macdValues.getHistogram(),
+                macdValues.getCurrentPrice(),
+                tradeAllowed,
+                tradeExecuted,
+                hasActivePosition,
+                positionSizeOk,
+                dailyLossLimitOk,
+                tradeAllowed,
+                decisionReason,
+                blockedReason,
+                orderId,
+                executedPrice,
+                executedQuantity
+            );
+        } catch (Exception e) {
+            log.error("Failed to record decision log for {}: {}", instanceId, e.getMessage());
+        }
+    }
+    
+    private void recordPortfolioSnapshot(Instant snapshotTime, BigDecimal currentMarketPrice) {
+        try {
+            InstancePerformance perf = performanceTracker.getPerformance(true);
+            
+            observabilityClient.recordPortfolioSnapshot(
+                instanceId,
+                strategyConfig.getName(),
+                snapshotTime,
+                perf.getCurrentBalance(),
+                perf.getCurrentBalance().subtract(performanceTracker.getCurrentPositionSize()),
+                performanceTracker.getCurrentPositionSize(),
+                strategyConfig.getSymbol(),
+                performanceTracker.getCurrentPositionSize(),
+                null, // Position entry price (not tracked yet)
+                currentMarketPrice,
+                null, // Unrealized P&L (not tracked yet)
+                perf.getTotalTrades(),
+                perf.getWinningTrades(),
+                perf.getTotalProfit(),
+                performanceTracker.getDailyPnL(),
+                null, // Current drawdown (not tracked yet)
+                perf.getMaxDrawdown()
+            );
+        } catch (Exception e) {
+            log.error("Failed to record portfolio snapshot for {}: {}", instanceId, e.getMessage());
         }
     }
     
@@ -208,7 +390,7 @@ public class TestnetTradingInstance {
         return true;
     }
     
-    private void executeTrade(TradeSignal signal) {
+    private BinanceOrderResponse executeTrade(TradeSignal signal) {
         try {
             // Create order request based on signal
             OrderSide orderSide = signal == TradeSignal.BUY ? 
@@ -240,8 +422,11 @@ public class TestnetTradingInstance {
                 log.error("Failed to execute trade for instance {}: {}", instanceId, response.getError());
             }
             
+            return response;
+            
         } catch (Exception e) {
             log.error("Error executing trade for instance {}: {}", instanceId, e.getMessage(), e);
+            return null;
         }
     }
 }
