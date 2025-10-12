@@ -3,7 +3,7 @@ groups:
     rules:
       # Service Health Alerts
       - alert: ServiceDown
-        expr: up{job=~".*testnet.*"} == 0
+        expr: up{environment="testnet"} == 0
         for: 1m
         labels:
           severity: critical
@@ -13,7 +13,7 @@ groups:
       
       # Trading Application Alerts
       - alert: TradingAppDown
-        expr: up{instance=~".*binance-trader-macd.*"} == 0
+        expr: up{environment="testnet", job=~".*binance-trader-macd.*"} == 0
         for: 30s
         labels:
           severity: critical
@@ -22,7 +22,7 @@ groups:
           description: "Binance trader MACD application has been down for more than 30 seconds."
       
       - alert: NoTradingActivity
-        expr: increase(binance_trader_signals_total[1h]) == 0
+        expr: increase(binance_trader_signals_total{environment="testnet"}[1h]) == 0
         for: 2h
         labels:
           severity: warning
@@ -32,7 +32,7 @@ groups:
       
       # Database Alerts
       - alert: DatabaseDown
-        expr: up{instance=~".*postgres.*"} == 0
+        expr: up{environment="testnet", instance=~".*postgres.*"} == 0
         for: 1m
         labels:
           severity: critical
@@ -42,7 +42,7 @@ groups:
       
       # Kafka Alerts
       - alert: KafkaDown
-        expr: up{instance=~".*kafka.*"} == 0
+        expr: up{environment="testnet", instance=~".*kafka.*"} == 0
         for: 1m
         labels:
           severity: critical
@@ -52,7 +52,7 @@ groups:
       
       # Elasticsearch Alerts
       - alert: ElasticsearchDown
-        expr: up{instance=~".*elasticsearch.*"} == 0
+        expr: up{environment="testnet", instance=~".*elasticsearch.*"} == 0
         for: 1m
         labels:
           severity: critical
@@ -62,7 +62,7 @@ groups:
       
       # Resource Usage Alerts
       - alert: HighMemoryUsage
-        expr: jvm_memory_used_bytes{instance=~".*binance-trader-macd.*"} / jvm_memory_max_bytes{instance=~".*binance-trader-macd.*"} > 0.8
+        expr: jvm_memory_used_bytes{environment="testnet", instance=~".*binance-trader-macd.*"} / jvm_memory_max_bytes{environment="testnet", instance=~".*binance-trader-macd.*"} > 0.8
         for: 5m
         labels:
           severity: warning
@@ -71,7 +71,7 @@ groups:
           description: "Trading application memory usage is above 80% for more than 5 minutes."
       
       - alert: HighCPUUsage
-        expr: rate(process_cpu_seconds_total{instance=~".*binance-trader-macd.*"}[5m]) > 0.8
+        expr: rate(process_cpu_seconds_total{environment="testnet", instance=~".*binance-trader-macd.*"}[5m]) > 0.8
         for: 5m
         labels:
           severity: warning
@@ -81,7 +81,7 @@ groups:
       
       # Trading Performance Alerts
       - alert: HighOrderFailureRate
-        expr: rate(binance_trader_orders_total{status="FAILED"}[5m]) / rate(binance_trader_orders_total[5m]) > 0.1
+        expr: rate(binance_trader_orders_total{environment="testnet", status="FAILED"}[5m]) / rate(binance_trader_orders_total{environment="testnet"}[5m]) > 0.1
         for: 5m
         labels:
           severity: warning
@@ -90,7 +90,7 @@ groups:
           description: "Order failure rate is above 10% for more than 5 minutes."
       
       - alert: NoSuccessfulOrders
-        expr: increase(binance_trader_orders_total{status="SUCCESS"}[1h]) == 0
+        expr: increase(binance_trader_orders_total{environment="testnet", status="SUCCESS"}[1h]) == 0
         for: 2h
         labels:
           severity: warning
