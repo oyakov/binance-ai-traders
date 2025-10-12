@@ -562,10 +562,9 @@
             "type": "postgres",
             "uid": "postgres-testnet"
           },
-          "rawSql": "SELECT symbol, interval, display_time, open, high, low, close, volume, number_of_trades FROM kline ORDER BY display_time DESC LIMIT 20",
+          "rawSql": "SELECT symbol, interval, TO_CHAR(display_time, 'YYYY-MM-DD HH24:MI:SS') as event_time, ROUND(open::numeric, 2) as open, ROUND(high::numeric, 2) as high, ROUND(low::numeric, 2) as low, ROUND(close::numeric, 2) as close, ROUND(volume::numeric, 0) as volume, number_of_trades as trades FROM kline ORDER BY display_time DESC LIMIT 20",
           "refId": "A",
-          "format": "table",
-          "rawQuery": true
+          "format": "table"
         }
       ],
       "fieldConfig": {
