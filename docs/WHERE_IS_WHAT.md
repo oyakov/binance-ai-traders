@@ -73,8 +73,12 @@ Quick navigation guide to the most important parts of the repository. Use this a
 - Top-level README: `README.md`
 - Docs hub: `docs/README.md`
 - Agent context: `docs/AGENTS.md`
-- Monitoring guide: `MONITORING_GUIDE.md`
+- Monitoring guide: `docs/monitoring/MONITORING_GUIDE.md`
 - System overview: `docs/overview.md`
+- Monitoring reports: `docs/reports/monitoring/`
+- Status reports: `docs/reports/status/`
+- Incident reports: `docs/reports/incidents/`
+- Document inventory: `docs/overview/DOCUMENT_INVENTORY.md`
 
 ---
 

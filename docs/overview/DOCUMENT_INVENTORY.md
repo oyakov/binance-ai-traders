@@ -8,7 +8,7 @@
 | **Main README** | `README.md` | ✅ Complete | Project overview, quick start, architecture | 2025-01-05 |
 | **System Overview** | `docs/overview.md` | ✅ Complete | High-level architecture and findings | 2025-01-05 |
 | **Agent Context** | `docs/AGENTS.md` | ✅ Complete | Comprehensive development guidance | 2025-01-05 |
-| **Project Rules** | `PROJECT_RULES.md` | ✅ **NEW** | Consolidated project rules and core features | 2025-01-05 |
+| **Project Rules** | `docs/PROJECT_RULES.md` | ✅ Updated | Consolidated project rules and core features | 2025-01-05 |
 
 ### Service Documentation
 | Service | Document | Status | Purpose | Last Updated |
@@ -44,6 +44,12 @@
 | **Milestone Guide** | `docs/guides/MILESTONE_GUIDE.md` | ✅ Complete | Project roadmap and milestones | 2025-01-05 |
 | **Testnet Guide** | `docs/guides/TESTNET_LAUNCH_GUIDE.md` | ✅ Complete | Testnet deployment guide | 2025-01-05 |
 | **Test Reports** | `docs/reports/` | ✅ Complete | 16+ analysis and test reports | 2025-01-05 |
+| **Monitoring Reports Index** | `docs/reports/monitoring/README.md` | ✅ New | Central hub for Grafana and observability reports | 2025-01-12 |
+| **Grafana Consolidation Archive** | `docs/reports/monitoring/grafana/` | ✅ Consolidated | Planning and completion reports for Grafana consolidation | 2025-01-12 |
+| **Dashboard Reports** | `docs/reports/monitoring/dashboards/` | ✅ Consolidated | Dashboard improvement and backfill coverage summaries | 2025-01-12 |
+| **Observability Implementation Summary** | `docs/reports/monitoring/observability/` | ✅ Consolidated | Observability retrospectives and action items | 2025-01-12 |
+| **Status Reports** | `docs/reports/status/` | ✅ Consolidated | System improvements and evaluation timelines | 2025-01-12 |
+| **Incident Reports** | `docs/reports/incidents/` | ✅ Consolidated | Root-cause analyses for production issues | 2025-01-12 |
 | **Metrics Testing Summary** | `docs/monitoring/METRICS_TESTING_SUMMARY.md` | ✅ Complete | Metrics endpoints and test scripts | 2025-10-09 |
 | **Grafana Dashboard Setup** | `docs/monitoring/GRAFANA_DASHBOARD_SETUP.md` | ✅ Complete | Grafana/Prometheus setup and queries | 2025-10-09 |
 
@@ -151,6 +157,7 @@
 
 ---
 
-**Last Updated**: 2025-01-05  
-**Version**: 1.0 (Document Inventory)  
+**Last Updated**: 2025-01-12
+**Version**: 1.1 (Documentation restructure)
 **Status**: Consolidation Complete
+
