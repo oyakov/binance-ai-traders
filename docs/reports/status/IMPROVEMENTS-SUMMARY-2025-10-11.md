@@ -245,7 +245,7 @@ curl http://localhost:8083/actuator/metrics/binance.trader.signals
    - Removed balanced-ada strategy
 
 ### New Files Created
-1. `system-state-evaluation-2025-10-11.md`
+1. `SYSTEM_STATE_EVALUATION_2025-10-11.md`
    - Comprehensive 250+ line system analysis
    
 2. `scripts/quick-fixes.md`

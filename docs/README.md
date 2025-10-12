@@ -13,7 +13,7 @@ Get up and running quickly with the trading system.
 ### 📋 [Guides](guides/)
 - [Milestone Guide](guides/MILESTONE_GUIDE.md) - Project progression roadmap
 - [Testnet Launch Guide](guides/TESTNET_LAUNCH_GUIDE.md) - Testnet deployment instructions
-- [Backtesting Guide](BACKTESTING_README.md) - Comprehensive backtesting documentation
+- [Backtesting Guide](reports/BACKTESTING_README.md) - Comprehensive backtesting documentation
 
 ### 🏗️ [Services](services/)
 Detailed documentation for each microservice:
@@ -39,6 +39,9 @@ Analysis reports and test results:
 - [Comprehensive Analysis](reports/COMPREHENSIVE_ANALYSIS_RESULTS.md)
 - [Test Coverage Report](reports/TEST_COVERAGE_REPORT.md)
 - [Real Data Analysis](reports/REAL_DATA_ANALYSIS_RESULTS.md)
+- [Monitoring Reports](reports/monitoring/README.md) - Grafana consolidation, dashboard updates, and observability summaries
+- [Status Reports](reports/status/README.md) - Point-in-time health checks and improvement logs
+- [Incident Reports](reports/incidents/README.md) - Root-cause analyses and remediation notes
 
 ### 🔧 [Scripts](scripts/)
 Automation and deployment scripts:
@@ -51,6 +54,7 @@ Automation and deployment scripts:
 - [Infrastructure Quick Reference](infrastructure/quick-reference.md)
 
 ### 📡 Monitoring & Metrics
+- [Monitoring Reports Index](reports/monitoring/README.md)
 - [Metrics Testing Summary](monitoring/METRICS_TESTING_SUMMARY.md)
 - [Grafana Dashboard Setup](monitoring/GRAFANA_DASHBOARD_SETUP.md)
 
@@ -87,7 +91,7 @@ LLM memory and knowledge management system.
 
 ### Essential Reading
 - **[Main README](../README.md)** - Project overview and quick start
-- **[Backtesting Engine](BACKTESTING_README.md)** - Strategy validation system
+- **[Backtesting Engine](reports/BACKTESTING_README.md)** - Strategy validation system
 - **[Milestone Guide](guides/MILESTONE_GUIDE.md)** - Project roadmap
 - **[Testnet Guide](guides/TESTNET_LAUNCH_GUIDE.md)** - Testnet deployment
 
@@ -106,7 +110,7 @@ LLM memory and knowledge management system.
 ### By Topic
 - **Trading Strategies**: [Services](services/) → [MACD Trader](services/binance-trader-macd.md)
 - **Data Collection**: [Services](services/) → [Data Collection](services/binance-data-collection.md)
-- **Backtesting**: [Backtesting Guide](BACKTESTING_README.md)
+- **Backtesting**: [Backtesting Guide](reports/BACKTESTING_README.md)
 - **Deployment**: [Guides](guides/) → [Testnet Launch](guides/TESTNET_LAUNCH_GUIDE.md)
 - **Monitoring**: [Infrastructure](infrastructure/) → [Monitoring](infrastructure/monitoring-grafana-testnet.md)
 
@@ -128,11 +132,12 @@ When adding new documentation:
 
 - **Technical Issues**: Check service-specific documentation
 - **Deployment Problems**: Review [Infrastructure](infrastructure/) guides
-- **Strategy Questions**: See [Backtesting](BACKTESTING_README.md) documentation
+- **Strategy Questions**: See [Backtesting](reports/BACKTESTING_README.md) documentation
 - **General Questions**: Start with [System Overview](overview.md)
 
 ---
 
-**Last Updated**: 2025-01-05  
-**Maintained By**: Development Team  
-**Version**: 2.0 (Consolidated)
+**Last Updated**: 2025-01-12
+**Maintained By**: Development Team
+**Version**: 2.1 (Documentation restructure)
+
