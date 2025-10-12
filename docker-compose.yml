@@ -92,6 +92,16 @@ services:
     networks:
       - binance-network
 
+  matrix-ui-portal:
+    build:
+      context: ./matrix-ui-portal
+      dockerfile: Dockerfile
+    container_name: matrix-ui-portal
+    ports:
+      - "3000:3000"
+    networks:
+      - binance-network
+
 volumes:
   postgres-data:
   es-data:
