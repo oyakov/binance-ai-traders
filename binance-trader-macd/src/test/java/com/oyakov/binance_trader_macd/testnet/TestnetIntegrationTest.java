@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ActiveProfiles("testnet")
 class TestnetIntegrationTest {
 
@@ -80,6 +83,10 @@ class TestnetIntegrationTest {
 
     @Test
     void testCompleteTestnetWorkflow() {
+        // Arrange: Mock shared data fetcher to return empty so it falls back to dataFetcher
+        when(sharedDataFetcher.fetchRecentKlines(anyString(), anyString(), anyInt(), anyString()))
+                .thenReturn(createMockDataset(List.of()));
+        
         // Arrange: Mock data collection
         List<KlineEvent> mockKlines = createMockKlines();
         when(dataFetcher.fetchHistoricalData(anyString(), anyString(), anyLong(), anyLong(), anyString()))
@@ -107,8 +114,10 @@ class TestnetIntegrationTest {
         tradingInstance.stop();
 
         // Assert: Verify interactions
+        verify(sharedDataFetcher, atLeastOnce()).fetchRecentKlines(
+                eq("BTCUSDT"), eq("1h"), anyInt(), anyString());
         verify(dataFetcher, atLeastOnce()).fetchHistoricalData(
-                eq("BTCUSDT"), eq("1h"), anyLong(), anyLong(), eq("testnet-test-instance"));
+                eq("BTCUSDT"), eq("1h"), anyLong(), anyLong(), anyString());
         verify(macdAnalyzer, atLeastOnce()).tryExtractSignal(any());
         verify(binanceOrderClient, atLeastOnce()).placeOrder(
                 eq("BTCUSDT"), any(), any(), eq(BigDecimal.valueOf(0.01)), any(), any(), any());

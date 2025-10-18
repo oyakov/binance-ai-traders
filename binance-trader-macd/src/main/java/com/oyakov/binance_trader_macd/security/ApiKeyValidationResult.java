@@ -56,10 +56,13 @@ public class ApiKeyValidationResult {
     }
 
     public String getErrorSummary() {
-        if (reason != null) {
+        if (reason != null && !reason.isEmpty()) {
             return reason;
         }
-        return errors != null && !errors.isEmpty() ? String.join(", ", errors) : "";
+        if (errors != null && !errors.isEmpty()) {
+            return String.join(", ", errors);
+        }
+        return "No errors";
     }
 
     public boolean isMainnet() {

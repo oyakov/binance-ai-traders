@@ -89,6 +89,8 @@ public class KlineDataService implements KlineDataServiceApi {
         String symbol = event.getSymbol();
         String interval = event.getInterval();
         boolean success = false;
+        Exception postgresError = null;
+        Exception elasticError = null;
         try {
             KlineItem klineItem = klineMapper.toItem(event);
 
@@ -108,7 +110,8 @@ public class KlineDataService implements KlineDataServiceApi {
                         metrics.incrementPostgresSaveFailures(symbol, interval, e.getClass().getSimpleName());
                         metrics.setPostgresConnectionStatus(false);
                         log.error("Failed to save to PostgreSQL: {}", klineItem, e);
-                        throw e;
+                        // Don't re-throw - try other repositories and publish error event
+                        postgresError = e;
                     } finally {
                         metrics.recordPostgresSaveTime(postgresSample, symbol, interval, localPostgresSuccess ? "success" : "failure");
                     }
@@ -131,7 +134,8 @@ public class KlineDataService implements KlineDataServiceApi {
                         metrics.incrementElasticsearchSaveFailures(symbol, interval, e.getClass().getSimpleName());
                         metrics.setElasticsearchConnectionStatus(false);
                         log.error("Failed to save to Elasticsearch: {}", klineItem, e);
-                        throw e;
+                        // Don't re-throw - try other repositories and publish error event
+                        elasticError = e;
                     } finally {
                         metrics.recordElasticsearchSaveTime(elasticsearchSample, symbol, interval, localElasticSuccess ? "success" : "failure");
                     }
@@ -140,11 +144,23 @@ public class KlineDataService implements KlineDataServiceApi {
                     metrics.setElasticsearchConnectionStatus(false);
                 }
 
+                // Check if we had partial failures
+                Exception primaryError = postgresError != null ? postgresError : elasticError;
+                
                 if (persisted) {
-                    metrics.incrementKlineEventsSaved(symbol, interval);
-                    eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
-                    log.info("Kline data saved successfully: {}", klineItem);
-                    success = true;
+                    if (primaryError != null) {
+                        // Partial success - at least one repository worked but one failed
+                        String errorMessage = primaryError.getMessage();
+                        eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, errorMessage, primaryError));
+                        log.warn("Kline data partially saved (some repositories failed): {}", klineItem);
+                        metrics.incrementKlineEventsFailed(symbol, interval, primaryError.getClass().getSimpleName());
+                    } else {
+                        // Complete success
+                        metrics.incrementKlineEventsSaved(symbol, interval);
+                        eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineWritten", event.getEventTime(), klineItem, null, null));
+                        log.info("Kline data saved successfully: {}", klineItem);
+                        success = true;
+                    }
                 } else {
                     String message = "No storage repositories available for kline data persistence";
                     log.error("{}: {}", message, klineItem);
@@ -155,7 +171,7 @@ public class KlineDataService implements KlineDataServiceApi {
                 log.error("Failed to save kline data: {}", klineItem, e);
                 metrics.incrementKlineEventsFailed(symbol, interval, e.getClass().getSimpleName());
                 eventPublisher.publishEvent(new DataItemWrittenNotification<>(this, "KlineNotWritten", event.getEventTime(), klineItem, e.getMessage(), e));
-                throw e;
+                // Don't re-throw - we've published the error event
             }
         } finally {
             metrics.recordKlineEventProcessingTime(sample, symbol, interval, success ? "success" : "failure");

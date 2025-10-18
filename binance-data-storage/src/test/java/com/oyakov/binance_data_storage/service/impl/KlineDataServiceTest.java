@@ -245,7 +245,8 @@ public class KlineDataServiceTest {
         klineDataService.saveKlineData(incomingCommand);
 
         verify(klinePostgresRepository, times(1)).upsertKline(expectedItem);
-        verify(klineElasticRepository, times(0)).save(expectedItem);
+        // With resilient behavior, Elasticsearch should still be attempted even if Postgres fails
+        verify(klineElasticRepository, times(1)).save(expectedItem);
 
         // check that eventPublisher.publishEvent was called with expected notification
         ArgumentCaptor<DataItemWrittenNotification<KlineItem>> eventCaptor = ArgumentCaptor.forClass(DataItemWrittenNotification.class);
