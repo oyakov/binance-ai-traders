@@ -114,10 +114,34 @@ Quick navigation guide to the most important parts of the repository. Use this a
 - Build acceleration: `scripts/build/build-data-collection-fast.ps1`
 - Storage tests: `scripts/storage/test-storage-fix.ps1`
 
-## Postman
-- Collections: `postman/Binance-AI-Traders-Comprehensive-Test-Collection.json`, `postman/Binance-AI-Traders-Monitoring-Tests.json`
-- Environment: `postman/Binance-AI-Traders-Testnet-Environment.json`
-- README: `postman/README.md`
+## Testing & Validation
+**Quick Start**: `binance-ai-traders/TESTING_QUICK_START.md` - Fast-track testing guide
+
+### Comprehensive System Testing
+- **Master Plan**: `binance-ai-traders/COMPREHENSIVE_SYSTEM_TESTING_AND_ARCHITECTURE_EVALUATION_PLAN.md`
+  - Complete testing scope and strategy
+  - Architecture evaluation criteria
+  - Detailed test categories and validation checklists
+  - Issue classification and success metrics
+- **Automated Test Script**: `scripts/run-complete-system-test.ps1`
+  - Full automated test execution (4-6 hours)
+  - Generates comprehensive reports
+  - Run: `.\scripts\run-complete-system-test.ps1`
+- **Test Checklist**: `binance-ai-traders/SYSTEM_TEST_CHECKLIST.md`
+  - Printable checklist for manual testing
+  - Architecture scorecard (0-100 points)
+  - Issue tracking templates
+
+### Test Plans
+- **Comprehensive System Testing**: `binance-ai-traders/test-plan-comprehensive-system-testing.md`
+- **MACD Trader Testing**: `binance-ai-traders/test-plan-macd-trader.md`
+- **Testability & Observability**: `binance-ai-traders/TESTABILITY_OBSERVABILITY_IMPLEMENTATION_STATUS.md`
+
+### Postman Collections
+- **Collections**: `postman/Binance-AI-Traders-Comprehensive-Test-Collection.json`, `postman/Binance-AI-Traders-Monitoring-Tests.json`, `postman/PostgreSQL-Kafka-Health-Tests.json`
+- **Environment**: `postman/Binance-AI-Traders-Testnet-Environment.json`
+- **README**: `postman/README.md`
+- **Run Tests**: `scripts/run-comprehensive-tests.ps1`
 
 ## Build & test
 - Build all: `mvn clean install`
