@@ -9,7 +9,6 @@ import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.header.Header;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -29,7 +28,7 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${binance.data.kline.kafka-topic}", groupId = "${binance.data.kline.kafka-consumer-group}")
     public void listen(@Payload KlineEvent event,
-                      @Header(value = KafkaHeaders.RECEIVED_MESSAGE_KEY, required = false) String key,
+                      @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key,
                       @Header(value = CorrelationIdConstants.CORRELATION_ID_KAFKA_HEADER, required = false) String correlationId) {
         Timer.Sample sample = metrics.startKafkaConsumerProcessing();
         boolean success = false;

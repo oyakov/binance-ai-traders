@@ -64,13 +64,13 @@ public class MarketRegimeDetector {
                         .regime(regime)
                         .startTime(periodStart)
                         .endTime(periodEnd)
-                        .startPrice(new BigDecimal(window.get(0).getOpen()))
-                        .endPrice(new BigDecimal(window.get(window.size() - 1).getClose()))
+                        .startPrice(window.get(0).getOpen())
+                        .endPrice(window.get(window.size() - 1).getClose())
                         .build();
             } else {
                 // Extend current regime period
                 currentRegime.setEndTime(periodEnd);
-                currentRegime.setEndPrice(new BigDecimal(window.get(window.size() - 1).getClose()));
+                currentRegime.setEndPrice(window.get(window.size() - 1).getClose());
             }
         }
         
@@ -98,8 +98,8 @@ public class MarketRegimeDetector {
             return MarketRegime.UNKNOWN;
         }
         
-        BigDecimal startPrice = new BigDecimal(window.get(0).getOpen());
-        BigDecimal endPrice = new BigDecimal(window.get(window.size() - 1).getClose());
+        BigDecimal startPrice = window.get(0).getOpen();
+        BigDecimal endPrice = window.get(window.size() - 1).getClose();
         
         // Calculate price change percentage
         BigDecimal priceChange = endPrice.subtract(startPrice)
@@ -127,9 +127,9 @@ public class MarketRegimeDetector {
         BigDecimal maxVolatility = BigDecimal.ZERO;
         
         for (KlineEvent kline : window) {
-            BigDecimal high = new BigDecimal(kline.getHigh());
-            BigDecimal low = new BigDecimal(kline.getLow());
-            BigDecimal open = new BigDecimal(kline.getOpen());
+            BigDecimal high = kline.getHigh();
+            BigDecimal low = kline.getLow();
+            BigDecimal open = kline.getOpen();
             
             if (open.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal range = high.subtract(low);
