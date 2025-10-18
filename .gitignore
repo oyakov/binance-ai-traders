@@ -73,8 +73,21 @@ dist/
 build/
 *.tgz
 
-# Environment files
+# Environment files and secrets
 .env
+*.env
+!*.env.template
+!*.env.example
+testnet.env
+production.env
+.secrets
+*.secrets
+age-key.txt
+.age-key.txt
+sops_error.txt
+
+# Encrypted files are safe to commit
+# *.env.enc files should be committed
 
 # VSCode
 .vscode/

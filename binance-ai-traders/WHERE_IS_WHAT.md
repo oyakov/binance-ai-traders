@@ -29,6 +29,11 @@ Quick navigation guide to the most important parts of the repository. Use this a
   - Purpose: FastAPI + Telegram UI scaffolding
   - App code: `telegram-frontend-python/src/`
 
+- **matrix-ui-portal**: `matrix-ui-portal/`
+  - Purpose: React/Vite web UI with Matrix theme
+  - Spec: `binance-ai-traders/UI_PORTAL_SPECIFICATION.md`
+  - Port: 3000 (planned)
+
 ## Docker Compose stacks
 - Root compose (dev/test): `docker-compose.test.yml`
   - Ports: Grafana 3000, Prometheus 9090, Kafka 9092, Postgres 5432, ES 9200, services 8081/8082/8083
@@ -40,20 +45,59 @@ Quick navigation guide to the most important parts of the repository. Use this a
 
 - Monitoring-only: `monitoring/docker-compose.grafana-testnet.yml`
 
+## Security and Deployment
+- **Public Deployment Security Guide**: `binance-ai-traders/guides/PUBLIC_DEPLOYMENT_SECURITY_GUIDE.md`
+  - VPS deployment architecture, SSH hardening, secrets management, network security
+- **VPS Setup Guide**: `binance-ai-traders/guides/VPS_SETUP_GUIDE.md`
+  - Initial VPS provisioning, SSH keys, firewall, fail2ban, Docker installation
+- **Incident Response Guide**: `binance-ai-traders/guides/INCIDENT_RESPONSE_GUIDE.md`
+  - Security incident procedures, containment, recovery, communication
+- **Security Verification Checklist**: `binance-ai-traders/guides/SECURITY_VERIFICATION_CHECKLIST.md`
+  - Pre-deployment checklist, 100+ verification items
+- **Security Hardening Guide**: `binance-ai-traders/guides/SECURITY_HARDENING_GUIDE.md`
+  - High-grade security controls, compliance, technical hardening
+
+### Secrets Management
+- **SOPS Configuration**: `.sops.yaml` (age encryption configuration)
+- **Environment Template**: `testnet.env.template` (documented template for secrets)
+- **Encrypted Secrets**: `testnet.env.enc` (SOPS-encrypted, safe to commit)
+- **Secrets Scripts**: `scripts/security/`
+  - `setup-secrets.ps1` - Generate strong passwords and API keys
+  - `encrypt-secrets.ps1` - Encrypt environment files with SOPS
+  - `decrypt-secrets.ps1` - Decrypt for deployment
+  - `rotate-secrets.ps1` - Secret rotation workflow
+  - `test-security-controls.ps1` - Comprehensive security validation
+
+### Network Security
+- **Nginx Reverse Proxy**: `nginx/nginx.conf`
+  - TLS 1.3, rate limiting, security headers, request size limits
+- **API Gateway**: `nginx/conf.d/api-gateway.conf`
+  - Service routing, authentication checks, endpoint protection
+- **TLS Certificates**: `nginx/ssl/` (cert.pem, key.pem)
+
 ## Monitoring
 - Prometheus config: `monitoring/prometheus.yml` (scrapes Java `/actuator/prometheus`, health metrics server `/metrics`)
 - Grafana dashboards/provisioning: `monitoring/grafana/`
+- Dashboard inventory: `monitoring/grafana/DASHBOARD_INVENTORY.md` (8 dashboards across 10 categories)
+- Dashboard structure: `monitoring/grafana/DASHBOARD_STRUCTURE.md`
 - Quick open: `scripts/monitoring/open-monitoring.ps1`
 - Simple/Comprehensive setup: `scripts/monitoring/setup-dashboard-simple.ps1`, `scripts/monitoring/setup-comprehensive-dashboard.ps1`
-- Metrics testing summary: `docs/monitoring/METRICS_TESTING_SUMMARY.md`
-- Grafana dashboard setup guide: `docs/monitoring/GRAFANA_DASHBOARD_SETUP.md`
+- Metrics testing summary: `binance-ai-traders/monitoring/METRICS_TESTING_SUMMARY.md`
+- Grafana dashboard setup guide: `binance-ai-traders/monitoring/GRAFANA_DASHBOARD_SETUP.md`
 
-## Scripts (PowerShell)
+## Scripts (PowerShell, Python, SQL)
+**Complete Index**: `scripts/INDEX.md` (87 PS1, 7 SQL, 6 Python files)
+
+### Quick Reference
 - Smoke tests: `scripts/tests/quick-test.ps1`, `scripts/tests/test-simple.ps1` (working), `scripts/tests/test-basic.ps1` (has syntax errors)
 - Kline tests: `scripts/kline/test-kline-*.ps1`
 - Metrics checks: `scripts/metrics/verify-metrics-simple.ps1`, `scripts/metrics/verify-metrics-config.ps1`, `scripts/metrics/check-metrics.ps1`
 - Comprehensive tests (Newman): `scripts/run-comprehensive-tests.ps1`
-- Monitoring helpers: `scripts/monitoring/open-monitoring.ps1`, `scripts/monitoring/start-grafana-monitoring.ps1`, `scripts/monitoring/start-kline-monitoring*.ps1`, `scripts/monitoring/monitor-*.ps1`
+- Monitoring helpers: `scripts/monitoring/open-monitoring.ps1`, `scripts/monitoring/start-grafana-monitoring.ps1`, `scripts/monitoring/start-kline-monitoring*.ps1`
+- Backfill operations: `scripts/backfill/backfill_klines.py`, `scripts/backfill/load_csv_to_postgres.py`
+- SQL diagnostics: `scripts/sql-diagnostics/` (database health, kline analysis, performance monitoring)
+- Build acceleration: `scripts/build/build-data-collection-fast.ps1`
+- Storage tests: `scripts/storage/test-storage-fix.ps1`
 
 ## Postman
 - Collections: `postman/Binance-AI-Traders-Comprehensive-Test-Collection.json`, `postman/Binance-AI-Traders-Monitoring-Tests.json`
@@ -69,16 +113,31 @@ Quick navigation guide to the most important parts of the repository. Use this a
 - Spring profiles: `application.yml`, `application-testnet.yml` in each Java service
 - Testnet env file: `testnet.env`
 
+## API Documentation
+- REST API endpoints: `binance-ai-traders/API_ENDPOINTS.md` (comprehensive API reference)
+- binance-data-storage: `/api/v1/klines`, `/api/v1/macd`, `/api/v1/observability`
+- binance-trader-macd: `/api/v1/macd/indicator`, `/api/v1/macd/update`, `/api/v1/macd/stats`
+
+## Memory System
+- Memory index: `binance-ai-traders/memory/memory-index.md` (31 active entries)
+- Findings: `binance-ai-traders/memory/findings/` (MEM-001 to MEM-F001)
+- Context: `binance-ai-traders/memory/context/` (MEM-C001 to MEM-C009)
+- Infrastructure: `binance-ai-traders/memory/` (MEM-I001 to MEM-I007)
+- Updates: `binance-ai-traders/memory/updates/`
+
 ## Quick links
 - Top-level README: `README.md`
-- Docs hub: `docs/README.md`
-- Agent context: `docs/AGENTS.md`
-- Monitoring guide: `docs/monitoring/MONITORING_GUIDE.md`
-- System overview: `docs/overview.md`
-- Monitoring reports: `docs/reports/monitoring/`
-- Status reports: `docs/reports/status/`
-- Incident reports: `docs/reports/incidents/`
-- Document inventory: `docs/overview/DOCUMENT_INVENTORY.md`
+- Project docs: `binance-ai-traders/` (main documentation folder)
+- Agent context: `binance-ai-traders/AGENTS.md` (comprehensive agent guidance)
+- Project rules: `binance-ai-traders/PROJECT_RULES.md`
+- Monitoring guide: `binance-ai-traders/monitoring/MONITORING_GUIDE.md`
+- System overview: `binance-ai-traders/overview.md`
+- Service docs: `binance-ai-traders/services/` (individual service documentation)
+- Guides: `binance-ai-traders/guides/` (QUICK_START, TESTNET_LAUNCH, MILESTONE_GUIDE, etc.)
+- Monitoring reports: `binance-ai-traders/reports/monitoring/`
+- Status reports: `binance-ai-traders/reports/status/`
+- Incident reports: `binance-ai-traders/reports/incidents/`
+- Document inventory: `binance-ai-traders/overview/DOCUMENT_INVENTORY.md`
 
 ---
 

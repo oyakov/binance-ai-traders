@@ -4,49 +4,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
+/**
+ * Result of API key validation
+ */
 @Data
+@AllArgsConstructor
 public class ApiKeyValidationResult {
-    
-    private final boolean valid;
-    private final List<String> errors;
-    private final boolean testnet;
+    private boolean valid;
+    private String keyId;
+    private String keyType;
+    private String reason;
+    private Set<String> allowedPaths;
 
-    public ApiKeyValidationResult(boolean valid, List<String> errors, boolean testnet) {
-        this.valid = valid;
-        this.errors = errors != null ? List.copyOf(errors) : Collections.emptyList();
-        this.testnet = testnet;
+    public static ApiKeyValidationResult valid(String keyId, String keyType, Set<String> allowedPaths) {
+        return new ApiKeyValidationResult(true, keyId, keyType, null, allowedPaths);
     }
 
-    public boolean isValid() {
-        return valid;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public boolean isTestnet() {
-        return testnet;
-    }
-
-    public boolean isMainnet() {
-        return !testnet;
-    }
-
-    public String getEnvironment() {
-        return testnet ? "TESTNET" : "MAINNET";
-    }
-
-    public boolean hasErrors() {
-        return !errors.isEmpty();
-    }
-
-    public String getErrorSummary() {
-        if (errors.isEmpty()) {
-            return "No errors";
-        }
-        return String.join("; ", errors);
+    public static ApiKeyValidationResult invalid(String reason) {
+        return new ApiKeyValidationResult(false, null, null, reason, Collections.emptySet());
     }
 }

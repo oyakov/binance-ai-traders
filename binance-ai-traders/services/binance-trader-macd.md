@@ -1,6 +1,6 @@
 # Binance MACD Trader Service
 
-**Language**: Java 17, Spring Boot
+**Language**: Java 21, Spring Boot 3.3.9
 
 ## Purpose
 Implements a MACD-based automated trading strategy that reacts to Kafka-delivered signals and places orders through Binance while persisting order state.
@@ -30,11 +30,38 @@ The MACD trader pulls REST credentials and runtime switches from environment var
 - Testing is absent; critical trading logic will require deterministic simulations before live deployment.
 - There is overlap with the data-storage module (duplicate Elasticsearch config) that could be factored into shared libraries.
 
+## REST API Endpoints
+
+### MACD Indicator API (`/api/v1/macd`)
+- `GET /indicator/{symbol}/{interval}` - Calculate MACD with custom parameters
+- `GET /indicator/{symbol}/{interval}/default` - Calculate MACD with default (12-26-9)
+- `GET /indicators/batch` - Get batch MACD indicators
+- `GET /cached` - Get all cached indicators
+- `POST /update` - Update all MACD indicators
+- `POST /update/{symbol}/{interval}` - Update specific indicator
+- `GET /stats` - Get MACD statistics
+- `GET /health` - Health check
+
+### Trading Metrics
+- `binance.trader.active.positions` - Active positions gauge
+- `binance.trader.realized.pnl` - Realized PnL by quote_asset
+- `binance.trader.signals{direction}` - Signal counters (total/buy/sell)
+
+**Full API Documentation**: See `binance-ai-traders/API_ENDPOINTS.md`
+
+## Backtesting Engine
+- **Status**: ✅ **COMPLETE** - 2,400+ test scenarios executed
+- **Documentation**: `binance-trader-macd/BACKTESTING_ENGINE.md`
+- **Run Demo**: `mvn test -pl binance-trader-macd -Dtest=StandaloneBacktestDemo`
+
 ## Recommendations
 1. Implement the MACD computation pipeline, preferably consuming indicator streams and encapsulating state in dedicated services.
 2. Flesh out Kafka listener and producer components with retry/backoff strategies and idempotency safeguards.
 3. Centralize shared infrastructure beans (Elasticsearch, Kafka) to reduce duplication across services.
 4. Create integration tests that mock Binance REST endpoints and assert order submission behavior in both test and live modes.
+5. Add authentication for API endpoints
+6. Implement comprehensive error handling and retry logic
+7. Add Swagger/OpenAPI documentation
 
 ## Observability & Metrics
 - Spring Boot Actuator is bundled with the service. Health, info, metrics, and Prometheus scrape endpoints are available under `/actuator/**` (e.g., `/actuator/health`, `/actuator/metrics`, `/actuator/prometheus`).

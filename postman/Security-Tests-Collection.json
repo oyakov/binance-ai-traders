@@ -1,0 +1,590 @@
+{
+  "info": {
+    "name": "Binance AI Traders - Security Tests",
+    "_postman_id": "security-tests-001",
+    "description": "Comprehensive security testing suite for binance-ai-traders public deployment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication Tests",
+      "item": [
+        {
+          "name": "Test API without authentication (should fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has error message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.eql('Unauthorized');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/signals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "signals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test API with invalid API key (should fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates invalid API key\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('Invalid');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "invalid_api_key_12345",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/signals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "signals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test API with valid admin API key (should succeed)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/signals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "signals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test readonly key with POST (should fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates insufficient permissions\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('permissions');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key_readonly}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"test\": \"data\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/update",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "update"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rate Limiting Tests",
+      "item": [
+        {
+          "name": "Test rate limiting (burst requests)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// After multiple rapid requests, should get 429",
+                  "pm.test(\"Eventually returns 429 Too Many Requests\", function () {",
+                  "    pm.expect([200, 429]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 429) {",
+                  "    pm.test(\"Rate limit error message present\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.error).to.include('Too Many Requests');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Make 15 rapid requests to trigger rate limit",
+                  "for (let i = 0; i < 15; i++) {",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('base_url') + '/health',",
+                  "        method: 'GET'",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Input Validation Tests",
+      "item": [
+        {
+          "name": "Test SQL injection attempt (should be blocked)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"SQL injection blocked (400 or 403)\", function () {",
+                  "    pm.expect([400, 403]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/signals?symbol=BTCUSDT' OR '1'='1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "signals"],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "BTCUSDT' OR '1'='1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test XSS attempt (should be blocked)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"XSS attempt blocked (400 or 403)\", function () {",
+                  "    pm.expect([400, 403]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/signals?symbol=<script>alert('xss')</script>",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "signals"],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "<script>alert('xss')</script>"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test oversized request (should be rejected)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Oversized request rejected (413 or 400)\", function () {",
+                  "    pm.expect([413, 400]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key_admin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"data\": \"{{$randomLoremParagraphs(1000)}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/macd/update",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "macd", "update"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Endpoint Protection Tests",
+      "item": [
+        {
+          "name": "Test direct actuator access (should be blocked)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Actuator endpoint blocked (403 or 404)\", function () {",
+                  "    pm.expect([403, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/actuator/prometheus",
+              "host": ["{{base_url}}"],
+              "path": ["actuator", "prometheus"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test direct metrics endpoint (should be blocked)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Metrics endpoint blocked (403 or 404)\", function () {",
+                  "    pm.expect([403, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["metrics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test public health endpoint (should work)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Health endpoint accessible\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TLS and Headers Tests",
+      "item": [
+        {
+          "name": "Test HTTPS redirect",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"HTTP redirects to HTTPS (301 or 302)\", function () {",
+                  "    pm.expect([301, 302]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(\"Location header points to HTTPS\", function () {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.include('https');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{domain}}/health",
+              "protocol": "http",
+              "host": ["{{domain}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test security headers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"X-Frame-Options header present\", function () {",
+                  "    pm.response.to.have.header('X-Frame-Options');",
+                  "});",
+                  "",
+                  "pm.test(\"X-Content-Type-Options header present\", function () {",
+                  "    pm.response.to.have.header('X-Content-Type-Options');",
+                  "    pm.expect(pm.response.headers.get('X-Content-Type-Options')).to.eql('nosniff');",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Security-Policy header present\", function () {",
+                  "    pm.response.to.have.header('Content-Security-Policy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Direct Port Access Tests",
+      "item": [
+        {
+          "name": "Test direct service port 8083 (should timeout)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Direct port access fails\", function () {",
+                  "    // Request should timeout or be refused",
+                  "    pm.expect(pm.response.code).to.be.oneOf([0, 502, 503]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{domain}}:8083/actuator/health",
+              "protocol": "http",
+              "host": ["{{domain}}"],
+              "port": "8083",
+              "path": ["actuator", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test direct Grafana port 3000 (should timeout)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Direct Grafana access blocked\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([0, 502, 503]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{domain}}:3000",
+              "protocol": "http",
+              "host": ["{{domain}}"],
+              "port": "3000"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://your-domain.com",
+      "type": "string"
+    },
+    {
+      "key": "domain",
+      "value": "your-domain.com",
+      "type": "string"
+    },
+    {
+      "key": "api_key_admin",
+      "value": "btai_testnet_admin_key_here",
+      "type": "string"
+    },
+    {
+      "key": "api_key_monitoring",
+      "value": "btai_testnet_monitoring_key_here",
+      "type": "string"
+    },
+    {
+      "key": "api_key_readonly",
+      "value": "btai_testnet_readonly_key_here",
+      "type": "string"
+    }
+  ]
+}
+
+

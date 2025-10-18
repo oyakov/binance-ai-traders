@@ -17,6 +17,7 @@ This file serves as the central index for all memory entries in the documentatio
 | MEM-009 | Root Cause: Incomplete Service Integration Architecture | Finding | Active | 2024-12-25 | global-architecture,service-integration |
 | MEM-010 | Root Cause: Insufficient Testing Strategy | Finding | Active | 2024-12-25 | testing-strategy,quality-assurance |
 | MEM-011 | Root Cause: Configuration Management Gaps | Finding | Active | 2024-12-25 | configuration-management,deployment |
+| MEM-F001 | Java Version Documentation Inconsistency | Finding | Active | 2025-10-18 | global-documentation |
 
 ## Recent Updates
 
@@ -37,6 +38,7 @@ This file serves as the central index for all memory entries in the documentatio
 | MEM-C006 | Backtesting Engine Comprehensive Overview | Context | Active | 2025-01-08 | binance-trader-macd |
 | MEM-C007 | Telegram Frontend Architecture Overview | Context | Active | 2025-01-08 | telegram-frontend-python |
 | MEM-C008 | Project Features and Capabilities Summary | Context | Active | 2025-01-08 | Global |
+| MEM-C009 | REST API Endpoints Inventory | Context | Active | 2025-10-18 | Global |
 
 ## Templates
 
@@ -54,16 +56,17 @@ This file serves as the central index for all memory entries in the documentatio
 | MEM-I003 | Infrastructure Quick Reference | Infrastructure | Active | 2024-12-25 | Global |
 | MEM-I004 | Infrastructure Documentation Overview | Infrastructure | Active | 2024-12-25 | Global |
 | MEM-I005 | Kline Dashboarding System Completion | Infrastructure | Active | 2024-12-25 | Monitoring |
+| MEM-I007 | Matrix UI Portal Specification and Status | Infrastructure | Active | 2025-10-18 | UI-Portal |
 
 ## Memory Statistics
 
-- **Total Active Entries**: 27
-- **Findings**: 11
+- **Total Active Entries**: 31
+- **Findings**: 12
 - **Updates**: 2
-- **Context**: 8
+- **Context**: 9
 - **Templates**: 2
-- **Infrastructure**: 4
-- **Last System Update**: 2025-01-08
+- **Infrastructure**: 6
+- **Last System Update**: 2025-10-18
 
 ## Quick Reference
 

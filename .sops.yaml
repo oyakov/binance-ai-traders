@@ -1,0 +1,35 @@
+# Mozilla SOPS Configuration for binance-ai-traders
+# https://github.com/mozilla/sops
+
+creation_rules:
+  # Encrypt testnet environment files with age
+  - path_regex: testnet\.env$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    # ⚠️  REPLACE THE ABOVE with your actual age public key from: age-keygen
+    # Generate your key with: age-keygen -o age-key.txt
+    # The public key will be displayed (starts with "age1...")
+    
+  # Encrypt production environment files with age  
+  - path_regex: production\.env$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    # ⚠️  REPLACE with your production age public key (use different key!)
+    
+  # Encrypt any .secrets files
+  - path_regex: \.secrets$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Encrypted file suffix
+encrypted_suffix: .enc
+
+# Unencrypted suffix (for documentation)
+unencrypted_suffix: .template
+
+# MAC configuration for authentication
+mac_only_encrypted: true
+
+# Version
+version: "3"
+

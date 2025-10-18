@@ -48,11 +48,12 @@ The system consists of microservices communicating through Kafka:
 
 | Service | Purpose | Tech Stack | Status | Notes |
 |---------|---------|------------|--------|-------|
-| **Data Collection** | Real-time Binance WebSocket data | Java 17, Spring Boot, Kafka | 🔴 **Skeleton** | Missing WebSocket implementation |
-| **Data Storage** | Persist market data | Java 17, Spring Boot, PostgreSQL, Elasticsearch | 🟢 **Complete** | Well-implemented with dual persistence |
-| **MACD Trader** | MACD trading strategy + backtesting | Java 17, Spring Boot, Binance API | 🟡 **Partial** | Backtesting complete, strategy logic incomplete |
-| **Grid Trader** | Grid trading strategy | Java 17, Spring Boot, Kafka | 🔴 **Duplicate** | Needs implementation |
+| **Data Collection** | Real-time Binance WebSocket data | Java 21, Spring Boot, Kafka | 🔴 **Skeleton** | Missing WebSocket implementation |
+| **Data Storage** | Persist market data | Java 21, Spring Boot, PostgreSQL, Elasticsearch | 🟢 **Complete** | Well-implemented with dual persistence |
+| **MACD Trader** | MACD trading strategy + backtesting | Java 21, Spring Boot, Binance API | 🟡 **Partial** | Backtesting complete, strategy logic incomplete |
+| **Grid Trader** | Grid trading strategy | Java 21, Spring Boot, Kafka | 🔴 **Duplicate** | Needs implementation |
 | **Telegram Bot** | User interface and notifications | Python 3.11, FastAPI, aiogram | 🔴 **Scaffolding** | Not runnable, missing dependencies |
+| **Matrix UI Portal** | Web UI control center | React 18, Vite, TypeScript | 🔴 **Planned** | Specification complete, implementation pending |
 
 ## 🧪 Backtesting Engine
 
@@ -74,7 +75,7 @@ mvn test -pl binance-trader-macd -Dtest=StandaloneBacktestDemo
 
 ### Prerequisites
 - **Docker** and **Docker Compose**
-- **Java 17+** and **Maven 3.8+**
+- **Java 21+** and **Maven 3.8+**
 - **Python 3.11+** (for Telegram bot)
 - **Binance Testnet Account**
 
@@ -153,7 +154,7 @@ We welcome contributions! Please see our [Agent Context Guide](docs/AGENTS.md) f
 6. Submit a pull request with clear description
 
 ### Code Standards
-- **Java**: Java 17, Spring Boot 3.x, Maven
+- **Java**: Java 21, Spring Boot 3.3.9, Maven
 - **Python**: Python 3.11, Poetry, FastAPI
 - **Testing**: Comprehensive unit and integration tests
 - **Documentation**: Update relevant docs with changes

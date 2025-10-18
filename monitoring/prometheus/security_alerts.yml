@@ -1,0 +1,305 @@
+# Prometheus Security Alert Rules
+# ============================================================================
+# Alert rules for security monitoring and threat detection
+# ============================================================================
+
+groups:
+  # ========================================================================
+  # Authentication and Access Control Alerts
+  # ========================================================================
+  - name: authentication_security
+    interval: 30s
+    rules:
+      - alert: HighFailedAuthenticationRate
+        expr: |
+          rate(http_server_requests_seconds_count{status="401"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          type: authentication
+        annotations:
+          summary: "High rate of failed authentication attempts"
+          description: "More than 10 failed authentication attempts per minute detected on {{ $labels.instance }}. Possible brute force attack."
+          impact: "Potential unauthorized access attempts"
+          action: "Review access logs, check for suspicious IP addresses, consider blocking"
+
+      - alert: CriticalFailedAuthenticationRate
+        expr: |
+          rate(http_server_requests_seconds_count{status="401"}[5m]) > 50
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+          type: authentication
+        annotations:
+          summary: "Critical rate of failed authentication attempts"
+          description: "More than 50 failed authentication attempts per minute on {{ $labels.instance }}. Active brute force attack likely."
+          impact: "Active security threat, potential service disruption"
+          action: "IMMEDIATE: Block attacking IPs, enable fail2ban, review firewall rules"
+
+      - alert: MultipleFailedAuthFromSingleIP
+        expr: |
+          sum by (remote_addr) (rate(http_server_requests_seconds_count{status="401"}[1m])) > 5
+        for: 30s
+        labels:
+          severity: warning
+          category: security
+          type: authentication
+        annotations:
+          summary: "Multiple failed authentications from single IP"
+          description: "IP {{ $labels.remote_addr }} has >5 failed auth attempts in 1 minute."
+          impact: "Targeted attack from specific IP"
+          action: "Block IP {{ $labels.remote_addr }} with fail2ban or firewall"
+
+  # ========================================================================
+  # Rate Limiting and DDoS Protection Alerts
+  # ========================================================================
+  - name: rate_limiting_security
+    interval: 30s
+    rules:
+      - alert: HighRateLimitViolations
+        expr: |
+          rate(http_server_requests_seconds_count{status="429"}[5m]) > 20
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          type: rate_limit
+        annotations:
+          summary: "High rate of rate limit violations"
+          description: "More than 20 rate limit violations per minute on {{ $labels.instance }}."
+          impact: "Possible DoS attempt or misbehaving client"
+          action: "Review Nginx logs, identify attacking IPs, adjust rate limits if needed"
+
+      - alert: SustainedHighTrafficVolume
+        expr: |
+          rate(http_server_requests_seconds_count[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+          type: ddos
+        annotations:
+          summary: "Sustained high traffic volume detected"
+          description: "Traffic volume >1000 requests/min sustained for 5 minutes on {{ $labels.instance }}."
+          impact: "Potential DDoS attack or traffic spike"
+          action: "Monitor service health, check traffic sources, enable DDoS protection"
+
+      - alert: UnusualTrafficSpike
+        expr: |
+          (rate(http_server_requests_seconds_count[1m]) / 
+           rate(http_server_requests_seconds_count[1m] offset 1h)) > 5
+        for: 2m
+        labels:
+          severity: info
+          category: security
+          type: anomaly
+        annotations:
+          summary: "Unusual traffic spike detected"
+          description: "Traffic increased by 5x compared to 1 hour ago on {{ $labels.instance }}."
+          impact: "Anomalous traffic pattern"
+          action: "Investigate traffic sources, verify legitimate usage"
+
+  # ========================================================================
+  # API Security Alerts
+  # ========================================================================
+  - name: api_security
+    interval: 30s
+    rules:
+      - alert: InvalidApiKeyUsage
+        expr: |
+          rate(http_server_requests_seconds_count{uri=~"/api/.*",status="401"}[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          category: security
+          type: api_security
+        annotations:
+          summary: "High rate of invalid API key usage"
+          description: "More than 5 invalid API key attempts per minute on {{ $labels.instance }}."
+          impact: "Possible API key compromise or brute force"
+          action: "Review API key usage logs, rotate compromised keys if needed"
+
+      - alert: UnauthorizedEndpointAccess
+        expr: |
+          rate(http_server_requests_seconds_count{uri=~"/(actuator|metrics)/.*",status!="404"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+          type: unauthorized_access
+        annotations:
+          summary: "Unauthorized access to internal endpoints"
+          description: "Attempts to access internal endpoints detected on {{ $labels.instance }}."
+          impact: "Potential security breach, information disclosure"
+          action: "IMMEDIATE: Verify Nginx configuration, block access, investigate source"
+
+      - alert: SuspiciousApiRequestPatterns
+        expr: |
+          rate(http_server_requests_seconds_count{uri=~".*(union|select|insert|drop|exec|script).*"}[5m]) > 0
+        for: 30s
+        labels:
+          severity: critical
+          category: security
+          type: sql_injection
+        annotations:
+          summary: "Suspicious SQL injection patterns detected"
+          description: "SQL injection attempt detected in request URI on {{ $labels.instance }}."
+          impact: "Active attack attempt, data breach risk"
+          action: "IMMEDIATE: Block attacking IP, review application logs, verify input validation"
+
+  # ========================================================================
+  # Service and Infrastructure Security Alerts
+  # ========================================================================
+  - name: infrastructure_security
+    interval: 60s
+    rules:
+      - alert: ServiceDownAfterAttack
+        expr: |
+          up == 0 and rate(http_server_requests_seconds_count{status="429"}[5m] offset 5m) > 10
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+          type: service_compromise
+        annotations:
+          summary: "Service down following high rate limit violations"
+          description: "Service {{ $labels.job }} is down after experiencing high rate limit violations."
+          impact: "Possible successful DoS attack, service unavailable"
+          action: "IMMEDIATE: Restart service, enable DDoS protection, investigate logs"
+
+      - alert: HighErrorRateAfterFailedAuth
+        expr: |
+          rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 10 and
+          rate(http_server_requests_seconds_count{status="401"}[5m] offset 5m) > 20
+        for: 2m
+        labels:
+          severity: critical
+          category: security
+          type: service_compromise
+        annotations:
+          summary: "High error rate following failed authentication attempts"
+          description: "Service {{ $labels.instance }} showing high errors after authentication failures."
+          impact: "Possible service compromise or degradation from attack"
+          action: "IMMEDIATE: Investigate service logs, check for compromise, consider service restart"
+
+      - alert: UnusualDatabaseConnectionSpike
+        expr: |
+          (rate(postgresql_connections_total[5m]) / 
+           rate(postgresql_connections_total[5m] offset 1h)) > 3
+        for: 3m
+        labels:
+          severity: warning
+          category: security
+          type: anomaly
+        annotations:
+          summary: "Unusual database connection spike"
+          description: "Database connections increased 3x on {{ $labels.instance }}."
+          impact: "Possible data exfiltration or application compromise"
+          action: "Review database logs, check for suspicious queries, verify application behavior"
+
+  # ========================================================================
+  # Certificate and TLS Security Alerts
+  # ========================================================================
+  - name: certificate_security
+    interval: 3600s  # Check every hour
+    rules:
+      - alert: TlsCertificateExpiringSoon
+        expr: |
+          (probe_ssl_earliest_cert_expiry - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          category: security
+          type: certificate
+        annotations:
+          summary: "TLS certificate expiring soon"
+          description: "TLS certificate for {{ $labels.instance }} expires in less than 30 days."
+          impact: "Service will become inaccessible when certificate expires"
+          action: "Renew TLS certificate immediately using certbot or manual process"
+
+      - alert: TlsCertificateExpiringSoonCritical
+        expr: |
+          (probe_ssl_earliest_cert_expiry - time()) / 86400 < 7
+        for: 1h
+        labels:
+          severity: critical
+          category: security
+          type: certificate
+        annotations:
+          summary: "TLS certificate expiring very soon"
+          description: "TLS certificate for {{ $labels.instance }} expires in less than 7 days!"
+          impact: "CRITICAL: Service will become inaccessible very soon"
+          action: "IMMEDIATE: Renew TLS certificate NOW"
+
+  # ========================================================================
+  # Container Security Alerts
+  # ========================================================================
+  - name: container_security
+    interval: 60s
+    rules:
+      - alert: ContainerRestartingFrequently
+        expr: |
+          rate(container_restarts_total[15m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+          type: container_security
+        annotations:
+          summary: "Container restarting frequently"
+          description: "Container {{ $labels.container }} restarting >3 times in 15 minutes."
+          impact: "Possible attack, resource exhaustion, or application instability"
+          action: "Check container logs, review resource limits, investigate cause"
+
+      - alert: UnauthorizedContainerAccess
+        expr: |
+          rate(container_cpu_usage_seconds_total{container=~"nginx.*"}[5m]) > 0.8 and
+          rate(http_server_requests_seconds_count{status="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: critical
+          category: security
+          type: container_security
+        annotations:
+          summary: "Possible container compromise"
+          description: "High CPU with concurrent auth failures suggests container compromise."
+          impact: "CRITICAL: Possible active breach"
+          action: "IMMEDIATE: Isolate container, review logs, check for malware, restore from backup"
+
+  # ========================================================================
+  # Compliance and Audit Alerts
+  # ========================================================================
+  - name: compliance_security
+    interval: 3600s
+    rules:
+      - alert: NoSecurityAuditRecently
+        expr: |
+          time() - security_last_audit_timestamp > 2592000  # 30 days
+        for: 1h
+        labels:
+          severity: info
+          category: security
+          type: compliance
+        annotations:
+          summary: "Security audit overdue"
+          description: "No security audit performed in the last 30 days."
+          impact: "Compliance risk, potential undetected vulnerabilities"
+          action: "Schedule and perform security audit"
+
+      - alert: PasswordRotationOverdue
+        expr: |
+          time() - security_last_password_rotation_timestamp > 7776000  # 90 days
+        for: 1h
+        labels:
+          severity: warning
+          category: security
+          type: compliance
+        annotations:
+          summary: "Password rotation overdue"
+          description: "Passwords have not been rotated in 90+ days."
+          impact: "Compliance violation, increased breach risk"
+          action: "Rotate all passwords and API keys using rotation script"
+
+

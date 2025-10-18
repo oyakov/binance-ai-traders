@@ -1,0 +1,17 @@
+# TLS/SSL Certificates Directory
+# 
+# Place your SSL certificates here:
+# - cert.pem: Full certificate chain
+# - key.pem: Private key
+#
+# For Let's Encrypt:
+#   sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem cert.pem
+#   sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem key.pem
+#
+# For self-signed (testnet only):
+#   openssl req -x509 -nodes -days 365 -newkey rsa:4096 \
+#     -keyout key.pem -out cert.pem \
+#     -subj "/C=US/ST=State/L=City/O=Organization/CN=your-domain.com"
+#
+# SECURITY: Never commit actual certificate files to git!
+
