@@ -49,4 +49,24 @@ public class ApiKeyValidationResult {
     public static ApiKeyValidationResult invalid(List<String> errors, boolean testnet) {
         return new ApiKeyValidationResult(false, errors, testnet);
     }
+
+    // Convenience methods for tests
+    public boolean hasErrors() {
+        return errors != null && !errors.isEmpty();
+    }
+
+    public String getErrorSummary() {
+        if (reason != null) {
+            return reason;
+        }
+        return errors != null && !errors.isEmpty() ? String.join(", ", errors) : "";
+    }
+
+    public boolean isMainnet() {
+        return !testnet;
+    }
+
+    public String getEnvironment() {
+        return testnet ? "TESTNET" : "MAINNET";
+    }
 }

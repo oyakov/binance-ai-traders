@@ -28,7 +28,9 @@ public class KafkaConsumerServiceIntegrationTest {
     @Test
     public void testKafkaListener() {
         KlineEvent command = new KlineEvent();
-        kafkaConsumerService.listen(command);
+        String key = "test-key";
+        String correlationId = "test-correlation-id";
+        kafkaConsumerService.listen(command, key, correlationId);
 
         verify(klineDataService).saveKlineData(command);
     }

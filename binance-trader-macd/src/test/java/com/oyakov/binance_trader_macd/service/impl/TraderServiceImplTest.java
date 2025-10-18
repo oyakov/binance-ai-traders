@@ -7,12 +7,15 @@ import com.oyakov.binance_trader_macd.domain.OrderState;
 import com.oyakov.binance_trader_macd.domain.TradeSignal;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.model.order.binance.storage.OrderItem;
+import com.oyakov.binance_trader_macd.service.MACDCalculationService;
+import com.oyakov.binance_trader_macd.service.api.MacdStorageClient;
 import com.oyakov.binance_trader_macd.service.api.OrderServiceApi;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -56,7 +59,9 @@ class TraderServiceImplTest {
         config.getTrader().setTakeProfitPercentage(TAKE_PROFIT_THRESHOLD);
 
         meterRegistry = new SimpleMeterRegistry();
-        traderService = new TraderServiceImpl(macdSignalAnalyzer, orderServiceApi, config, meterRegistry);
+        MACDCalculationService macdCalculationService = Mockito.mock(MACDCalculationService.class);
+        MacdStorageClient macdStorageClient = Mockito.mock(MacdStorageClient.class);
+        traderService = new TraderServiceImpl(macdSignalAnalyzer, orderServiceApi, macdCalculationService, macdStorageClient, config, meterRegistry);
         ReflectionTestUtils.invokeMethod(traderService, "init");
     }
 

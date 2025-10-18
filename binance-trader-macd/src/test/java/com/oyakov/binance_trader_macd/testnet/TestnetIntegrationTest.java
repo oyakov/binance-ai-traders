@@ -4,11 +4,14 @@ import com.oyakov.binance_trader_macd.backtest.BinanceHistoricalDataFetcher;
 import com.oyakov.binance_trader_macd.backtest.SharedDataFetcher;
 import com.oyakov.binance_trader_macd.domain.signal.MACDSignalAnalyzer;
 import com.oyakov.binance_trader_macd.rest.client.BinanceOrderClient;
+import com.oyakov.binance_trader_macd.service.api.MacdStorageClient;
+import com.oyakov.binance_trader_macd.service.api.ObservabilityStorageClient;
 import com.oyakov.binance_shared_model.avro.KlineEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -59,6 +62,9 @@ class TestnetIntegrationTest {
                 .enabled(true)
                 .build();
 
+        MacdStorageClient macdStorageClient = Mockito.mock(MacdStorageClient.class);
+        ObservabilityStorageClient observabilityStorageClient = Mockito.mock(ObservabilityStorageClient.class);
+        
         tradingInstance = new TestnetTradingInstance(
                 "test-instance", 
                 strategyConfig, 
@@ -66,7 +72,9 @@ class TestnetIntegrationTest {
                 dataFetcher,
                 sharedDataFetcher,
                 macdAnalyzer,
-                binanceOrderClient
+                binanceOrderClient,
+                macdStorageClient,
+                observabilityStorageClient
         );
     }
 
