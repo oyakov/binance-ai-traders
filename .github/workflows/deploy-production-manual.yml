@@ -1,0 +1,365 @@
+name: Deploy to Production (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - testnet
+        default: 'production'
+      
+      action:
+        description: 'Deployment action'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - restart
+          - rollback
+          - status
+        default: 'deploy'
+      
+      confirm:
+        description: 'Type YES to confirm deployment'
+        required: true
+        type: string
+      
+      rollback_tag:
+        description: 'Docker image tag for rollback (if action=rollback)'
+        required: false
+        type: string
+
+jobs:
+  validate:
+    name: Validate Deployment Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "YES" ]; then
+            echo "❌ Deployment not confirmed. You must type 'YES' to proceed."
+            exit 1
+          fi
+          echo "✓ Deployment confirmed"
+      
+      - name: Validate rollback parameters
+        if: inputs.action == 'rollback'
+        run: |
+          if [ -z "${{ inputs.rollback_tag }}" ]; then
+            echo "❌ Rollback tag is required for rollback action"
+            exit 1
+          fi
+          echo "✓ Rollback tag provided: ${{ inputs.rollback_tag }}"
+  
+  deploy:
+    name: ${{ inputs.action }} - ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: validate
+    timeout-minutes: 45
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Deployment info
+        run: |
+          echo "## 🚀 Deployment Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.action }}" == "rollback" ]; then
+            echo "**Rollback Tag:** ${{ inputs.rollback_tag }}" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Checkout code
+        if: inputs.action != 'status' && inputs.action != 'restart'
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          
+          # Use environment-specific SSH key
+          if [ "${{ inputs.environment }}" == "production" ]; then
+            echo "${{ secrets.PROD_VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+            VPS_HOST="${{ secrets.PROD_VPS_HOST }}"
+            VPS_USER="${{ secrets.PROD_VPS_USER }}"
+          else
+            echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+            VPS_HOST="${{ secrets.VPS_HOST }}"
+            VPS_USER="${{ secrets.VPS_USER }}"
+          fi
+          
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          
+          # Save for later steps
+          echo "VPS_HOST=$VPS_HOST" >> $GITHUB_ENV
+          echo "VPS_USER=$VPS_USER" >> $GITHUB_ENV
+      
+      - name: Check VPS status
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          echo "Connected to VPS: $(hostname)"
+          echo "Uptime: $(uptime)"
+          echo "Disk usage:"
+          df -h /opt/binance-traders || df -h /
+          echo "Memory:"
+          free -h
+          ENDSSH
+      
+      - name: Status Check
+        if: inputs.action == 'status'
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          echo "=== Docker Compose Status ==="
+          docker compose -f docker-compose-testnet.yml ps
+          
+          echo ""
+          echo "=== Service Health ==="
+          curl -f http://localhost/health && echo "✓ Health check passed" || echo "✗ Health check failed"
+          
+          echo ""
+          echo "=== Recent Logs (last 20 lines) ==="
+          docker compose -f docker-compose-testnet.yml logs --tail=20
+          
+          echo ""
+          echo "=== Resource Usage ==="
+          docker stats --no-stream
+          ENDSSH
+      
+      - name: Quick Restart
+        if: inputs.action == 'restart'
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          echo "Restarting services..."
+          docker compose -f docker-compose-testnet.yml restart
+          
+          echo "Waiting for services..."
+          sleep 30
+          
+          echo "Checking health..."
+          docker compose -f docker-compose-testnet.yml ps
+          curl -f http://localhost/health && echo "✓ Services restarted successfully"
+          ENDSSH
+      
+      - name: Install SOPS and age
+        if: inputs.action == 'deploy' || inputs.action == 'rollback'
+        run: |
+          wget -q https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+          chmod +x sops-v3.8.1.linux.amd64
+          sudo mv sops-v3.8.1.linux.amd64 /usr/local/bin/sops
+          
+          wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
+          tar xzf age-v1.1.1-linux-amd64.tar.gz
+          sudo mv age/age age/age-keygen /usr/local/bin/
+      
+      - name: Decrypt secrets
+        if: inputs.action == 'deploy'
+        run: |
+          if [ "${{ inputs.environment }}" == "production" ]; then
+            AGE_KEY="${{ secrets.PROD_SOPS_AGE_KEY }}"
+            ENV_FILE="production.env.enc"
+          else
+            AGE_KEY="${{ secrets.SOPS_AGE_KEY }}"
+            ENV_FILE="testnet.env.enc"
+          fi
+          
+          echo "$AGE_KEY" > age-key.txt
+          chmod 600 age-key.txt
+          export SOPS_AGE_KEY_FILE=age-key.txt
+          
+          if [ -f "$ENV_FILE" ]; then
+            sops -d "$ENV_FILE" > environment.env
+            echo "✓ Secrets decrypted"
+          else
+            echo "❌ Environment file $ENV_FILE not found"
+            exit 1
+          fi
+      
+      - name: Setup Java and build
+        if: inputs.action == 'deploy'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Build application
+        if: inputs.action == 'deploy'
+        run: |
+          mvn clean package -DskipTests -T 1C
+          echo "✓ Application built"
+      
+      - name: Build Docker images
+        if: inputs.action == 'deploy'
+        run: |
+          docker compose -f docker-compose-testnet.yml build
+          docker save \
+            $(docker compose -f docker-compose-testnet.yml config | grep 'image:' | awk '{print $2}') \
+            -o images.tar
+          echo "✓ Docker images built and saved"
+      
+      - name: Backup current deployment
+        if: inputs.action == 'deploy' || inputs.action == 'rollback'
+        run: |
+          BACKUP_ID=$(date +%Y%m%d_%H%M%S)
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << ENDSSH
+          set -e
+          mkdir -p /opt/binance-traders/backups
+          
+          if [ -f /opt/binance-traders/docker-compose-testnet.yml ]; then
+            cp /opt/binance-traders/docker-compose-testnet.yml \
+               /opt/binance-traders/backups/docker-compose-$BACKUP_ID.yml
+            echo "✓ Backed up current deployment to backups/docker-compose-$BACKUP_ID.yml"
+          fi
+          ENDSSH
+      
+      - name: Transfer and deploy
+        if: inputs.action == 'deploy'
+        run: |
+          # Transfer files
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            --exclude '.git' \
+            --exclude 'target' \
+            --exclude 'node_modules' \
+            --exclude '*.log' \
+            . ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:/opt/binance-traders/
+          
+          # Transfer images
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            images.tar ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:/tmp/
+          
+          # Transfer environment
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            environment.env ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:/opt/binance-traders/testnet.env
+          
+          # Deploy
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          echo "Loading images..."
+          docker load -i /tmp/images.tar
+          rm /tmp/images.tar
+          
+          echo "Stopping services..."
+          docker compose -f docker-compose-testnet.yml down
+          
+          echo "Starting services..."
+          docker compose -f docker-compose-testnet.yml --env-file testnet.env up -d
+          
+          echo "Waiting for services..."
+          sleep 40
+          
+          echo "✓ Deployment complete"
+          ENDSSH
+      
+      - name: Rollback to previous version
+        if: inputs.action == 'rollback'
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          ROLLBACK_FILE="backups/docker-compose-${{ inputs.rollback_tag }}.yml"
+          
+          if [ ! -f "$ROLLBACK_FILE" ]; then
+            echo "❌ Rollback file not found: $ROLLBACK_FILE"
+            echo "Available backups:"
+            ls -lh backups/
+            exit 1
+          fi
+          
+          echo "Stopping current services..."
+          docker compose -f docker-compose-testnet.yml down
+          
+          echo "Restoring previous version..."
+          cp "$ROLLBACK_FILE" docker-compose-testnet.yml
+          
+          echo "Starting services..."
+          docker compose -f docker-compose-testnet.yml --env-file testnet.env up -d
+          
+          echo "✓ Rollback complete"
+          ENDSSH
+      
+      - name: Verify deployment
+        if: inputs.action == 'deploy' || inputs.action == 'rollback'
+        run: |
+          sleep 15
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          # Health check
+          if curl -f http://localhost/health > /dev/null 2>&1; then
+            echo "✓ Health check passed"
+          else
+            echo "❌ Health check failed"
+            docker compose -f docker-compose-testnet.yml logs --tail=50
+            exit 1
+          fi
+          
+          # Container check
+          RUNNING=$(docker compose -f docker-compose-testnet.yml ps --services --filter "status=running" | wc -l)
+          echo "Running containers: $RUNNING"
+          
+          if [ "$RUNNING" -lt 8 ]; then
+            echo "❌ Not enough containers running"
+            docker compose -f docker-compose-testnet.yml ps
+            exit 1
+          fi
+          
+          echo "✓ All checks passed"
+          ENDSSH
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f age-key.txt
+          rm -f environment.env
+          rm -f images.tar
+      
+      - name: Success summary
+        if: success()
+        run: |
+          echo "## ✅ ${{ inputs.action }} Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**VPS:** ${{ env.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Failure summary
+        if: failure()
+        run: |
+          echo "## ❌ ${{ inputs.action }} Failed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Emergency procedures:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. SSH to VPS: \`ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check logs: \`docker compose logs\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Use manual rollback: \`scripts/deployment/rollback.ps1\`" >> $GITHUB_STEP_SUMMARY
+

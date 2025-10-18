@@ -1,0 +1,221 @@
+name: Deploy to Testnet
+
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/**'
+      - 'postman/**'
+
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes'
+        required: false
+        default: 'false'
+
+env:
+  VPS_HOST: ${{ secrets.VPS_HOST }}
+  VPS_USER: ${{ secrets.VPS_USER }}
+  DOCKER_COMPOSE_FILE: docker-compose-testnet.yml
+
+jobs:
+  deploy:
+    name: Deploy to Testnet VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          
+          # Create SSH config for easier commands
+          cat >> ~/.ssh/config <<EOF
+          Host vps
+            HostName ${{ secrets.VPS_HOST }}
+            User ${{ secrets.VPS_USER }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+      
+      - name: Install SOPS
+        run: |
+          wget -q https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+          chmod +x sops-v3.8.1.linux.amd64
+          sudo mv sops-v3.8.1.linux.amd64 /usr/local/bin/sops
+          sops --version
+      
+      - name: Install age
+        run: |
+          wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
+          tar xzf age-v1.1.1-linux-amd64.tar.gz
+          sudo mv age/age age/age-keygen /usr/local/bin/
+          age --version
+      
+      - name: Decrypt secrets
+        run: |
+          echo "${{ secrets.SOPS_AGE_KEY }}" > age-key.txt
+          chmod 600 age-key.txt
+          export SOPS_AGE_KEY_FILE=age-key.txt
+          sops -d testnet.env.enc > testnet.env
+          echo "✓ Secrets decrypted successfully"
+      
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Build Java services
+        run: |
+          mvn clean package -DskipTests -T 1C
+          echo "✓ Maven build completed"
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker images
+        run: |
+          docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} build
+          echo "✓ Docker images built"
+      
+      - name: Save Docker images
+        run: |
+          docker save \
+            $(docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} config | grep 'image:' | awk '{print $2}') \
+            -o images.tar
+          ls -lh images.tar
+          echo "✓ Docker images saved to images.tar"
+      
+      - name: Transfer application files
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            --exclude '.git' \
+            --exclude 'target' \
+            --exclude 'node_modules' \
+            --exclude '*.log' \
+            --exclude '.idea' \
+            --exclude 'images.tar' \
+            . ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/binance-traders/
+          echo "✓ Application files transferred"
+      
+      - name: Transfer Docker images
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            images.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/
+          echo "✓ Docker images transferred"
+      
+      - name: Transfer environment file
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            testnet.env ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/binance-traders/
+          echo "✓ Environment file transferred"
+      
+      - name: Deploy on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          cd /opt/binance-traders
+          
+          echo "Loading Docker images..."
+          docker load -i /tmp/images.tar
+          rm /tmp/images.tar
+          
+          echo "Stopping existing services..."
+          docker compose -f docker-compose-testnet.yml down || true
+          
+          echo "Starting services..."
+          docker compose -f docker-compose-testnet.yml --env-file testnet.env up -d
+          
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          echo "Checking service health..."
+          docker compose -f docker-compose-testnet.yml ps
+          
+          echo "✓ Deployment complete!"
+          ENDSSH
+      
+      - name: Verify deployment
+        run: |
+          echo "Waiting for services to be fully ready..."
+          sleep 10
+          
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+          set -e
+          
+          # Check health endpoint
+          if curl -f http://localhost/health > /dev/null 2>&1; then
+            echo "✓ Health check passed"
+          else
+            echo "✗ Health check failed"
+            docker compose -f /opt/binance-traders/docker-compose-testnet.yml logs --tail=50
+            exit 1
+          fi
+          
+          # Check all containers are running
+          cd /opt/binance-traders
+          RUNNING=$(docker compose -f docker-compose-testnet.yml ps --services --filter "status=running" | wc -l)
+          EXPECTED=10
+          
+          if [ "$RUNNING" -ge "$EXPECTED" ]; then
+            echo "✓ All services running ($RUNNING/$EXPECTED)"
+          else
+            echo "✗ Not all services running ($RUNNING/$EXPECTED)"
+            docker compose -f docker-compose-testnet.yml ps
+            exit 1
+          fi
+          ENDSSH
+      
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f age-key.txt
+          rm -f testnet.env
+          rm -f images.tar
+          echo "✓ Cleanup complete"
+      
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "## ✅ Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Testnet" >> $GITHUB_STEP_SUMMARY
+          echo "**VPS:** ${{ secrets.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Services:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Health Check: http://${{ secrets.VPS_HOST }}/health" >> $GITHUB_STEP_SUMMARY
+          echo "- Grafana: http://${{ secrets.VPS_HOST }}/grafana/" >> $GITHUB_STEP_SUMMARY
+          echo "- Prometheus: http://${{ secrets.VPS_HOST }}/prometheus/" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "## ❌ Deployment Failed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Testnet" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Failed step:** Check workflow logs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Check workflow logs for errors" >> $GITHUB_STEP_SUMMARY
+          echo "2. SSH to VPS and check container logs" >> $GITHUB_STEP_SUMMARY
+          echo "3. Use manual rollback if needed: \`scripts/deployment/rollback.ps1\`" >> $GITHUB_STEP_SUMMARY
+

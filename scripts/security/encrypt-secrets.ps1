@@ -3,8 +3,10 @@
     Encrypt environment files using Mozilla SOPS with age encryption
 
 .DESCRIPTION
-    This script encrypts sensitive environment files (testnet.env) using Mozilla SOPS
+    This script encrypts sensitive environment files (testnet.env, production.env) using Mozilla SOPS
     and age encryption. The encrypted files can be safely committed to git.
+    
+    Supports CI/CD workflows with separate encryption keys for testnet and production environments.
 
 .PARAMETER InputFile
     Path to plaintext environment file (default: testnet.env)
@@ -18,6 +20,12 @@
 .PARAMETER Verify
     Verify encryption by attempting to decrypt after encryption
 
+.PARAMETER EncryptBoth
+    Encrypt both testnet.env and production.env for CI/CD
+
+.PARAMETER AgeKeyPath
+    Custom path to age key file (default: searches common locations)
+
 .EXAMPLE
     .\encrypt-secrets.ps1
     Encrypts testnet.env to testnet.env.enc
@@ -27,12 +35,16 @@
     Encrypts production environment file
 
 .EXAMPLE
+    .\encrypt-secrets.ps1 -EncryptBoth
+    Encrypts both testnet and production files for CI/CD deployment
+
+.EXAMPLE
     .\encrypt-secrets.ps1 -Force -Verify
     Force overwrite and verify encryption
 
 .NOTES
     Author: Binance AI Traders Security Team
-    Version: 1.0
+    Version: 2.0 (CI/CD Support)
     Requires: SOPS and age installed (choco install sops age)
 #>
 
@@ -48,7 +60,13 @@ param(
     [switch]$Force,
     
     [Parameter()]
-    [switch]$Verify
+    [switch]$Verify,
+    
+    [Parameter()]
+    [switch]$EncryptBoth,
+    
+    [Parameter()]
+    [string]$AgeKeyPath
 )
 
 # Set strict mode
@@ -237,6 +255,66 @@ if ($Verify) {
     }
 }
 
+# Handle -EncryptBoth for CI/CD
+if ($EncryptBoth) {
+    Write-ColorOutput "`n═══════════════════════════════════════════════════════" $ColorCyan
+    Write-ColorOutput "  CI/CD Mode: Encrypting Both Environments" $ColorCyan
+    Write-ColorOutput "═══════════════════════════════════════════════════════`n" $ColorCyan
+    
+    $environments = @(
+        @{ Input = "testnet.env"; Output = "testnet.env.enc" },
+        @{ Input = "production.env"; Output = "production.env.enc" }
+    )
+    
+    foreach ($env in $environments) {
+        $inputPath = $env.Input
+        $outputPath = $env.Output
+        
+        Write-ColorOutput "`nEncrypting $inputPath..." $ColorYellow
+        
+        if (Test-Path $inputPath) {
+            try {
+                $env:SOPS_AGE_KEY_FILE = if ($AgeKeyPath) { $AgeKeyPath } else { "age-key.txt" }
+                
+                sops -e $inputPath > $outputPath
+                
+                if ($LASTEXITCODE -eq 0) {
+                    Write-ColorOutput "✓ $outputPath created" $ColorGreen
+                    
+                    # Verify
+                    $testDecrypt = sops -d $outputPath 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-ColorOutput "✓ Encryption verified" $ColorGreen
+                    }
+                } else {
+                    Write-ColorOutput "✗ Encryption failed for $inputPath" $ColorRed
+                }
+            } catch {
+                Write-ColorOutput "✗ Error encrypting $inputPath : $_" $ColorRed
+            }
+        } else {
+            Write-ColorOutput "⚠️  $inputPath not found - skipping" $ColorYellow
+        }
+    }
+    
+    Write-ColorOutput "`n═══════════════════════════════════════════════════════" $ColorGreen
+    Write-ColorOutput "  CI/CD Encryption Complete!" $ColorGreen
+    Write-ColorOutput "═══════════════════════════════════════════════════════`n" $ColorGreen
+    
+    Write-ColorOutput "⚠️  CI/CD DEPLOYMENT CHECKLIST:" $ColorYellow
+    Write-ColorOutput "  1. ✓ Add age secret key to GitHub Secrets:" $ColorCyan
+    Write-ColorOutput "     - VPS_AGE_KEY (testnet)" $ColorCyan
+    Write-ColorOutput "     - PROD_SOPS_AGE_KEY (production)" $ColorCyan
+    Write-ColorOutput "  2. ✓ Commit encrypted files: git add *.env.enc" $ColorGreen
+    Write-ColorOutput "  3. ⚠️  Delete plaintext files: Remove-Item *.env" $ColorYellow
+    Write-ColorOutput "  4. ✓ Update .sops.yaml with age public keys" $ColorGreen
+    Write-ColorOutput "  5. ⚠️  Test decryption locally before pushing" $ColorYellow
+    Write-ColorOutput "  6. 🔐 Store age-key.txt in password manager" $ColorYellow
+    Write-ColorOutput "`nSee .github/SECRETS_SETUP.md for complete instructions" $ColorCyan
+    
+    exit 0
+}
+
 # Security recommendations
 Write-ColorOutput "`n═══════════════════════════════════════════════════════" $ColorGreen
 Write-ColorOutput "  Encryption Complete!" $ColorGreen
@@ -249,6 +327,7 @@ Write-ColorOutput "  3. ✓ Commit encrypted file: git add $OutputFile" $ColorGr
 Write-ColorOutput "  4. ⚠️  NEVER commit plaintext: Verify with git status" $ColorYellow
 Write-ColorOutput "  5. 🔐 Store age-key.txt securely (password manager)" $ColorYellow
 Write-ColorOutput "  6. 📋 Document key location for team members" $ColorCyan
+Write-ColorOutput "`nFor CI/CD deployment, use: .\encrypt-secrets.ps1 -EncryptBoth" $ColorCyan
 
 Write-ColorOutput "`n📋 DEPLOYMENT STEPS:" $ColorCyan
 Write-ColorOutput "  1. Transfer $OutputFile to VPS" $ColorCyan

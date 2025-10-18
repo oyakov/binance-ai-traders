@@ -1,8 +1,72 @@
-# Automated Deployment Guide
+# Complete Deployment Guide
 
-## Quick Start - Automated Deployment to 145.223.70.118
+## Deployment Options
 
-Your VPS is ready for automated deployment! Follow these steps:
+This guide covers **TWO** deployment methods:
+
+1. **GitHub Actions CI/CD (RECOMMENDED)** - Automatic deployment on code push
+2. **Manual Deployment Scripts** - Emergency backup when GitHub is unavailable
+
+---
+
+## Option 1: GitHub Actions CI/CD (Recommended)
+
+### Quick Start
+
+**Automatic Testnet Deployment:**
+```bash
+git checkout develop
+git merge feature/my-feature
+git push origin develop
+# Deployment starts automatically!
+```
+
+**Manual Production Deployment:**
+1. Go to https://github.com/YOUR_REPO/actions
+2. Click "Deploy to Production (Manual)"
+3. Fill in: Environment: `production`, Action: `deploy`, Confirm: `YES`
+4. Click "Run workflow"
+5. Approve when requested
+
+### Setup GitHub Actions (One-Time)
+
+**Complete setup guide:** `.github/SECRETS_SETUP.md`
+
+**Quick steps:**
+1. Generate SSH keys for deployment
+2. Generate age keys for secrets encryption
+3. Add secrets to GitHub repository
+4. Configure branch protection and environments
+5. Push to `develop` to test automatic deployment
+
+**What you get:**
+- ✅ Automatic deployment on push to `develop` → testnet
+- ✅ Manual deployment to production with approval gates
+- ✅ Automatic testing before deployment
+- ✅ Security scanning
+- ✅ Automatic rollback on failure
+- ✅ Full audit trail
+- ✅ Team collaboration
+
+**Documentation:**
+- Setup: `.github/SECRETS_SETUP.md`
+- Operations: `.github/CICD_OPERATIONS.md`
+- Branch Protection: `.github/BRANCH_PROTECTION.md`
+- Emergency: `scripts/deployment/EMERGENCY_COMMANDS.md`
+
+---
+
+## Option 2: Manual Deployment (Emergency Backup)
+
+Use manual scripts when:
+- GitHub Actions is unavailable
+- Emergency hotfix needed
+- Initial VPS setup
+- Testing deployment locally
+
+### Quick Start - Manual Deployment to 145.223.70.118
+
+Your VPS is ready for manual deployment! Follow these steps:
 
 ### Prerequisites
 

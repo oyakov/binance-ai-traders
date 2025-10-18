@@ -71,3 +71,17 @@ management:
       prometheus:
         enabled: true
 
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.oyakov: DEBUG
+    org.springframework: INFO
+    org.apache.kafka: WARN
+    org.springframework.web.socket: INFO
+  file:
+    name: /var/log/binance-data-collection/application.log
+    max-history: 30
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId:-NO-CORR-ID}] - %msg%n"
+

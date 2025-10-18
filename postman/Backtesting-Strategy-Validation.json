@@ -1,0 +1,529 @@
+{
+  "info": {
+    "name": "Backtesting Strategy Validation",
+    "description": "Comprehensive API tests for backtesting endpoints and strategy validation.\n\nPart of: Testability & Observability Feedback Loop\nVersion: 1.0\nDate: 2025-01-18",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8083",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Backtest Execution",
+      "item": [
+        {
+          "name": "Run Single Dataset Backtest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has run_id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('run_id');",
+                  "    pm.environment.set('last_run_id', jsonData.run_id);",
+                  "});",
+                  "",
+                  "pm.test('Response has metrics', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('metrics');",
+                  "    pm.expect(jsonData.metrics).to.have.property('netProfit');",
+                  "    pm.expect(jsonData.metrics).to.have.property('winRate');",
+                  "});",
+                  "",
+                  "pm.test('Net profit is numeric', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.metrics.netProfit).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Win rate is between 0 and 1', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.metrics.winRate).to.be.within(0, 1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"datasetPath\": \"datasets/BTCUSDT/1h/30d-latest.json\",\n  \"strategy\": \"MACD\",\n  \"parameters\": {\n    \"fastEMA\": 12,\n    \"slowEMA\": 26,\n    \"signal\": 9,\n    \"stopLoss\": 0.98,\n    \"takeProfit\": 1.05\n  },\n  \"initialCapital\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/run",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "run"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Run Multi-Dataset Backtest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is array of results', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('Each result has required fields', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.forEach(function(result) {",
+                  "        pm.expect(result).to.have.property('run_id');",
+                  "        pm.expect(result).to.have.property('dataset_name');",
+                  "        pm.expect(result).to.have.property('metrics');",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('Results persisted to database', function() {",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbols\": [\"BTCUSDT\", \"ETHUSDT\"],\n  \"intervals\": [\"1h\", \"4h\"],\n  \"timeRanges\": [\"30d\"],\n  \"strategy\": \"MACD\",\n  \"parameters\": {\n    \"fastEMA\": 12,\n    \"slowEMA\": 26,\n    \"signal\": 9\n  },\n  \"initialCapital\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/run-multi",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "run-multi"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Backtest Result",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Result contains complete metrics', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.metrics).to.have.property('sharpeRatio');",
+                  "    pm.expect(jsonData.metrics).to.have.property('maxDrawdown');",
+                  "    pm.expect(jsonData.metrics).to.have.property('totalTrades');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/results/{{last_run_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "results", "{{last_run_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Parameter Sensitivity",
+      "item": [
+        {
+          "name": "Analyze Parameter Sensitivity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains parameter results', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('parameterResults');",
+                  "    pm.expect(jsonData.parameterResults).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Each parameter has performance metrics', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.parameterResults.forEach(function(param) {",
+                  "        pm.expect(param).to.have.property('parameterName');",
+                  "        pm.expect(param).to.have.property('parameterValue');",
+                  "        pm.expect(param).to.have.property('avgSharpeRatio');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"datasetPath\": \"datasets/BTCUSDT/1h/30d-latest.json\",\n  \"strategy\": \"MACD\",\n  \"parameterRanges\": {\n    \"fastEMA\": [8, 10, 12, 14],\n    \"slowEMA\": [20, 23, 26, 29]\n  },\n  \"fixedParameters\": {\n    \"signal\": 9,\n    \"stopLoss\": 0.98,\n    \"takeProfit\": 1.05\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/analyze-parameters",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "analyze-parameters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Parameter Heatmap Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Heatmap data is valid', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('heatmapData');",
+                  "    pm.expect(jsonData.heatmapData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/parameter-heatmap?symbol=BTCUSDT&interval=1h&parameter=fastEMA",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "parameter-heatmap"],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "BTCUSDT"
+                },
+                {
+                  "key": "interval",
+                  "value": "1h"
+                },
+                {
+                  "key": "parameter",
+                  "value": "fastEMA"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Market Regime Analysis",
+      "item": [
+        {
+          "name": "Detect Market Regimes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Regimes detected', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('regimes');",
+                  "    pm.expect(jsonData.regimes).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Each regime has valid type', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    var validRegimes = ['BULL_TRENDING', 'BEAR_TRENDING', 'RANGING', 'VOLATILE'];",
+                  "    jsonData.regimes.forEach(function(regime) {",
+                  "        pm.expect(validRegimes).to.include(regime.regimeType);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"datasetPath\": \"datasets/BTCUSDT/1h/30d-latest.json\",\n  \"lookbackHours\": 24\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/detect-regimes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "detect-regimes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Regime Performance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Performance by regime returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('regimePerformance');",
+                  "    pm.expect(jsonData.regimePerformance).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/regime-performance?symbol=BTCUSDT&strategy=MACD",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "regime-performance"],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "BTCUSDT"
+                },
+                {
+                  "key": "strategy",
+                  "value": "MACD"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Walk-Forward Validation",
+      "item": [
+        {
+          "name": "Run Walk-Forward Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Validation results returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('inSampleResults');",
+                  "    pm.expect(jsonData).to.have.property('outOfSampleResults');",
+                  "});",
+                  "",
+                  "pm.test('Robustness score calculated', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('robustnessScore');",
+                  "    pm.expect(jsonData.robustnessScore).to.be.within(0, 1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"datasetPath\": \"datasets/BTCUSDT/1h/90d-latest.json\",\n  \"strategy\": \"MACD\",\n  \"parameters\": {\n    \"fastEMA\": 12,\n    \"slowEMA\": 26,\n    \"signal\": 9\n  },\n  \"trainingWindowDays\": 60,\n  \"validationWindowDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/walk-forward",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "walk-forward"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Strategy Comparison",
+      "item": [
+        {
+          "name": "Compare Strategies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Comparison matrix returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('strategies');",
+                  "    pm.expect(jsonData.strategies).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Each strategy has metrics', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.strategies.forEach(function(strategy) {",
+                  "        pm.expect(strategy).to.have.property('strategyName');",
+                  "        pm.expect(strategy).to.have.property('avgSharpeRatio');",
+                  "        pm.expect(strategy).to.have.property('avgWinRate');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"datasetPath\": \"datasets/BTCUSDT/1h/30d-latest.json\",\n  \"strategies\": [\n    {\n      \"name\": \"MACD-Standard\",\n      \"type\": \"MACD\",\n      \"parameters\": {\"fastEMA\": 12, \"slowEMA\": 26}\n    },\n    {\n      \"name\": \"MACD-Fast\",\n      \"type\": \"MACD\",\n      \"parameters\": {\"fastEMA\": 10, \"slowEMA\": 24}\n    },\n    {\n      \"name\": \"BuyAndHold\",\n      \"type\": \"BUY_AND_HOLD\",\n      \"parameters\": {}\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/compare-strategies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "compare-strategies"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Performance Regression",
+      "item": [
+        {
+          "name": "Check Performance Regression",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('No performance regression detected', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('regressionDetected');",
+                  "    if (jsonData.regressionDetected) {",
+                  "        console.warn('Performance regression detected:', jsonData.details);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/backtest/check-regression?strategy=MACD&symbol=BTCUSDT&threshold=0.7",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "backtest", "check-regression"],
+              "query": [
+                {
+                  "key": "strategy",
+                  "value": "MACD"
+                },
+                {
+                  "key": "symbol",
+                  "value": "BTCUSDT"
+                },
+                {
+                  "key": "threshold",
+                  "value": "0.7",
+                  "description": "Alert if performance drops below 70% of baseline"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

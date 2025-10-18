@@ -119,6 +119,21 @@ management:
       prometheus:
         enabled: true
 
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.oyakov: DEBUG
+    org.springframework: INFO
+    org.apache.kafka: WARN
+    org.elasticsearch: INFO
+    org.hibernate: INFO
+  file:
+    name: /var/log/binance-trader-macd/application.log
+    max-history: 30
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId:-NO-CORR-ID}] - %msg%n"
+
 # Security Configuration
 security:
   api:

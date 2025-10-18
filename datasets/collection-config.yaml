@@ -1,0 +1,91 @@
+# Dataset Collection Configuration
+# Used by scripts/collect-backtest-datasets.ps1
+
+# Trading pairs to collect
+symbols:
+  - BTCUSDT
+  - ETHUSDT
+  - BNBUSDT
+  - ADAUSDT
+  - SOLUSDT
+
+# Candlestick intervals
+intervals:
+  - 5m
+  - 15m
+  - 1h
+  - 4h
+  - 1d
+
+# Time ranges (in days)
+timeRanges:
+  - name: 7d
+    days: 7
+    description: "Last 7 days - for quick iteration testing"
+  - name: 30d
+    days: 30
+    description: "Last 30 days - for comprehensive testing"
+  - name: 90d
+    days: 90
+    description: "Last 90 days - for robustness validation"
+  - name: 180d
+    days: 180
+    description: "Last 180 days - for long-term performance"
+
+# API Configuration
+api:
+  baseUrl: "https://api.binance.com"
+  testnetUrl: "https://testnet.binance.vision"
+  useTestnet: false
+  rateLimit:
+    requestsPerMinute: 1200
+    delayBetweenRequests: 100  # milliseconds
+
+# Collection Settings
+collection:
+  cacheEnabled: true
+  validateAfterCollection: true
+  overwriteExisting: true
+  parallelDownloads: 3
+  retryAttempts: 3
+  retryDelay: 5000  # milliseconds
+
+# Output Settings
+output:
+  baseDirectory: "datasets"
+  metadataDirectory: "datasets/metadata"
+  format: "json"
+  prettyPrint: true
+  compressionEnabled: false
+
+# Validation Settings
+validation:
+  checkGaps: true
+  checkAnomalies: true
+  maxAllowedGapMinutes: 60
+  anomalyDetection:
+    enabled: true
+    maxPriceChangePercent: 20.0  # Flag if price changes >20% in single kline
+    minVolume: 0.1                # Flag if volume < 0.1
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR
+  logFile: "logs/dataset-collection.log"
+  consoleOutput: true
+
+# Metadata Tracking
+metadata:
+  trackCollectionHistory: true
+  trackFileSize: true
+  trackMD5Checksum: true
+  trackKlineCount: true
+  trackTimeRange: true
+
+# Maintenance
+maintenance:
+  autoCleanupOldVersions: false
+  archiveBeforeOverwrite: false
+  archiveDirectory: "datasets/archive"
+  maxArchiveAge: 90  # days
+
