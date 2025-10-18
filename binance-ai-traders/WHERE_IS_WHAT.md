@@ -75,6 +75,21 @@ Quick navigation guide to the most important parts of the repository. Use this a
   - Service routing, authentication checks, endpoint protection
 - **TLS Certificates**: `nginx/ssl/` (cert.pem, key.pem)
 
+### Deployment Scripts
+**Location**: `scripts/deployment/`
+- **README**: Complete deployment scripts overview
+- **Step-by-Step Deploy**: `step-by-step-deploy.ps1` - Interactive deployment guide (RECOMMENDED)
+- **Automated Deploy**: `deploy-to-vps-automated.ps1` - Partially automated deployment
+- **Quick Deploy (VPS)**: `quick-deploy.sh` - Application deployment on VPS
+- **Deployment Guide**: `DEPLOYMENT_GUIDE.md` - Complete deployment reference
+
+**Quick Start**: `.\scripts\deployment\step-by-step-deploy.ps1`
+
+### Security Monitoring & Testing
+- **Security Dashboard**: `monitoring/grafana/provisioning/dashboards/08-security/security-monitoring.json`
+- **Prometheus Alerts**: `monitoring/prometheus/security_alerts.yml` (48 security alert rules)
+- **Security Tests**: `postman/Security-Tests-Collection.json` (18 automated tests)
+
 ## Monitoring
 - Prometheus config: `monitoring/prometheus.yml` (scrapes Java `/actuator/prometheus`, health metrics server `/metrics`)
 - Grafana dashboards/provisioning: `monitoring/grafana/`
