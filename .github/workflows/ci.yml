@@ -28,9 +28,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
       - name: Build shared model
         working-directory: binance-shared-model
-        run: ./mvnw -B -ntp clean install
+        run: ../mvnw -B -ntp clean install
 
       - name: Run service test suites
         run: ./mvnw -B -ntp -T 1C -am -pl binance-data-collection,binance-data-storage,binance-trader-grid,binance-trader-macd -DskipTests=false clean test
