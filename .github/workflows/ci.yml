@@ -1,5 +1,7 @@
 name: CI
 
+# Fast feedback workflow - runs on every push and PR
+# For comprehensive testing, see build-test.yml (runs on PRs, manual, and nightly)
 on:
   push:
     branches:

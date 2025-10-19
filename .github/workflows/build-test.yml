@@ -1,24 +1,18 @@
 name: Build and Test
 
 on:
+  # Run on pull requests for thorough validation before merge
   pull_request:
     branches:
       - develop
       - main
   
-  push:
-    branches:
-      - develop
-      - main
-    paths:
-      - '**.java'
-      - 'pom.xml'
-      - '**/pom.xml'
-      - 'Dockerfile'
-      - '**/Dockerfile'
-      - 'docker-compose*.yml'
-
+  # Allow manual triggering for on-demand comprehensive testing
   workflow_dispatch:
+  
+  # Run nightly for continuous validation
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM UTC daily
 
 jobs:
   build:
